@@ -1,10 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+
+    <color name="primary">#60A5FA</color>
+
+    <!-- 背景色 -->
+    <color name="background">#F8F3EC</color>
+    <color name="card_background">#FFFFFF</color>
+    <color name="edit_background">#FDFBF6</color>
+    <color name="tag_background">#4F6B6C</color>
+
+    <!-- 导航栏 -->
+    <color name="status_bar">#6289DD</color>
+    <color name="navigation_bar">#D8D5CB</color>
+
+    <!-- 功能色 -->
+    <color name="error">#EF4444</color>
+    <color name="on_error">#FFFFFF</color>
+    <color name="success">#10B981</color>
+
+    <!-- 文本 -->
+    <color name="text">#120B0B</color>
+    <color name="text_secondary">#2B2D46</color>
+    <color name="text_tertiary">#464962</color>
+    <color name="text_hint">#989698</color>
+    <color name="tag_text">#FFFFFF</color>
+
+    <!-- 分割线/边框 -->
+    <color name="divider">#111112</color>
+    <color name="divider_unfocused">#818795</color>
+
 </resources>
