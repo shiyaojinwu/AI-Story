@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:orientation="vertical"
+    android:padding="25dp"
+    tools:context=".TraditionalActivity">
+
+    <!-- 内容容器 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <!-- 标题栏 -->
+        <TextView
+            android:id="@+id/text_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="32dp"
+            android:text="@string/story_flow"
+            android:textColor="@color/text_tertiary"
+            android:textSize="38sp"
+            android:textStyle="bold" />
+
+        <!-- 次级标题 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:text="@string/create"
+            android:textColor="@color/text_secondary"
+            android:textSize="40sp"
+            android:textStyle="bold" />
+
+        <!-- 故事输入框 -->
+        <EditText
+            android:id="@+id/et_story_input"
+            android:layout_width="match_parent"
+            android:layout_height="160dp"
+            android:layout_marginBottom="24dp"
+            android:autofillHints="story"
+            android:background="@drawable/rounded_edittext"
+            android:gravity="top|start"
+            android:hint="@string/write_your_story"
+            android:inputType="textMultiLine"
+            android:padding="16dp"
+            android:textColorHint="@color/text_hint" />
+
+        <!-- 风格选择按钮组 -->
+        <LinearLayout
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_movie"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/edit_background"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"
+                android:shape="rectangle"
+                android:text="@string/movie"
+                android:textColor="@color/text"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/btn_animation"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/edit_background"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"
+                android:text="@string/animation"
+                android:textColor="@color/text"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/btn_realistic"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/edit_background"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"
+                android:text="@string/realistic"
+                android:textColor="@color/text"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <!-- 生成按钮 -->
+        <Button
+            android:id="@+id/btn_generate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:backgroundTint="@color/primary"
+            android:padding="16dp"
+            android:radius="12dp"
+            android:text="@string/generate_storyboard"
+            android:textColor="@android:color/white"
+            android:textSize="25sp" />
+
+        <!-- 提示文本 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="@string/the_storyboard_will_open_n_automatically_after_generation"
+            android:textColor="@color/text_hint"
+            android:textSize="15sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        style="?android:attr/buttonBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_gravity="center_horizontal|bottom"
+        android:layout_marginBottom="16dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_create"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="@string/create"
+            android:textColor="#4A6FFF"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/btn_assets"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="@string/assets"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+</LinearLayout>

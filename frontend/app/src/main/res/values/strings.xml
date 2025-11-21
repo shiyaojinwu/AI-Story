@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">AI-Story</string>
+    <string name="story_flow">StoryFlow</string>
+    <string name="create">Create</string>
+    <string name="write_your_story">Write your story…</string>
+    <string name="movie">Movie</string>
+    <string name="animation">Animation</string>
+    <string name="realistic">Realistic</string>
+    <string name="generate_storyboard">Generate Storyboard</string>
+    <string name="the_storyboard_will_open_n_automatically_after_generation">The storyboard will open \n automatically after generation.</string>
+    <string name="assets">Assets</string>
 </resources>
