@@ -14,21 +14,22 @@ import androidx.room.PrimaryKey
     indices = [Index(value = ["storyboardId"])],
     foreignKeys = [
         ForeignKey(
-            entity = Storyboard::class,
+            entity = Story::class,
             parentColumns = ["id"],
-            childColumns = ["storyboardId"],
+            childColumns = ["storyId"],
             onDelete = CASCADE
         )
     ]
 )
 data class Shot(
     @PrimaryKey val id: String,
-    val storyboardId: String,
-    val sortOrder: Int,
+    val storyId: String,
+    val order: Int,
     val prompt: String,
     val imageUrl: String? = null,
     val narration: String? = null,
     val transition: String = "Crossfade", // 转场效果：Ken Burns / Crossfade / Volume Mix
-    val status: String = "pending", // 状态：pending / generating / completed / failed
-    val createdAt: Long
+    val status: String = "generating", // 状态： generating / completed / failed
+    val createdAt: Long?=System.currentTimeMillis(),
+    val updatedAt: Long?=System.currentTimeMillis()
 )
