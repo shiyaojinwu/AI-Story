@@ -9,7 +9,6 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.shiyao.ai_story.model.entity.Asset
 import com.shiyao.ai_story.model.entity.Shot
 import com.shiyao.ai_story.model.entity.Story
-import com.shiyao.ai_story.model.entity.Storyboard
 import com.shiyao.story_creat.model.dao.AssetDao
 
 
@@ -17,7 +16,7 @@ import com.shiyao.story_creat.model.dao.AssetDao
  * 应用数据库类
  */
 @Database(
-    entities = [Story::class, Storyboard::class, Shot::class, Asset::class],
+    entities = [Story::class, Shot::class, Asset::class],
     version = 1,
     exportSchema = false
 )
@@ -25,7 +24,6 @@ import com.shiyao.story_creat.model.dao.AssetDao
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun storyDao(): StoryDao
-    abstract fun storyboardDao(): StoryboardDao
     abstract fun shotDao(): ShotDao
     abstract fun assetDao(): AssetDao
 

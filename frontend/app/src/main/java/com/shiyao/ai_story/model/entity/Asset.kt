@@ -13,11 +13,11 @@ import androidx.room.PrimaryKey
 )
 data class Asset(
     @PrimaryKey val id: String,
-    val storyboardId: String,
-    val title: String,
+    val storyId: String,
     val thumbnailUrl: String? = null,
     val videoUrl: String? = null,
     val duration: Int? = null,
-    val status: String, // 状态：completed/failed
-    val createdAt: Long
+    val status: String, // 状态：generating / completed / failed
+    val createdAt: Long?=System.currentTimeMillis()
 )
+
