@@ -11,7 +11,7 @@ import androidx.room.PrimaryKey
  */
 @Entity(
     tableName = "shots",
-    indices = [Index(value = ["storyboardId"])],
+    indices = [Index(value = ["storyId"])],
     foreignKeys = [
         ForeignKey(
             entity = Story::class,
@@ -24,7 +24,7 @@ import androidx.room.PrimaryKey
 data class Shot(
     @PrimaryKey val id: String,
     val storyId: String,
-    val order: Int,
+    val sortOrder: Int,
     val prompt: String,
     val imageUrl: String? = null,
     val narration: String? = null,
