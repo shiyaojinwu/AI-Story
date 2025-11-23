@@ -1,0 +1,65 @@
+package com.shiyao.ai_story.viewmodel
+
+import com.shiyao.ai_story.model.enums.BottomTab
+import com.shiyao.ai_story.model.enums.Style
+import com.shiyao.ai_story.model.repository.StoryRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+
+/**
+ * 故事生成 ViewModel
+ */
+class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewModel() {
+
+    // 当前选择的风格
+    private val _selectedStyle = MutableStateFlow(Style.MOVIE)
+    val selectedStyle: MutableStateFlow<Style> = _selectedStyle
+
+    // 输入的故事文本
+    private val _storyContent = MutableStateFlow("")
+    val storyContent: StateFlow<String> = _storyContent
+
+    // 故事标题
+    private val _storyTitle = MutableStateFlow("")
+    val storyTitle: StateFlow<String> = _storyTitle
+
+    // 底部导航状态
+    private val _bottomNavSelected = MutableStateFlow(BottomTab.CREATE)
+    val bottomNavSelected: MutableStateFlow<BottomTab> = _bottomNavSelected
+
+
+    /**
+     * 设置风格
+     */
+    fun setStyle(style: Style) {
+        _selectedStyle.value = style
+    }
+
+    /**
+     * 设置故事内容
+     */
+    fun setStoryContent(content: String) {
+        _storyContent.value = content
+    }
+
+    /**
+     * 生成故事：调 Repository 请求后端生成 story
+     * 返回 storyId 给 UI,跳转到分镜页
+     */
+    fun generateStory(): String {
+        // TODO 调用 Repository 生成故事
+        return "1"
+    }
+
+    fun setStoryTitle(storyId: String): String {
+        safeLaunch {
+            // TODO 获取故事标题
+            _storyTitle.value = "生成的故事"
+        }
+        return _storyTitle.value
+    }
+
+    fun setBottomNavSelected(item: BottomTab) {
+        _bottomNavSelected.value = item
+    }
+}
