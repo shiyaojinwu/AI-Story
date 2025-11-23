@@ -1,52 +1,203 @@
 package com.shiyao.ai_story.screens
 
-import android.content.Intent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Photo
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.shiyao.ai_story.TraditionalActivity
+import androidx.navigation.compose.currentBackStackEntryAsState
+import com.shiyao.ai_story.R
+import com.shiyao.ai_story.components.CommonButton
+import com.shiyao.ai_story.components.CommonTextField
+import com.shiyao.ai_story.model.enums.BottomTab
+import com.shiyao.ai_story.model.enums.Style
+import com.shiyao.ai_story.navigation.AppRoute
+import com.shiyao.ai_story.viewmodel.StoryViewModel
 
 /**
  * 首页屏幕
  * @param navController 导航控制器
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateScreen(navController: NavController) {
+fun CreateScreen(
+    navController: NavController,
+    storyViewModel: StoryViewModel
+) {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
-    val context = LocalContext.current
+    val selectedStyle by storyViewModel.selectedStyle.collectAsState()
+    val storyContent by storyViewModel.storyContent.collectAsState()
+    val bottomNavSelected by storyViewModel.bottomNavSelected.collectAsState()
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = "首页 (Compose)")
+    Scaffold(
+        bottomBar = {
+            NavigationBar(
+                containerColor = colorResource(id = R.color.card_background),
+            ) {
+                NavigationBarItem(
+                    icon = { Icon(Icons.Filled.Edit, null) },
+                    label = { Text(stringResource(id = R.string.create)) },
+                    selected = bottomNavSelected == BottomTab.CREATE,
+                    onClick = {
+                        storyViewModel.setBottomNavSelected(BottomTab.CREATE)
+                        if (currentRoute != AppRoute.CREATE.route &&
+                            currentRoute != AppRoute.GENERATE_STORY.route) {
+                            navController.navigate(AppRoute.CREATE.route) {
+                                launchSingleTop = true
+                            }
+                        }
+                    }
+                )
 
-        Button(
-            onClick = { navController.navigate("Assets") },
-            modifier = Modifier.padding(vertical = 8.dp)
-        ) {
-            Text(text = "跳转到详情页 (Compose)")
+                NavigationBarItem(
+                    icon = { Icon(Icons.Filled.Photo, null) },
+                    label = { Text(stringResource(id = R.string.assets)) },
+                    selected = bottomNavSelected == BottomTab.ASSETS,
+                    onClick = {
+                        storyViewModel.setBottomNavSelected(BottomTab.ASSETS)
+                        if (currentRoute != AppRoute.ASSETS.route) {
+                            navController.navigate(AppRoute.ASSETS.route) {
+                                launchSingleTop = true
+                            }
+                        }
+                    }
+                )
+            }
         }
+    ) { paddingValues ->
 
-        Button(
-            onClick = {
-                // 跳转到传统的 XML Activity
-                val intent = Intent(context, TraditionalActivity::class.java)
-                context.startActivity(intent)
-            },
-            modifier = Modifier.padding(vertical = 8.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(colorResource(id = R.color.background))
+                .padding(22.dp)
+                .padding(paddingValues)
         ) {
-            Text(text = "跳转到传统 XML 页面")
+
+            Text(
+                text = stringResource(id = R.string.story_flow),
+                color = colorResource(id = R.color.text_tertiary),
+                fontSize = 38.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .padding(top = 16.dp, bottom = 32.dp)
+            )
+
+            Text(
+                text = stringResource(id = R.string.create),
+                color = colorResource(id = R.color.text_secondary),
+                fontSize = 40.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            CommonTextField(
+                placeholder = stringResource(id = R.string.write_your_story),
+                value = storyContent,
+                onValueChange = { storyViewModel.setStoryContent(it) },
+                height = 160.dp,
+                modifier = Modifier.padding(bottom = 24.dp)
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 24.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                StyleButton(
+                    title = stringResource(id = R.string.movie),
+                    isSelected = selectedStyle == Style.MOVIE
+                ) { storyViewModel.setStyle(Style.MOVIE) }
+
+                Spacer(Modifier.width(8.dp))
+
+                StyleButton(
+                    title = stringResource(id = R.string.animation),
+                    isSelected = selectedStyle == Style.ANIMATION
+                ) { storyViewModel.setStyle(Style.ANIMATION) }
+
+                Spacer(Modifier.width(8.dp))
+
+                StyleButton(
+                    title = stringResource(id = R.string.realistic),
+                    isSelected = selectedStyle == Style.REALISTIC
+                ) { storyViewModel.setStyle(Style.REALISTIC) }
+            }
+
+            CommonButton(
+                text = stringResource(id = R.string.generate_storyboard),
+                backgroundColor = colorResource(id = R.color.primary),
+                contentColor = Color.White,
+                fontSize = 25,
+                horizontalPadding = 16,
+                verticalPadding = 16,
+                enabled = storyContent.isNotEmpty(),
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    val storyId = storyViewModel.generateStory()
+                    storyViewModel.setBottomNavSelected(BottomTab.GENERATE_STORY)
+                    navController.navigate(AppRoute.generateShotRoute(storyId))
+                }
+            )
+
+            Text(
+                text = stringResource(id = R.string.the_storyboard_will_open_n_automatically_after_generation),
+                color = colorResource(id = R.color.text_hint),
+                fontSize = 15.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .padding(top = 12.dp)
+                    .align(Alignment.CenterHorizontally)
+            )
         }
     }
 }
+
+@Composable
+private fun StyleButton(
+    title: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    CommonButton(
+        text = title,
+        onClick = onClick,
+        backgroundColor = if (isSelected) colorResource(id = R.color.primary)
+        else colorResource(id = R.color.edit_background),
+        contentColor = if (isSelected) Color.White else colorResource(id = R.color.text),
+        fontSize = 18,
+        horizontalPadding = 16,
+        verticalPadding = 8
+    )
+}
+

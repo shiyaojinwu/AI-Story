@@ -2,8 +2,10 @@ package com.shiyao.ai_story.navigation
 
 enum class AppRoute(val route: String) {
     CREATE("create"),
-    ASSETS("assets");
+    ASSETS("assets"),
+    GENERATE_STORY("generate_shot/{storyId}");
 
-    // 带参路由
-    fun withArg(arg: String) = "$route/$arg"
+    companion object {
+        fun generateShotRoute(storyId: String): String = "generate_shot/$storyId"
+    }
 }
