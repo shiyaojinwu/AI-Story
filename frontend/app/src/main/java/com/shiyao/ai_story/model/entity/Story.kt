@@ -9,9 +9,9 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "stories")
 data class Story(
     @PrimaryKey val id: String,
-    val title: String,
     val content: String,
+    val title: String,
     val style: String, // 电影/动画/写实
-    val createdAt: Long,
-    val updatedAt: Long
+    val status: String, // 状态：generating / completed / failed
+    val createdAt: Long?=System.currentTimeMillis()
 )

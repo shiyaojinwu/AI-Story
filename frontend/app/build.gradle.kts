@@ -59,6 +59,7 @@ dependencies {
     implementation(libs.androidx.material)//XML 主题 + Material3 风格控件
     implementation(libs.androidx.compose.material3)//Compose 版本的 Material3
     implementation(libs.androidx.compose.material3.adaptive.navigation.suite)
+    implementation(libs.androidx.compose.material.icons.extended)
     // Navigation
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.fragment.ktx)
