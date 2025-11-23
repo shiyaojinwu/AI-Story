@@ -14,6 +14,7 @@ import androidx.room.PrimaryKey
 data class Asset(
     @PrimaryKey val id: String,
     val storyId: String,
+    val title: String,
     val thumbnailUrl: String? = null,
     val videoUrl: String? = null,
     val duration: Int? = null,

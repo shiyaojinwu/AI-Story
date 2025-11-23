@@ -10,6 +10,7 @@ import androidx.room.PrimaryKey
 data class Story(
     @PrimaryKey val id: String,
     val content: String,
+    val title: String,
     val style: String, // 电影/动画/写实
     val status: String, // 状态：generating / completed / failed
     val createdAt: Long?=System.currentTimeMillis()

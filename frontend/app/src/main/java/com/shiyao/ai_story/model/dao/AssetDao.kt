@@ -40,6 +40,6 @@ interface AssetDao {
     /**
      * 根据故事ID获取资产
      */
-    @Query("SELECT * FROM asset WHERE storyId = :storyboardId")
-    fun getAssetsByStoryboardId(storyboardId: String): Flow<List<Asset>>
+    @Query("SELECT * FROM asset WHERE storyId = :storyId")
+    fun getAssetsByStoryId(storyId: String): Flow<List<Asset>>
 }

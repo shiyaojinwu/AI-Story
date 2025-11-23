@@ -24,6 +24,7 @@ import androidx.room.PrimaryKey
 data class Shot(
     @PrimaryKey val id: String,
     val storyId: String,
+    val title: String,
     val sortOrder: Int,
     val prompt: String,
     val imageUrl: String? = null,

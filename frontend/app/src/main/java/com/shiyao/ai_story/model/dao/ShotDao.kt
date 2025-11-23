@@ -38,16 +38,16 @@ interface ShotDao {
     suspend fun getShotById(shotId: String): Shot?
 
     /**
-     * 根据故事板ID获取所有分镜（按顺序排列）
+     * 根据故事ID获取所有分镜（按顺序排列）
      */
-    @Query("SELECT * FROM shots WHERE storyId = :storyboardId ORDER BY sortOrder ASC")
-    fun getShotsByStoryboardId(storyboardId: String): Flow<List<Shot>>
+    @Query("SELECT * FROM shots WHERE storyId = :storyId ORDER BY sortOrder ASC")
+    fun getShotsByStoryId(storyId: String): Flow<List<Shot>>
 
     /**
-     * 根据故事板ID删除所有分镜
+     * 根据故事ID删除所有分镜
      */
-    @Query("DELETE FROM shots WHERE storyId = :storyboardId")
-    suspend fun deleteShotsByStoryboardId(storyboardId: String)
+    @Query("DELETE FROM shots WHERE storyId = :storyId")
+    suspend fun deleteShotsByStoryId(storyId: String)
 
     /**
      * 删除分镜

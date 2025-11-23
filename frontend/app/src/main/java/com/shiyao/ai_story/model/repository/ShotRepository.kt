@@ -34,8 +34,8 @@ class ShotRepository private constructor(
     /**
      * 获取故事板下的所有分镜
      */
-    fun getShotsByStoryboardId(storyboardId: String): Flow<List<Shot>> =
-        shotDao.getShotsByStoryboardId(storyboardId)
+    fun getShotsByStoryId(storyId: String): Flow<List<Shot>> =
+        shotDao.getShotsByStoryId(storyId)
 
     /**
      * 获取分镜详情
@@ -48,6 +48,13 @@ class ShotRepository private constructor(
      */
     suspend fun insertShot(shot: Shot) =
         shotDao.insertShot(shot)
+
+    /**
+     * 批量插入分镜
+     */
+    suspend fun insertShots(shots: List<Shot>) {
+        shotDao.insertShots(shots)
+    }
 
     /**
      * 更新分镜

@@ -40,10 +40,10 @@ class AssetRepository private constructor(
         assetDao.getAllAssets()
 
     /**
-     * 根据 StoryboardId 获取资产列表
+     * 根据 StoryId 获取资产列表
      */
-    fun getAssetsByStoryboardId(storyboardId: String): Flow<List<Asset>> =
-        assetDao.getAssetsByStoryboardId(storyboardId)
+    fun getAssetsByStoryId(storyId: String): Flow<List<Asset>> =
+        assetDao.getAssetsByStoryId(storyId)
 
     /**
      * 根据 ID 查询资产
