@@ -1,63 +1,31 @@
 package main
 
 import (
-    "fmt"
-    "log"
-    "net/http"
-    "os"
+	"fmt"
+	"log"
+	"os"
 
-    "github.com/gin-gonic/gin"
-    "github.com/joho/godotenv"
-    "gorm.io/driver/postgres"
-    "gorm.io/gorm"
+	"github.com/joho/godotenv"
+
+	"story-video-backend/config"
+	"story-video-backend/db"
+	"story-video-backend/router"
 )
 
 func main() {
-    // 1. 加载 .env 文件
-    err := godotenv.Load()
-    if err != nil {
-        log.Println("⚠️  No .env file found or failed to load")
-    }
+	if err := godotenv.Load(); err != nil {
+		log.Println("can find file .env")
+	}
+	cfg := config.LoadConfig()
+	database := db.InitDB(cfg)
+	r := router.InitRouter(database)
 
-    // 2. 从环境变量读取
-    dsn := fmt.Sprintf(
-        "host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=%s",
-        os.Getenv("DB_HOST"),
-        os.Getenv("DB_USER"),
-        os.Getenv("DB_PASSWORD"),
-        os.Getenv("DB_NAME"),
-        os.Getenv("DB_PORT"),
-        os.Getenv("DB_SSLMODE"),
-        os.Getenv("DB_TIMEZONE"),
-    )
+	//start the service and print port
+	address := fmt.Sprintf(":%d", cfg.Port)
+	fmt.Printf("Server started at http://localhost%s\n", address)
 
-    log.Println("DSN:", dsn)
-
-    // 3. 测试数据库连接
-    db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-    if err != nil {
-        log.Fatal("❌ Failed to connect to PostgreSQL:", err)
-    }
-
-    log.Println("✅ Connected to PostgreSQL successfully!")
-
-    // 4. 测试接口
-    r := gin.Default()
-
-    r.GET("/ping", func(c *gin.Context) {
-        c.JSON(http.StatusOK, gin.H{"message": "pong"})
-    })
-
-    // DB 测试
-    r.GET("/db-status", func(c *gin.Context) {
-        sqlDB, _ := db.DB()
-        if err := sqlDB.Ping(); err != nil {
-            c.JSON(500, gin.H{"db": "not ok"})
-            return
-        }
-        c.JSON(200, gin.H{"db": "ok"})
-    })
-
-    r.Run(":8080")
+	if err := r.Run(address); err != nil {
+		log.Fatalf("启动服务失败: %v", err)
+		os.Exit(1)
+	}
 }
-
