@@ -21,4 +21,3 @@ data class Asset(
     val status: String, // 状态：generating / completed / failed
     val createdAt: Long?=System.currentTimeMillis()
 )
-
