@@ -20,6 +20,9 @@ func main() {
 	database := db.InitDB(cfg)
 	r := router.InitRouter(database)
 
+	//for test
+	fmt.Printf("\n \033[32mTEST config.go test\033[0m,%+v\n", cfg)
+
 	//start the service and print port
 	address := fmt.Sprintf(":%d", cfg.Port)
 	fmt.Printf("Server started at http://localhost%s\n", address)
@@ -28,4 +31,5 @@ func main() {
 		log.Fatalf("启动服务失败: %v", err)
 		os.Exit(1)
 	}
+
 }
