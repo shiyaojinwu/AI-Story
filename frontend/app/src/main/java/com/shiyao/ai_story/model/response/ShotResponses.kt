@@ -17,5 +17,5 @@ data class ShotDetailResponse(
     val imageUrl: String?,
     val transition: String,
     val narration: String,
-    val status: Int
+    val status: String
 )

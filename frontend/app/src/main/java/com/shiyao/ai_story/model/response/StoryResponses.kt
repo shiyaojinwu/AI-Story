@@ -11,10 +11,10 @@ data class CreateStoryResponse(
 
 data class ShotItem(
     val id: String,
-    val order: Int,
+    val sortOrder: Int,
     val title: String,
     val imageUrl: String?,
-    val status: Int
+    val status: String
 )
 
 data class StoryShotsResponse(
