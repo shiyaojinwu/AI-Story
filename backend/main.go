@@ -21,7 +21,8 @@ func main() {
 	r := router.InitRouter(database)
 
 	//for test
-	fmt.Printf("\n \033[32mTEST config.go test\033[0m,%+v\n", cfg)
+	fmt.Printf("\n \033[32mTEST config.go test\033[0m,%+v", cfg)
+	fmt.Printf("\n \033[32mTEST db.go test\033[0m,%+v\n", database)
 
 	//start the service and print port
 	address := fmt.Sprintf(":%d", cfg.Port)
