@@ -22,8 +22,8 @@ func main() {
 
 	//for test
 	fmt.Printf("\n \033[32mTEST config.go test\033[0m,%+v", cfg)
-	fmt.Printf("\n \033[32mTEST db.go test\033[0m,%+v\n", database)
-
+	fmt.Printf("\n \033[32mTEST db.go test\033[0m,%v", database)
+	fmt.Printf("\n \033[32mTEST router.go test\033[0m,%v\n", r)
 	//start the service and print port
 	address := fmt.Sprintf(":%d", cfg.Port)
 	fmt.Printf("Server started at http://localhost%s\n", address)

@@ -25,7 +25,7 @@ func LoadConfig() *Config {
 	PortStr := os.Getenv("PORT")
 	//先判空
 	if PortStr == "" {
-		PortStr = "8080"
+		PortStr = "9000"
 	}
 	//再判数据合理性
 	port, err := strconv.Atoi(PortStr)
