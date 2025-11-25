@@ -9,6 +9,7 @@ import (
 
 	"story-video-backend/config"
 	"story-video-backend/db"
+	"story-video-backend/model"
 	"story-video-backend/router"
 )
 
@@ -18,6 +19,11 @@ func main() {
 	}
 	cfg := config.LoadConfig()
 	database := db.InitDB(cfg)
+	err := database.AutoMigrate(&model.Story{}, &model.Shot{}, &model.Asset{})
+	if err != nil {
+		log.Fatalf("数据库初始化失败：%v", err)
+	}
+	log.Println("=^w^= 数据库连接成功")
 	r := router.InitRouter(database)
 
 	//for test
