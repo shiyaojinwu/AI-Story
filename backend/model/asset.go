@@ -13,6 +13,6 @@ type Asset struct {
 	CreatedAt    time.Time `json:"createdAt"`
 }
 
-func (Asset) TabelName() string {
+func (Asset) TableName() string {
 	return "assets"
 }

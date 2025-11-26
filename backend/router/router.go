@@ -33,6 +33,9 @@ func InitRouter() *gin.Engine {
 		api.POST("/shot/:id/update", controller.UpdateShot)
 		//生成mock数据
 		api.POST("/story/:id/mock-gen", controller.GenMockShots)
+
+		//asset模块
+		api.GET("/story/all", controller.GetAllAssets)
 	}
 
 	return r
