@@ -3,12 +3,22 @@ package router
 import (
 	"story-video-backend/controller"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func InitRouter() *gin.Engine {
 	r := gin.Default()
 
+	//跨域访问
+	config := cors.Config{
+		AllowAllOrigins:  true,
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}
+	r.Use(cors.New(config))
 	//api分组
 	api := r.Group("/api")
 	{
