@@ -5,7 +5,7 @@ import "time"
 type Shot struct {
 	ID         uint      `json:"id" gorm:"primaryKey"`
 	StoryID    uint      `json:"storyId" gorm:"index"` //加索引，增加查询速率
-	Order      int       `json:"order" gorm:"column:sort_order"`
+	Order      int       `json:"sortOrder" gorm:"column:sort_order"`
 	Title      string    `json:"title"`
 	Prompt     string    `json:"prompt" gorm:"type:text"`
 	Narration  string    `json:"narration" gorm:"type:text"`
