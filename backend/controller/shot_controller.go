@@ -132,7 +132,7 @@ func UpdateShot(c *gin.Context) {
 		"prompt":     req.Prompt,
 		"narration":  req.Narration,
 		"transition": req.Transition,
-		// 如果修改了 Prompt，理论上状态应该重置为 0 (Pending) 或其他，这里暂时保持不变，由前端控制重绘逻辑
+		"status":     0,
 	}
 
 	// 执行更新
@@ -144,6 +144,8 @@ func UpdateShot(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"code":    200,
 		"message": "更新成功",
-		"data":    nil,
+		"data": gin.H{
+			"status": 0,
+		},
 	})
 }
