@@ -6,11 +6,14 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.shiyao.ai_story.app.MyApplication
+import com.shiyao.ai_story.model.repository.AssetRepository
 import com.shiyao.ai_story.model.repository.ShotRepository
 import com.shiyao.ai_story.model.repository.StoryRepository
 import com.shiyao.ai_story.screens.AssetsScreen
 import com.shiyao.ai_story.screens.CreateScreen
 import com.shiyao.ai_story.screens.GenerateStoryScreen
+import com.shiyao.ai_story.screens.PreviewScreen
+import com.shiyao.ai_story.viewmodel.AssetsViewModel
 import com.shiyao.ai_story.viewmodel.ShotViewModel
 import com.shiyao.ai_story.viewmodel.StoryViewModel
 import com.shiyao.ai_story.viewmodel.ViewModelFactory
@@ -35,6 +38,15 @@ fun AppNavigation(navController: NavHostController) {
     val shotViewModel: ShotViewModel = viewModel(
         factory = ViewModelFactory { ShotViewModel(shotRepository) }
     )
+    val assetDao = database.assetDao() // 获取 DAO
+
+    // 初始化 Repository
+    val assetRepository = AssetRepository.getInstance(assetDao)
+
+    // 初始化 ViewModel
+    val assetsViewModel: AssetsViewModel = viewModel(
+        factory = ViewModelFactory { AssetsViewModel(assetRepository) }
+    )
 
     NavHost(
         navController = navController,
@@ -49,7 +61,18 @@ fun AppNavigation(navController: NavHostController) {
         }
 
         composable(AppRoute.ASSETS.route) {
-            AssetsScreen(navController)
+            AssetsScreen(
+                navController = navController,
+                storyViewModel = storyViewModel, // 用于底部栏
+                assetsViewModel = assetsViewModel // 用于数据
+            )
+        }
+
+        // 3. 新增 Preview 页
+        composable(AppRoute.PREVIEW.route)
+        { backStackEntry ->
+            val assetName = backStackEntry.arguments?.getString("assetName") ?: ""
+            PreviewScreen(navController = navController, assetName = assetName)
         }
 
         composable(AppRoute.GENERATE_STORY.route) { backStackEntry ->
