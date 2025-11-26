@@ -11,7 +11,13 @@
       <SelectionState runConfigName="CommonCard_Horizontal_Preview">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="MainActivity">
+      <SelectionState runConfigName="VideoPreviewPlayerPreview">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="VideoScreen">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="FileDemoScreen">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

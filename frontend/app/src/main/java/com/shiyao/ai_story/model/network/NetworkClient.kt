@@ -19,16 +19,17 @@ object NetworkClient {
     /**
      * OkHttp客户端实例
      */
-    private val okHttpClient: OkHttpClient by lazy {
+    val okHttpClient: OkHttpClient by lazy {
         // 创建日志拦截器
         val loggingInterceptor = HttpLoggingInterceptor()
-        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
+        //loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC)
 
         OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor) // 添加日志拦截器
             .connectTimeout(30, TimeUnit.SECONDS) // 连接超时
-            .readTimeout(30, TimeUnit.SECONDS) // 读取超时
-            .writeTimeout(30, TimeUnit.SECONDS) // 写入超时
+            .readTimeout(120, TimeUnit.SECONDS) // 读取超时
+            .writeTimeout(120, TimeUnit.SECONDS) // 写入超时
             .build()
     }
 
