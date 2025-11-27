@@ -14,7 +14,7 @@ object NetworkClient {
     /**
      * 服务端URL，后续可通过BuildConfig配置不同环境
      */
-    private const val BASE_URL = "http://localhost:8080"
+    private const val BASE_URL = "http://129.204.21.232:9000"
 
     /**
      * OkHttp客户端实例
@@ -22,8 +22,8 @@ object NetworkClient {
     val okHttpClient: OkHttpClient by lazy {
         // 创建日志拦截器
         val loggingInterceptor = HttpLoggingInterceptor()
-        //loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
-        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC)
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
+        //loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC)
 
         OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor) // 添加日志拦截器

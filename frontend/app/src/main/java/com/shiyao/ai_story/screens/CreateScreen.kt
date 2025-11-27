@@ -19,11 +19,13 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -38,7 +40,9 @@ import com.shiyao.ai_story.components.CommonTextField
 import com.shiyao.ai_story.model.enums.BottomTab
 import com.shiyao.ai_story.model.enums.Style
 import com.shiyao.ai_story.navigation.AppRoute
+import com.shiyao.ai_story.utils.ToastUtils
 import com.shiyao.ai_story.viewmodel.StoryViewModel
+import com.shiyao.ai_story.viewmodel.UIState
 
 /**
  * 首页屏幕
@@ -56,6 +60,20 @@ fun CreateScreen(
     val selectedStyle by storyViewModel.selectedStyle.collectAsState()
     val storyContent by storyViewModel.storyContent.collectAsState()
     val bottomNavSelected by storyViewModel.bottomNavSelected.collectAsState()
+    val generateState by storyViewModel.generateStoryState.collectAsState()
+    val context = LocalContext.current
+
+
+    LaunchedEffect(generateState) {
+        if (generateState is UIState.Success) {
+            val storyId = generateState.getOrNull()!!
+            navController.navigate(AppRoute.generateShotRoute(storyId))
+        }
+        if (generateState is UIState.Error) {
+            val message = (generateState as UIState.Error).message ?: "生成失败"
+            ToastUtils.showShort( context, message)
+        }
+    }
 
     Scaffold(
         bottomBar = {
@@ -69,7 +87,8 @@ fun CreateScreen(
                     onClick = {
                         storyViewModel.setBottomNavSelected(BottomTab.CREATE)
                         if (currentRoute != AppRoute.CREATE.route &&
-                            currentRoute != AppRoute.GENERATE_STORY.route) {
+                            currentRoute != AppRoute.GENERATE_STORY.route
+                        ) {
                             navController.navigate(AppRoute.CREATE.route) {
                                 launchSingleTop = true
                             }
@@ -164,9 +183,7 @@ fun CreateScreen(
                 enabled = storyContent.isNotEmpty(),
                 modifier = Modifier.fillMaxWidth(),
                 onClick = {
-                    val storyId = storyViewModel.generateStory()
-                    storyViewModel.setBottomNavSelected(BottomTab.GENERATE_STORY)
-                    navController.navigate(AppRoute.generateShotRoute(storyId))
+                    storyViewModel.generateStory()
                 }
             )
 

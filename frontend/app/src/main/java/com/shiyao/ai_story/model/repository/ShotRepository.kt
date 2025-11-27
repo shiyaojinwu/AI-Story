@@ -7,6 +7,7 @@ import com.shiyao.ai_story.model.network.NetworkClient
 import com.shiyao.ai_story.model.request.GenerateShotRequest
 import com.shiyao.ai_story.model.response.ShotDetailResponse
 import com.shiyao.ai_story.model.response.ShotPreviewResponse
+import com.shiyao.ai_story.model.response.StoryShotsResponse
 import kotlinx.coroutines.flow.Flow
 
 @Suppress("unused")
@@ -32,7 +33,7 @@ class ShotRepository private constructor(
     }
 
     /**
-     * 获取故事板下的所有分镜
+     * 获取故事所有分镜
      */
     fun getShotsByStoryId(storyId: String): Flow<List<Shot>> =
         shotDao.getShotsByStoryId(storyId)
@@ -69,7 +70,13 @@ class ShotRepository private constructor(
         shotDao.deleteShotById(shotId)
 
     /**
-     * 单例，全局访问
+     * 获取故事分镜列表
+     */
+    suspend fun getStoryShots(storyId: String): StoryShotsResponse =
+        handleResponse(apiService.getStoryShots(storyId))
+
+    /**
+     * 获取单张分镜生成进度 / 轮询接口
      */
     suspend fun getShotPreview(shotId: String): ShotPreviewResponse =
         handleResponse(apiService.getShotPreview(shotId))

@@ -7,6 +7,7 @@ import com.shiyao.ai_story.exception.AppException
 import com.shiyao.ai_story.exception.DatabaseException
 import com.shiyao.ai_story.exception.NetworkException
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
@@ -27,7 +28,7 @@ abstract class BaseViewModel : ViewModel() {
      * 安全地启动协程（自动处理异常）
      */
     protected fun safeLaunch(block: suspend () -> Unit) {
-        viewModelScope.launch(exceptionHandler) {
+        viewModelScope.launch(Dispatchers.IO + exceptionHandler) {
             block()
         }
     }

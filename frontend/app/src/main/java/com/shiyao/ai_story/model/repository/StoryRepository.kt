@@ -10,7 +10,6 @@ import com.shiyao.ai_story.model.response.GenerateVideoResponse
 import com.shiyao.ai_story.model.response.ShotDetailResponse
 import com.shiyao.ai_story.model.response.ShotPreviewResponse
 import com.shiyao.ai_story.model.response.StoryPreviewResponse
-import com.shiyao.ai_story.model.response.StoryShotsResponse
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -72,9 +71,6 @@ class StoryRepository private constructor(
 
     suspend fun generateStoryboard(request: CreateStoryRequest): CreateStoryResponse =
         handleResponse(apiService.generateStoryboard(request))
-
-    suspend fun getStoryShots(storyId: String): StoryShotsResponse =
-        handleResponse(apiService.getStoryShots(storyId))
 
     suspend fun getShotPreview(shotId: String): ShotPreviewResponse =
         handleResponse(apiService.getShotPreview(shotId))

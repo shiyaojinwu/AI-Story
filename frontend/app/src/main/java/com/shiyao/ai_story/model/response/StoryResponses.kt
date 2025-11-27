@@ -6,7 +6,7 @@ package com.shiyao.ai_story.model.response
 data class CreateStoryResponse(
     val storyId: String,
     val status: String,
-    val createdAt: Long?
+    val createdAt: String?
 )
 
 data class ShotItem(

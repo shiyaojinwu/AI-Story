@@ -24,17 +24,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.shiyao.ai_story.R
 import com.shiyao.ai_story.components.CommonCard
+import com.shiyao.ai_story.model.enums.ShotStatus
 import com.shiyao.ai_story.viewmodel.ShotViewModel
 import com.shiyao.ai_story.viewmodel.StoryViewModel
 
@@ -58,12 +59,8 @@ fun GenerateStoryScreen(
     )
 
     LaunchedEffect(storyId) {
-        storyViewModel.setStoryTitle(storyId)
-
-        snapshotFlow { storyTitle.value }
-            .collect { title ->
-                shotViewModel.loadShots(storyId, title)
-            }
+        val title = storyViewModel.storyTitle.value
+        shotViewModel.pollShotsUntilCompleted(storyId, title)
     }
 
     Column(
@@ -129,14 +126,33 @@ fun GenerateStoryScreen(
                         pageSpacing = 16.dp
                     ) { page ->
                         val shot = shots.value[page]
+                        val status = ShotStatus.from(shot.status)
 
-                        shot.imageUrl?.let {
-                            CommonCard(
-                                title = shot.title,
-                                tag = "Generated",
-                                imageUrl = it,
-                                backgroundColor = colorResource(id = R.color.card_background),
-                            )
+                        when (status) {
+                            ShotStatus.COMPLETED -> {
+                                shot.imageUrl?.let {
+                                    CommonCard(
+                                        title = shot.title,
+                                        tag = "Generated",
+                                        imageUrl = it,
+                                        backgroundColor = colorResource(id = R.color.card_background),
+                                    )
+                                }
+                            }
+
+                            ShotStatus.GENERATING, ShotStatus.FAILED -> {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "Loading shots...",
+                                        color = Color.Gray,
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+                            }
                         }
                     }
 

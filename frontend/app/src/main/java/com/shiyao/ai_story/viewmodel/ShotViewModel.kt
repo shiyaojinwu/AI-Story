@@ -1,14 +1,15 @@
 package com.shiyao.ai_story.viewmodel
 
-import androidx.lifecycle.viewModelScope
+import android.util.Log
 import com.shiyao.ai_story.model.entity.Shot
+import com.shiyao.ai_story.model.enums.ShotStatus
 import com.shiyao.ai_story.model.repository.ShotRepository
+import com.shiyao.ai_story.model.response.ShotItem
 import com.shiyao.ai_story.model.ui.ShotUI
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 
 /**
  * 分镜 ViewModel
@@ -21,9 +22,8 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
     /**
      * 加载指定 storyId 的分镜
      */
-    fun loadShots(storyId: String, title: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-
+    fun loadShotsBySql(storyId: String, title: String) {
+        safeLaunch {
             shotRepository.getShotsByStoryId(storyId).collectLatest { dbShots ->
 
                 if (dbShots.isNotEmpty()) {
@@ -38,6 +38,62 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
         }
     }
 
+    /**
+     * 加载指定 storyId 的分镜
+     */
+    fun loadShotsByNetwork(storyId: String, title: String) {
+        safeLaunch {
+            try {
+                val response = shotRepository.getStoryShots(storyId)
+                val shots = response.shots
+                val uiList = if (!shots.isNullOrEmpty()) {
+                    shots.map { mapShotToUI(it, title,response.storyId) }
+                } else {
+                    createMockShots(storyId).map { mapShotToUI(it, title) }
+                }
+                _shots.value = uiList
+            } catch (e: Exception) {
+                Log.e("ShotViewModel", "loadShotsByNetwork error", e)
+                _shots.value = emptyList() // 或者处理错误状态
+            }
+        }
+    }
+
+    private fun mapShotToUI(shot: ShotItem, title: String, storyId: String): ShotUI {
+        return ShotUI(
+            id = shot.id,
+            storyId = storyId,
+            storyTitle = title,
+            title = shot.title,
+            sortOrder = shot.sortOrder,
+            prompt = null,
+            imageUrl = shot.imageUrl,
+            status = shot.status
+        )
+    }
+
+    /**
+     * 轮询加载网络分镜，直到全部完成
+     */
+    fun pollShotsUntilCompleted(storyId: String, title: String, intervalMillis: Long = 2000) {
+        safeLaunch {
+            while (true) {
+                // 加载数据
+                loadShotsByNetwork(storyId, title)
+                // 获取当前 UI 数据
+                val currentShots = _shots.value
+                // 检查是否全部完成
+                if (currentShots.isNotEmpty() && currentShots.all { it.status == ShotStatus.COMPLETED.value }) {
+                    Log.i("ShotViewModel", "所有分镜已完成，停止轮询")
+                    break
+                } else {
+                    Log.i("ShotViewModel", "分镜未完成，继续轮询...")
+                }
+                // 等待间隔
+                delay(intervalMillis)
+            }
+        }
+    }
 
     private fun mapShotToUI(shot: Shot, title: String): ShotUI {
         return ShotUI(
@@ -74,7 +130,7 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
                 sortOrder = 2,
                 prompt = "Hikers in the mist",
                 imageUrl = "https://ts1.tc.mm.bing.net/th/id/R-C.987f582c510be58755c4933cda68d525",
-                status = "completed"
+                status = "failed"
             )
         )
     }
@@ -84,6 +140,6 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
      */
     fun refresh(storyId: String, title: String) {
         _shots.value = emptyList()
-        loadShots(storyId, title)
+        loadShotsBySql(storyId, title)
     }
 }

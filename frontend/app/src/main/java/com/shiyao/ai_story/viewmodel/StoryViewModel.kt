@@ -1,8 +1,10 @@
 package com.shiyao.ai_story.viewmodel
 
+import android.util.Log
 import com.shiyao.ai_story.model.enums.BottomTab
 import com.shiyao.ai_story.model.enums.Style
 import com.shiyao.ai_story.model.repository.StoryRepository
+import com.shiyao.ai_story.model.request.CreateStoryRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -27,7 +29,8 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
     private val _bottomNavSelected = MutableStateFlow(BottomTab.CREATE)
     val bottomNavSelected: MutableStateFlow<BottomTab> = _bottomNavSelected
 
-
+    private val _generateStoryState = MutableStateFlow<UIState<String>>(UIState.Initial)
+    val generateStoryState: StateFlow<UIState<String>> = _generateStoryState
     /**
      * 设置风格
      */
@@ -46,10 +49,25 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
      * 生成故事：调 Repository 请求后端生成 story
      * 返回 storyId 给 UI,跳转到分镜页
      */
-    fun generateStory(): String {
-        // TODO 调用 Repository 生成故事
-        return "1"
+    fun generateStory() {
+        safeLaunch {
+            _generateStoryState.value = UIState.Loading
+
+            try {
+                val createStoryResponse = storyRepository.generateStoryboard(
+                    CreateStoryRequest(
+                        content = storyContent.value,
+                        style = selectedStyle.value.name
+                    )
+                )
+                _generateStoryState.value = UIState.Success(createStoryResponse.storyId)
+            } catch (e: Exception) {
+                Log.e("StoryViewModel", "generateStory error", e)
+                _generateStoryState.value = UIState.Error(e, e.message)
+            }
+        }
     }
+
 
     fun setStoryTitle(storyId: String): String {
         safeLaunch {
