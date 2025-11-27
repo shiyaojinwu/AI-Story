@@ -78,6 +78,10 @@ dependencies {
     implementation(libs.logging.interceptor)
     // Coil
     implementation(libs.coil)
+    // ExoPlayer
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.ui)
+    implementation(libs.media3.session)
     // Coroutines & Flow
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.core)
