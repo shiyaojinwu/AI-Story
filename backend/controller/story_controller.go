@@ -2,9 +2,10 @@ package controller
 
 import (
 	"net/http"
+	"time"
+
 	"story-video-backend/db"
 	"story-video-backend/model"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,7 +18,7 @@ type CreateStoryRequest struct {
 func CreateStory(c *gin.Context) {
 	var req CreateStoryRequest
 
-	//校验是否符合json标签
+	// 校验是否符合json标签
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":  400,
@@ -27,7 +28,7 @@ func CreateStory(c *gin.Context) {
 		return
 	}
 
-	//把请求里的的json映射到model层的story模型
+	// 把请求里的的json映射到model层的story模型
 	story := model.Story{
 		Content:   req.Content,
 		Style:     req.Style,
@@ -35,7 +36,7 @@ func CreateStory(c *gin.Context) {
 		CreatedAt: time.Now(),
 	}
 
-	//然后把这个story模型写入数据库
+	// 然后把这个story模型写入数据库
 	if err := db.DB.Create(&story).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    500,
@@ -45,7 +46,7 @@ func CreateStory(c *gin.Context) {
 		return
 	}
 
-	//返回结果
+	// 返回结果
 	c.JSON(http.StatusOK, gin.H{
 		"code":   200,
 		"messge": "success",
@@ -54,5 +55,26 @@ func CreateStory(c *gin.Context) {
 			"status":    story.Status,
 			"createdAt": story.CreatedAt,
 		},
+	})
+}
+
+func GetStoryDetail(c *gin.Context) {
+	id := c.Param("id")
+	var story model.Story
+
+	// 根据id查询
+	if err := db.DB.First(&story, "id = ?", id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"code":    404,
+			"message": "分镜不存在" + err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    200,
+		"message": "success",
+		"data":    story,
 	})
 }

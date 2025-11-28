@@ -2,20 +2,20 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
+
 	"story-video-backend/db"
 	"story-video-backend/model"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
-//to do 按故事获取分镜
-
+// to do 按故事获取分镜
 func GetShotsByStory(c *gin.Context) {
 	storyIdStr := c.Param("id")
 
 	var shots []model.Shot
-	//数据库查询
+	// 数据库查询
 	result := db.DB.Where("story_id = ?", storyIdStr).Order("sort_order asc").Find(&shots)
 
 	if result.Error != nil {
@@ -27,7 +27,7 @@ func GetShotsByStory(c *gin.Context) {
 		return
 	}
 
-	//返回数据
+	// 返回数据
 	c.JSON(http.StatusOK, gin.H{
 		"code":    200,
 		"message": "success",
@@ -36,13 +36,13 @@ func GetShotsByStory(c *gin.Context) {
 			"shots":   shots,
 		},
 	})
-
 }
+
 func GetShotDetail(c *gin.Context) {
 	id := c.Param("id")
 	var shot model.Shot
 
-	//根据id查询
+	// 根据id查询
 	if err := db.DB.First(&shot, "id = ?", id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"code":    404,
@@ -56,6 +56,28 @@ func GetShotDetail(c *gin.Context) {
 		"code":    200,
 		"message": "success",
 		"data":    shot,
+	})
+}
+
+func GetShotProgress(c *gin.Context) {
+	id := c.Param("id")
+	var shot model.Shot
+
+	if err := db.DB.First(&shot, "id = ?", id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"code":    404,
+			"message": "分镜不存在" + err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    200,
+		"message": "success",
+		"data": gin.H{
+			"status": shot.Status,
+		},
 	})
 }
 
@@ -94,7 +116,7 @@ func GenMockShots(c *gin.Context) {
 			ImageURL: "",
 		},
 	}
-	//批量写入数据库
+	// 批量写入数据库
 	if err := db.DB.Create(&mockShots).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    500,
