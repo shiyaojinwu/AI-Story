@@ -103,8 +103,10 @@ fun AssetsScreen(
                         tag = "Generated",
                         imageUrl = asset.thumbnailUrl ?: "", // 处理空值
                         modifier = Modifier.clickable {
+                            assetsViewModel.selectAsset(asset)
+
                             // 跳转到预览页
-                            navController.navigate(AppRoute.previewRoute(asset.title))
+                            navController.navigate(AppRoute.PREVIEW.route)
                         }
                     )
                 }

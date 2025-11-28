@@ -41,7 +41,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "ai_story_db"
                 )
-                    .fallbackToDestructiveMigration() // 数据库版本升级时销毁旧数据
+                    .fallbackToDestructiveMigration()// 数据库版本升级时销毁旧数据
                     // .addMigrations(MIGRATION_1_2) // 注册 Migration迁移策略，表结构变更才要
                     .build()
                 INSTANCE = instance

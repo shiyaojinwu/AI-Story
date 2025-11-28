@@ -13,13 +13,13 @@ import java.time.Instant
     tableName = "asset"
 )
 data class Asset(
-    @PrimaryKey val id: String,
-    val storyId: String,
+    @PrimaryKey val id: Int,
+    val storyId: Int,
     val title: String,
     val thumbnailUrl: String? = null,
     val videoUrl: String? = null,
     val duration: Int? = null,
-    val status: String, // 状态：generating / completed / failed
+    val status: Int, // 状态：generating / completed / failed
     val createdAt: String? = Instant.now().toString()
 
 )

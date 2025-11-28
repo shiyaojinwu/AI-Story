@@ -11,6 +11,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,13 +22,25 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import androidx.navigation.NavController
 import com.shiyao.ai_story.R
 import com.shiyao.ai_story.components.CommonButton
+import com.shiyao.ai_story.components.CommonVideoPlayer
+import com.shiyao.ai_story.viewmodel.AssetsViewModel
+
 
 @Composable
-fun PreviewScreen(navController: NavController, assetName: String) {
+fun PreviewScreen(navController: NavController, assetsViewModel: AssetsViewModel) {
     val context = LocalContext.current
+    val selectedAsset by assetsViewModel.selectedAsset.collectAsState()
+    val realVideoUrl = selectedAsset?.videoUrl ?: ""
+    val realTitle = selectedAsset?.title ?: "Unknown Story"
+
+    val fallbackUrl = "http://flv4mp4.people.com.cn/videofile7/pvmsvideo/2023/4/14/DangWang-BoChenDi_7a0283ace3c035c20500c33dfaef44ed.mp4"
+
+    val urlToPlay = if (realVideoUrl.isNotEmpty()) realVideoUrl else fallbackUrl
+
 
     Column(
         modifier = Modifier
@@ -56,33 +70,20 @@ fun PreviewScreen(navController: NavController, assetName: String) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(240.dp)
                 .padding(20.dp),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = Color.Black)
         ) {
-            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                Icon(
-                    painter = painterResource(android.R.drawable.ic_media_play),
-                    contentDescription = "Play",
-                    tint = Color.White,
-                    modifier = Modifier.size(64.dp)
-                )
-                LinearProgressIndicator(
-                    progress = 0.3f,
-                    color = colorResource(id = R.color.primary),
-                    trackColor = Color.Gray,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                        .height(4.dp)
-                )
-            }
+            // 接入播放器
+            CommonVideoPlayer(
+                uri = urlToPlay.toUri(),
+                autoPlay = true,
+                height = 240.dp
+            )
         }
 
         Text(
-            text = "Story: $assetName",
+            text = "Story: $realTitle",
             color = colorResource(id = R.color.text_secondary),
             fontSize = 14.sp,
             modifier = Modifier.align(Alignment.CenterHorizontally)

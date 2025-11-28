@@ -3,7 +3,7 @@ package com.shiyao.ai_story.navigation
 enum class AppRoute(val route: String) {
     CREATE("create"),
     ASSETS("assets"),
-    PREVIEW("preview/{assetName}"),
+    PREVIEW("preview"),
     GENERATE_STORY("generate_shot/{storyId}");
 
     companion object {

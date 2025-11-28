@@ -17,18 +17,27 @@ class AssetsViewModel(
     private val _assetsList = MutableStateFlow<List<Asset>>(emptyList())
     val assetsList: StateFlow<List<Asset>> = _assetsList.asStateFlow()
 
+
+
+
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+    private val _selectedAsset = MutableStateFlow<Asset?>(null)
+    val selectedAsset: StateFlow<Asset?> = _selectedAsset.asStateFlow()
+
+    fun selectAsset(asset: Asset) {
+        _selectedAsset.value = asset
+    }
 
     init {
         // 调试模式
-        loadMockData()
+        //loadMockData()
         // 真实模式
-        // loadAssetsFromRepository()
+        loadAssetsFromRepository()
     }
 
-    // 1. 加载假数据 (用于调试 UI)
-    private fun loadMockData() {
+    // 1. 加载假数据
+    /*private fun loadMockData() {
         val mocks = listOf(
             Asset(
                 id = "1",
@@ -61,9 +70,9 @@ class AssetsViewModel(
             )
         )
         _assetsList.value = mocks
-    }
+    }*/
 
-    // 2. 从仓库加载真实数据 (后续对接用)
+    // 2. 从仓库加载真实数据
     private fun loadAssetsFromRepository() {
         viewModelScope.launch {
             assetRepository.getAllAssets().collect { list ->
@@ -72,11 +81,12 @@ class AssetsViewModel(
         }
     }
 
+
     fun updateSearchQuery(query: String) {
         _searchQuery.value = query
         // 本地搜索过滤逻辑
         if (query.isEmpty()) {
-            loadMockData() // 恢复所有数据
+            loadAssetsFromRepository() // 恢复所有数据
         } else {
             val currentList = _assetsList.value
             _assetsList.value = currentList.filter {

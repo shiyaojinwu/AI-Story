@@ -71,8 +71,7 @@ fun AppNavigation(navController: NavHostController) {
         // 3. 新增 Preview 页
         composable(AppRoute.PREVIEW.route)
         { backStackEntry ->
-            val assetName = backStackEntry.arguments?.getString("assetName") ?: ""
-            PreviewScreen(navController = navController, assetName = assetName)
+            PreviewScreen(navController = navController, assetsViewModel = assetsViewModel)
         }
 
         composable(AppRoute.GENERATE_STORY.route) { backStackEntry ->
