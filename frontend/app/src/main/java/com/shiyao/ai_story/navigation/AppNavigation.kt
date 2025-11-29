@@ -13,6 +13,7 @@ import com.shiyao.ai_story.screens.AssetsScreen
 import com.shiyao.ai_story.screens.CreateScreen
 import com.shiyao.ai_story.screens.GenerateStoryScreen
 import com.shiyao.ai_story.screens.PreviewScreen
+import com.shiyao.ai_story.screens.ShotDetailScreen
 import com.shiyao.ai_story.viewmodel.AssetsViewModel
 import com.shiyao.ai_story.viewmodel.ShotViewModel
 import com.shiyao.ai_story.viewmodel.StoryViewModel
@@ -35,10 +36,12 @@ fun AppNavigation(navController: NavHostController) {
         factory = ViewModelFactory { StoryViewModel(storyRepository) }
     )
 
+    // 共享的 ShotViewModel
     val shotViewModel: ShotViewModel = viewModel(
         factory = ViewModelFactory { ShotViewModel(shotRepository) }
     )
-    val assetDao = database.assetDao() // 获取 DAO
+
+    val assetDao = database.assetDao()
 
     // 初始化 Repository
     val assetRepository = AssetRepository.getInstance(assetDao)
@@ -63,16 +66,20 @@ fun AppNavigation(navController: NavHostController) {
         composable(AppRoute.ASSETS.route) {
             AssetsScreen(
                 navController = navController,
-                storyViewModel = storyViewModel, // 用于底部栏
-                assetsViewModel = assetsViewModel // 用于数据
+                storyViewModel = storyViewModel,
+                assetsViewModel = assetsViewModel
             )
         }
 
-        // 3. 新增 Preview 页
+        // 3. 预览页 (PreviewScreen) - 正确传递 shotViewModel
         composable(AppRoute.PREVIEW.route)
         { backStackEntry ->
             val assetName = backStackEntry.arguments?.getString("assetName") ?: ""
-            PreviewScreen(navController = navController, assetName = assetName)
+            PreviewScreen(
+                navController = navController,
+                assetName = assetName,
+                shotViewModel = shotViewModel // 修复：正确传递参数
+            )
         }
 
         composable(AppRoute.GENERATE_STORY.route) { backStackEntry ->
@@ -83,6 +90,14 @@ fun AppNavigation(navController: NavHostController) {
                 storyId = storyId,
                 shotViewModel = shotViewModel,
                 storyViewModel = storyViewModel
+            )
+        }
+
+        // 分镜详情页路由
+        composable(AppRoute.SHOT_DETAIL.route) {
+            ShotDetailScreen(
+                navController = navController,
+                shotViewModel = shotViewModel
             )
         }
     }
