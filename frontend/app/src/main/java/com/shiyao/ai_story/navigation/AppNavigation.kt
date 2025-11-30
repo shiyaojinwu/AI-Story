@@ -38,10 +38,12 @@ fun AppNavigation(navController: NavHostController) {
         factory = ViewModelFactory { StoryViewModel(storyRepository) }
     )
 
+    // 共享的 ShotViewModel
     val shotViewModel: ShotViewModel = viewModel(
         factory = ViewModelFactory { ShotViewModel(shotRepository) }
     )
 
+    // 初始化 ViewModel
     val assetsViewModel: AssetsViewModel = viewModel(
         factory = ViewModelFactory { AssetsViewModel(assetRepository) }
     )
@@ -66,9 +68,15 @@ fun AppNavigation(navController: NavHostController) {
             )
         }
 
+        // 3. 预览页 (PreviewScreen) - 正确传递 shotViewModel
         composable(AppRoute.PREVIEW.route)
         { backStackEntry ->
-            PreviewScreen(navController = navController, assetsViewModel = assetsViewModel)
+            val assetName = backStackEntry.arguments?.getString("assetName") ?: ""
+            PreviewScreen(
+                navController = navController,
+                assetName = assetName,
+                shotViewModel = shotViewModel // 修复：正确传递参数
+            )
         }
 
         composable(AppRoute.GENERATE_STORY.route) { backStackEntry ->
@@ -82,12 +90,10 @@ fun AppNavigation(navController: NavHostController) {
             )
         }
 
-        composable(AppRoute.SHOT_DETAIL.route) { backStackEntry ->
-            val shotId = backStackEntry.arguments?.getString("shotId") ?: ""
-
+        // 分镜详情页路由
+        composable(AppRoute.SHOT_DETAIL.route) {
             ShotDetailScreen(
                 navController = navController,
-                shotId = shotId,
                 shotViewModel = shotViewModel
             )
         }
