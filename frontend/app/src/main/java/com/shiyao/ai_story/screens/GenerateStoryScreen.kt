@@ -22,7 +22,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,6 +36,7 @@ import androidx.navigation.NavController
 import com.shiyao.ai_story.R
 import com.shiyao.ai_story.components.CommonCard
 import com.shiyao.ai_story.model.enums.ShotStatus
+import com.shiyao.ai_story.navigation.AppRoute // ⚠️ 导入 AppRoute
 import com.shiyao.ai_story.viewmodel.ShotViewModel
 import com.shiyao.ai_story.viewmodel.StoryViewModel
 
@@ -58,15 +59,10 @@ fun GenerateStoryScreen(
         pageCount = { shots.value.size }
     )
 
-    DisposableEffect(Unit) {
+    LaunchedEffect(storyId) {
         val title = storyViewModel.storyTitle.value
         shotViewModel.pollShotsUntilCompleted(storyId, title)
-
-        onDispose {
-            shotViewModel.stopPolling()   // 停止轮询
-        }
     }
-
 
     Column(
         modifier = Modifier
@@ -141,6 +137,11 @@ fun GenerateStoryScreen(
                                         tag = "Generated",
                                         imageUrl = it,
                                         backgroundColor = colorResource(id = R.color.card_background),
+                                        // ⚠️ 新增：点击卡片跳转到分镜详情页
+                                        modifier = Modifier.clickable {
+                                            shotViewModel.selectShotForEditing(shot) // 设置当前编辑的分镜
+                                            navController.navigate(AppRoute.SHOT_DETAIL.route)
+                                        }
                                     )
                                 }
                             }
@@ -190,8 +191,9 @@ fun GenerateStoryScreen(
 
         Button(
             onClick = {
-                // TODO: 创建视频
-//                shotViewModel.generateVideo(storyId)
+                // ⚠️ 修改：调用 ViewModel 生成视频，并跳转到预览页
+                shotViewModel.generateVideo(storyId)
+                navController.navigate(AppRoute.PREVIEW.route)
             },
             modifier = Modifier
                 .fillMaxWidth()
