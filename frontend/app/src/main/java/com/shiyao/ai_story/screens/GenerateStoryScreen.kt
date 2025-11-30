@@ -157,7 +157,10 @@ fun GenerateStoryScreen(
                                         backgroundColor = colorResource(id = R.color.card_background),
                                         modifier = Modifier.clickable {
                                             // 点击分镜卡片，跳转到分镜详情页
-                                            navController.navigate(AppRoute.shotDetailRoute(shot.id))
+                                            // 先设置要编辑的分镜数据到 ViewModel
+                                            shotViewModel.selectShotForEditing(shot)
+                                            // 跳转到分镜详情页
+                                            navController.navigate(AppRoute.SHOT_DETAIL.route)
                                         }
                                     )
                                 }

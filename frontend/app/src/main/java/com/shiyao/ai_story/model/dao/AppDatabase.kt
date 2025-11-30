@@ -9,7 +9,6 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.shiyao.ai_story.model.entity.Asset
 import com.shiyao.ai_story.model.entity.Shot
 import com.shiyao.ai_story.model.entity.Story
-import com.shiyao.story_creat.model.dao.AssetDao
 
 
 /**
