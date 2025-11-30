@@ -17,7 +17,7 @@ import com.shiyao.story_creat.model.dao.AssetDao
  */
 @Database(
     entities = [Story::class, Shot::class, Asset::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @Suppress("unused")

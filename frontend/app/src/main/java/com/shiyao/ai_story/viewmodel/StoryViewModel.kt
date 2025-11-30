@@ -80,4 +80,8 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
     fun setBottomNavSelected(item: BottomTab) {
         _bottomNavSelected.value = item
     }
+
+    fun clearGenerateState() {
+        _generateStoryState.value = UIState.Initial
+    }
 }

@@ -22,7 +22,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,10 +58,15 @@ fun GenerateStoryScreen(
         pageCount = { shots.value.size }
     )
 
-    LaunchedEffect(storyId) {
+    DisposableEffect(Unit) {
         val title = storyViewModel.storyTitle.value
         shotViewModel.pollShotsUntilCompleted(storyId, title)
+
+        onDispose {
+            shotViewModel.stopPolling()   // 停止轮询
+        }
     }
+
 
     Column(
         modifier = Modifier

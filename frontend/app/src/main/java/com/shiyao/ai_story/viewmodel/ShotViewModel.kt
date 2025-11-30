@@ -6,16 +6,19 @@ import com.shiyao.ai_story.model.enums.ShotStatus
 import com.shiyao.ai_story.model.repository.ShotRepository
 import com.shiyao.ai_story.model.response.ShotItem
 import com.shiyao.ai_story.model.ui.ShotUI
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.isActive
+import kotlin.coroutines.coroutineContext
 
 /**
  * 分镜 ViewModel
  */
 class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel() {
-
+    private var pollingJob: Job? = null
     private val _shots = MutableStateFlow<List<ShotUI>>(emptyList())
     val shots: StateFlow<List<ShotUI>> = _shots
 
@@ -47,7 +50,7 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
                 val response = shotRepository.getStoryShots(storyId)
                 val shots = response.shots
                 val uiList = if (!shots.isNullOrEmpty()) {
-                    shots.map { mapShotToUI(it, title,response.storyId) }
+                    shots.map { mapShotToUI(it, title, response.storyId) }
                 } else {
                     createMockShots(storyId).map { mapShotToUI(it, title) }
                 }
@@ -75,24 +78,42 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
     /**
      * 轮询加载网络分镜，直到全部完成
      */
-    fun pollShotsUntilCompleted(storyId: String, title: String, intervalMillis: Long = 2000) {
-        safeLaunch {
-            while (true) {
+    fun pollShotsUntilCompleted(storyId: String, title: String, intervalMillis: Long = 2000): Job {
+        pollingJob?.cancel()
+        pollingJob = safeLaunchJob {
+            while (coroutineContext.isActive) {
                 // 加载数据
-                loadShotsByNetwork(storyId, title)
-                // 获取当前 UI 数据
+                try {
+                    val response = shotRepository.getStoryShots(storyId)
+                    val shots = response.shots
+                    val uiList = if (!shots.isNullOrEmpty()) {
+                        shots.map { mapShotToUI(it, title, response.storyId) }
+                    } else {
+                        createMockShots(storyId).map { mapShotToUI(it, title) }
+                    }
+                    _shots.value = uiList
+                } catch (e: Exception) {
+                    Log.e("ShotViewModel", "loadShotsByNetwork error", e)
+                }
+                // 判断完成状态
                 val currentShots = _shots.value
-                // 检查是否全部完成
-                if (currentShots.isNotEmpty() && currentShots.all { it.status == ShotStatus.COMPLETED.value }) {
+                if (currentShots.isNotEmpty() &&
+                    currentShots.all { it.status == ShotStatus.COMPLETED.value }
+                ) {
                     Log.i("ShotViewModel", "所有分镜已完成，停止轮询")
                     break
-                } else {
-                    Log.i("ShotViewModel", "分镜未完成，继续轮询...")
                 }
-                // 等待间隔
+                // 未完成 → 等待
+                Log.i("ShotViewModel", "分镜未完成，继续轮询...")
                 delay(intervalMillis)
             }
         }
+        return pollingJob!!
+    }
+
+    fun stopPolling() {
+        pollingJob?.cancel()
+        pollingJob = null
     }
 
     private fun mapShotToUI(shot: Shot, title: String): ShotUI {
