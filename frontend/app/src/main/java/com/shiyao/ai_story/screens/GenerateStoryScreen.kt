@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
@@ -56,6 +58,10 @@ fun GenerateStoryScreen(
 ) {
     val shots = shotViewModel.shots.collectAsState()
     val storyTitle = storyViewModel.storyTitle.collectAsState()
+    val generateVideoState by storyViewModel.generateVideoState.collectAsState()
+    val videoProgress by storyViewModel.videoProgress.collectAsState()
+    val context = LocalContext.current
+    val isLoadingVideo = generateVideoState is UIState.Loading
 
     val pagerState = rememberPagerState(
         initialPage = 0,
@@ -68,15 +74,38 @@ fun GenerateStoryScreen(
         shotViewModel.loadShotsByNetwork(storyId, title)
     }
 
+    // 监听视频生成状态
+    LaunchedEffect(generateVideoState) {
+        if (generateVideoState is UIState.Success) {
+            // 视频生成成功，设置预览视频路径并跳转到预览页
+            val videoId = generateVideoState.getOrNull()
+            if (videoId != null) {
+                // 设置 Mock 视频路径（在 Mock 模式下）
+                val mockVideoUrl = "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_1MB.mp4"
+                shotViewModel.setPreviewVideoPath(mockVideoUrl)
+                
+                navController.navigate(AppRoute.previewRoute(videoId))
+                storyViewModel.clearGenerateVideoState()
+            }
+        }
+        if (generateVideoState is UIState.Error) {
+            // 视频生成失败，显示错误提示
+            val message = (generateVideoState as UIState.Error).message ?: "视频生成失败"
+            ToastUtils.showShort(context, message)
+            storyViewModel.clearGenerateVideoState()
+        }
+    }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colorResource(id = R.color.background))
-            .padding(22.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
-    ) {
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(colorResource(id = R.color.background))
+                .padding(22.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
+        ) {
 
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -219,12 +248,41 @@ fun GenerateStoryScreen(
             enabled = shots.value.isNotEmpty(),
             modifier = Modifier.fillMaxWidth(),
             onClick = {
-                // TODO: 创建视频
-                //shotViewModel.generateVideo(storyId)
-                
-                // 跳转到预览页
-                navController.navigate(AppRoute.PREVIEW.route)
+                // 调用生成视频方法
+                storyViewModel.generateVideo(storyId)
             }
         )
+    }
+
+        // Loading 弹窗
+        if (isLoadingVideo) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.5f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    CircularProgressIndicator(
+                        color = colorResource(id = R.color.primary),
+                        modifier = Modifier.size(48.dp)
+                    )
+                    Spacer(modifier = Modifier.padding(top = 16.dp))
+                    Text(
+                        text = if (videoProgress != null) {
+                            "Loading... $videoProgress%"
+                        } else {
+                            "Loading..."
+                        },
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+        }
     }
 }
