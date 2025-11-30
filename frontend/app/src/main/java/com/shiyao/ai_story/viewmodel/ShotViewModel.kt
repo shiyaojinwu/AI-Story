@@ -111,13 +111,21 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
     }
 
     /**
-     * ⚠️ 新增：生成最终视频
+     * ⚠️ 新增：生成最终视频（已弃用，视频生成现在在 StoryViewModel 中处理）
      */
     fun generateVideo(storyId: String) {
         // 实际应用中：调用 API 开始视频生成，并设置轮询
         // 这里：直接模拟生成成功，并设置预览路径为公共 URL
         _previewVideoPath.value = MOCK_VIDEO_PATH
         Log.i("ShotViewModel", "Video generated successfully for story ID: $storyId, Path: $MOCK_VIDEO_PATH")
+    }
+
+    /**
+     * 设置预览视频路径
+     */
+    fun setPreviewVideoPath(videoUrl: String) {
+        _previewVideoPath.value = videoUrl
+        Log.d("ShotViewModel", "Preview video path set: $videoUrl")
     }
 
     /**
@@ -154,8 +162,10 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
                 }
                 _shots.value = uiList
             } catch (e: Exception) {
-                Log.e("ShotViewModel", "loadShotsByNetwork error", e)
-                _shots.value = emptyList() // 或者处理错误状态
+                Log.e("ShotViewModel", "loadShotsByNetwork error, using mock data", e)
+                // 加载失败时，使用 Mock 数据
+                val mockShots = createMockShots(storyId)
+                _shots.value = mockShots.map { mapShotToUI(it, title) }
             }
         }
     }
@@ -214,24 +224,45 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
      * 生成 mock 数据
      */
     private fun createMockShots(storyId: String): List<Shot> {
+        // 占位图 URL
+        val placeholderImageUrl = "https://www.keaitupian.cn/cjpic/frombd/0/253/4061721412/2857814056.jpg"
+
         return listOf(
             Shot(
                 id = "shot_001",
-                title = "Untitled Storyboard",
+                title = "Shot 1",
                 storyId = storyId,
                 sortOrder = 1,
-                prompt = "Camp in the morning fog",
-                imageUrl = "https://www.keaitupian.cn/cjpic/frombd/0/253/4061721412/2857814056.jpg",
+                prompt = "Opening scene in the morning fog",
+                imageUrl = placeholderImageUrl,
                 status = "completed"
             ),
             Shot(
                 id = "shot_002",
-                title = "Untitled Storyboard",
+                title = "Shot 2",
                 storyId = storyId,
                 sortOrder = 2,
-                prompt = "Hikers in the mist",
-                imageUrl = "https://ts1.tc.mm.bing.net/th/id/R-C.987f582c510be58755c4933cda68d525",
-                status = "failed"
+                prompt = "Hikers walking through the forest",
+                imageUrl = placeholderImageUrl,
+                status = "completed"
+            ),
+            Shot(
+                id = "shot_003",
+                title = "Shot 3",
+                storyId = storyId,
+                sortOrder = 3,
+                prompt = "Mountain peak at sunset",
+                imageUrl = placeholderImageUrl,
+                status = "completed"
+            ),
+            Shot(
+                id = "shot_004",
+                title = "Shot 4",
+                storyId = storyId,
+                sortOrder = 4,
+                prompt = "Campfire scene at night",
+                imageUrl = placeholderImageUrl,
+                status = "completed"
             )
         )
     }
