@@ -13,6 +13,7 @@ import com.shiyao.ai_story.screens.AssetsScreen
 import com.shiyao.ai_story.screens.CreateScreen
 import com.shiyao.ai_story.screens.GenerateStoryScreen
 import com.shiyao.ai_story.screens.PreviewScreen
+import com.shiyao.ai_story.screens.ShotDetailScreen
 import com.shiyao.ai_story.viewmodel.AssetsViewModel
 import com.shiyao.ai_story.viewmodel.ShotViewModel
 import com.shiyao.ai_story.viewmodel.StoryViewModel
@@ -78,6 +79,16 @@ fun AppNavigation(navController: NavHostController) {
                 storyId = storyId,
                 shotViewModel = shotViewModel,
                 storyViewModel = storyViewModel
+            )
+        }
+
+        composable(AppRoute.SHOT_DETAIL.route) { backStackEntry ->
+            val shotId = backStackEntry.arguments?.getString("shotId") ?: ""
+
+            ShotDetailScreen(
+                navController = navController,
+                shotId = shotId,
+                shotViewModel = shotViewModel
             )
         }
     }

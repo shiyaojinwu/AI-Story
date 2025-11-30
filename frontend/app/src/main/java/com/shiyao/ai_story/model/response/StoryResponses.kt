@@ -1,23 +1,32 @@
 package com.shiyao.ai_story.model.response
 
+import com.google.gson.annotations.SerializedName
+
 /**
  * 创建故事响应
  */
 data class CreateStoryResponse(
     val storyId: String,
-    val status: String,
-    val createdAt: String?
+    val status: String, // generating/completed/failed
+    val createdAt: Long
 )
 
+/**
+ * 分镜项
+ */
 data class ShotItem(
     val id: String,
     val sortOrder: Int,
     val title: String,
     val imageUrl: String?,
-    val status: String
+    val status: String // generating/completed/failed
 )
 
+/**
+ * 故事分镜列表响应
+ */
 data class StoryShotsResponse(
+    @SerializedName("story_id")
     val storyId: String,
     val shots: List<ShotItem>?
 )

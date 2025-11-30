@@ -10,6 +10,7 @@ import com.shiyao.ai_story.model.response.GenerateVideoResponse
 import com.shiyao.ai_story.model.response.ShotDetailResponse
 import com.shiyao.ai_story.model.response.ShotPreviewResponse
 import com.shiyao.ai_story.model.response.StoryPreviewResponse
+import com.shiyao.ai_story.model.response.StoryShotsResponse
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -69,8 +70,25 @@ class StoryRepository private constructor(
     suspend fun deleteStory(storyId: String) =
         storyDao.deleteStoryById(storyId)
 
+    /**
+     * 创建故事（生成故事分镜）
+     * POST /api/story/create
+     */
     suspend fun generateStoryboard(request: CreateStoryRequest): CreateStoryResponse =
         handleResponse(apiService.generateStoryboard(request))
+    
+    /**
+     * 查询故事状态（用于轮询）
+     */
+    suspend fun getStoryStatus(storyId: String): CreateStoryResponse =
+        handleResponse(apiService.getStoryStatus(storyId))
+
+    /**
+     * 获取故事分镜列表
+     * GET /api/story/:id/shots
+     */
+    suspend fun getStoryShots(storyId: String): StoryShotsResponse =
+        handleResponse(apiService.getStoryShots(storyId))
 
     suspend fun getShotPreview(shotId: String): ShotPreviewResponse =
         handleResponse(apiService.getShotPreview(shotId))

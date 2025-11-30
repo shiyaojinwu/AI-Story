@@ -17,27 +17,31 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.shiyao.ai_story.R
+import com.shiyao.ai_story.components.CommonButton
 import com.shiyao.ai_story.components.CommonCard
 import com.shiyao.ai_story.model.enums.ShotStatus
+import com.shiyao.ai_story.navigation.AppRoute
+import com.shiyao.ai_story.utils.ToastUtils
 import com.shiyao.ai_story.viewmodel.ShotViewModel
 import com.shiyao.ai_story.viewmodel.StoryViewModel
+import com.shiyao.ai_story.viewmodel.UIState
 
 /**
  * 分镜生成与视频创建屏幕
@@ -58,20 +62,18 @@ fun GenerateStoryScreen(
         pageCount = { shots.value.size }
     )
 
-    DisposableEffect(Unit) {
+    // 页面加载时，立即获取分镜列表
+    LaunchedEffect(storyId) {
         val title = storyViewModel.storyTitle.value
-        shotViewModel.pollShotsUntilCompleted(storyId, title)
-
-        onDispose {
-            shotViewModel.stopPolling()   // 停止轮询
-        }
+        shotViewModel.loadShotsByNetwork(storyId, title)
     }
 
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .background(colorResource(id = R.color.background))
+            .padding(22.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
@@ -89,14 +91,26 @@ fun GenerateStoryScreen(
             )
 
             Text(
+                text = "StoryFlow",
+                color = colorResource(id = R.color.text_tertiary),
+                fontSize = 38.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .padding(top = 16.dp, bottom = 32.dp)
+            )
+
+            Text(
                 text = "Storyboard",
-                fontSize = 28.sp
+                color = colorResource(id = R.color.text_secondary),
+                fontSize = 40.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 16.dp)
             )
 
             Text(
                 text = storyTitle.value,
                 fontSize = 18.sp,
-                color = Color.Gray,
+                color = colorResource(id = R.color.text_hint),
                 modifier = Modifier.padding(bottom = 24.dp)
             )
         }
@@ -141,6 +155,10 @@ fun GenerateStoryScreen(
                                         tag = "Generated",
                                         imageUrl = it,
                                         backgroundColor = colorResource(id = R.color.card_background),
+                                        modifier = Modifier.clickable {
+                                            // 点击分镜卡片，跳转到分镜详情页
+                                            navController.navigate(AppRoute.shotDetailRoute(shot.id))
+                                        }
                                     )
                                 }
                             }
@@ -170,8 +188,8 @@ fun GenerateStoryScreen(
                     ) {
                         repeat(pagerState.pageCount) { index ->
                             val color =
-                                if (pagerState.currentPage == index) Color(0xFFFFFFFF)
-                                else Color.Gray.copy(alpha = 0.5f)
+                                if (pagerState.currentPage == index) Color(0xFF333333) // 当前选中：深色
+                                else Color.Gray.copy(alpha = 0.3f) // 未选中：浅色
 
                             Box(
                                 modifier = Modifier
@@ -188,24 +206,22 @@ fun GenerateStoryScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Button(
+        CommonButton(
+            text = "Generate Video",
+            backgroundColor = colorResource(id = R.color.primary),
+            contentColor = Color.White,
+            fontSize = 25,
+            horizontalPadding = 16,
+            verticalPadding = 16,
+            enabled = shots.value.isNotEmpty(),
+            modifier = Modifier.fillMaxWidth(),
             onClick = {
                 // TODO: 创建视频
-//                shotViewModel.generateVideo(storyId)
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(55.dp),
-            shape = RoundedCornerShape(8.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF3B82F6),
-                contentColor = Color.White
-            )
-        ) {
-            Text(
-                text = "Generate Video",
-                fontSize = 18.sp
-            )
-        }
+                //shotViewModel.generateVideo(storyId)
+                
+                // 跳转到预览页
+                navController.navigate(AppRoute.PREVIEW.route)
+            }
+        )
     }
 }
