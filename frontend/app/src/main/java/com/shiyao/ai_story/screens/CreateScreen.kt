@@ -68,6 +68,7 @@ fun CreateScreen(
         if (generateState is UIState.Success) {
             val storyId = generateState.getOrNull()!!
             navController.navigate(AppRoute.generateShotRoute(storyId))
+
         }
         if (generateState is UIState.Error) {
             val message = (generateState as UIState.Error).message ?: "生成失败"

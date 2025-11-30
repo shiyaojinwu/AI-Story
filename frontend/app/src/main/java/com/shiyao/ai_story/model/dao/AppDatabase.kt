@@ -17,7 +17,7 @@ import com.shiyao.story_creat.model.dao.AssetDao
  */
 @Database(
     entities = [Story::class, Shot::class, Asset::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @Suppress("unused")
@@ -41,7 +41,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "ai_story_db"
                 )
-                    .fallbackToDestructiveMigration() // 数据库版本升级时销毁旧数据
+                    .fallbackToDestructiveMigration()// 数据库版本升级时销毁旧数据
                     // .addMigrations(MIGRATION_1_2) // 注册 Migration迁移策略，表结构变更才要
                     .build()
                 INSTANCE = instance
