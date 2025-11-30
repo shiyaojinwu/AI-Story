@@ -2,6 +2,7 @@ package com.shiyao.story_creat.model.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.shiyao.ai_story.model.entity.Asset
@@ -42,4 +43,7 @@ interface AssetDao {
      */
     @Query("SELECT * FROM asset WHERE storyId = :storyId")
     fun getAssetsByStoryId(storyId: String): Flow<List<Asset>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAssets(assets: List<Asset>)
 }

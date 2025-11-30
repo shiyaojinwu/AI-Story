@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import coil.util.CoilUtils.result
 import com.shiyao.ai_story.model.entity.Asset
 import com.shiyao.ai_story.model.repository.AssetRepository
 import com.shiyao.ai_story.utils.VideoSaver // 👈 关键：必须导入这个工具类
@@ -33,9 +34,9 @@ class AssetsViewModel(
 
     init {
         // 调试模式：加载假数据
-        loadMockData()
+        //loadMockData()
         // 真实模式：
-        // loadAssetsFromRepository()
+        loadAssetsFromRepository()
     }
 
     // 设置当前选中的资产
@@ -97,14 +98,24 @@ class AssetsViewModel(
         _assetsList.value = mocks
     }
 
+
     private fun loadAssetsFromRepository() {
+        Log.d("DEBUG_API", "准备发起请求...")
+
+        viewModelScope.launch {
+            assetRepository.getAllAssets().collect { list ->
+                _assetsList.value = list
+            }
+        }
+
         viewModelScope.launch {
             try {
-                assetRepository.getAllAssets().collect { list ->
-                    _assetsList.value = list
-                }
+                val result = assetRepository.fetchAllRemoteAssets()
+                Log.d("DEBUG_API", "请求成功，拿到数据: ${result.size} 条")
+                assetRepository.insertAssets(result)
             } catch (e: Exception) {
                 e.printStackTrace()
+                Log.e("DEBUG_API", "请求失败: ${e.message}")
             }
         }
     }

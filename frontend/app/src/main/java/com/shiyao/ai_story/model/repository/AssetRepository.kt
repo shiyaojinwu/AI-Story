@@ -69,4 +69,8 @@ class AssetRepository private constructor(
      */
     suspend fun fetchAllRemoteAssets(): List<Asset> =
         handleResponse(apiService.getAllStories())
+
+    suspend fun insertAssets(assets: List<Asset>) {
+        assetDao.insertAssets(assets)
+    }
 }
