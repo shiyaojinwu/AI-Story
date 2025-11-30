@@ -1,16 +1,21 @@
 package com.shiyao.ai_story.screens
 
+import android.R.attr.progress
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -36,10 +41,25 @@ fun PreviewScreen(navController: NavController, assetsViewModel: AssetsViewModel
     val selectedAsset by assetsViewModel.selectedAsset.collectAsState()
     val realVideoUrl = selectedAsset?.videoUrl ?: ""
     val realTitle = selectedAsset?.title ?: "Unknown Story"
+    val exportState by assetsViewModel.exportState.collectAsState()
+    val progress by assetsViewModel.progressPercentage.collectAsState()
 
-    val fallbackUrl = "http://flv4mp4.people.com.cn/videofile7/pvmsvideo/2023/4/14/DangWang-BoChenDi_7a0283ace3c035c20500c33dfaef44ed.mp4"
+    val fallbackUrl = "https://v-cdn.zjol.com.cn/280443.mp4"
 
     val urlToPlay = if (realVideoUrl.isNotEmpty()) realVideoUrl else fallbackUrl
+    LaunchedEffect(exportState) {
+        when (exportState) {
+            1 -> Toast.makeText(context, "开始下载...", Toast.LENGTH_SHORT).show()
+            2 -> {
+                Toast.makeText(context, "导出成功！已保存到相册", Toast.LENGTH_LONG).show()
+                assetsViewModel.resetExportState()
+            }
+            -1 -> {
+                Toast.makeText(context, "导出失败，请检查网络", Toast.LENGTH_SHORT).show()
+                assetsViewModel.resetExportState()
+            }
+        }
+    }
 
 
     Column(
@@ -91,16 +111,47 @@ fun PreviewScreen(navController: NavController, assetsViewModel: AssetsViewModel
 
         Spacer(modifier = Modifier.weight(1f))
 
-        CommonButton(
-            text = "Export Video",
-            backgroundColor = colorResource(id = R.color.primary),
-            contentColor = Color.White,
-            fontSize = 20,
-            horizontalPadding = 14,
-            verticalPadding = 18,
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 40.dp),
-            onClick = { Toast.makeText(context, "Exporting...", Toast.LENGTH_SHORT).show() }
-        )
+// 5. 导出按钮
+        Button(
+            onClick = {
+                assetsViewModel.exportCurrentVideo(context)
+            },
+            enabled = exportState != 1,
+
+            shape = RoundedCornerShape(50),
+
+
+            colors = ButtonDefaults.buttonColors(
+                containerColor = colorResource(id = R.color.primary), // 蓝底
+                contentColor = Color.White,
+                disabledContainerColor = Color.Gray // 禁用时变灰
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .padding(horizontal = 24.dp)
+                .align(Alignment.CenterHorizontally)
+        ) {
+            if (exportState == 1) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    // 环形进度条 (progress 参数 0.0 ~ 1.0)
+                    CircularProgressIndicator(
+                        progress = progress / 100f,
+                        modifier = Modifier.size(20.dp),
+                        color = Color.White,
+                        strokeWidth = 2.dp
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Text("Downloading... $progress%", fontSize = 16.sp)
+                }
+            } else {
+                // 正常状态
+                Text("Export Video", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(40.dp))
     }
 }
 
