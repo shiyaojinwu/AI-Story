@@ -8,6 +8,7 @@ import com.shiyao.ai_story.exception.DatabaseException
 import com.shiyao.ai_story.exception.NetworkException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 /**
@@ -29,6 +30,15 @@ abstract class BaseViewModel : ViewModel() {
      */
     protected fun safeLaunch(block: suspend () -> Unit) {
         viewModelScope.launch(Dispatchers.IO + exceptionHandler) {
+            block()
+        }
+    }
+
+    /**
+     * 安全地启动协程并返回Job（用于轮询等需要取消的场景）
+     */
+    protected fun safeLaunchJob(block: suspend () -> Unit): Job {
+        return viewModelScope.launch(Dispatchers.IO + exceptionHandler) {
             block()
         }
     }

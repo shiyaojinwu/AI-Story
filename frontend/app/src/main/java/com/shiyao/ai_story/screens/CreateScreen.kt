@@ -2,13 +2,16 @@ package com.shiyao.ai_story.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Photo
@@ -62,13 +65,15 @@ fun CreateScreen(
     val bottomNavSelected by storyViewModel.bottomNavSelected.collectAsState()
     val generateState by storyViewModel.generateStoryState.collectAsState()
     val context = LocalContext.current
-
+    val isLoading = generateState is UIState.Loading
 
     LaunchedEffect(generateState) {
         if (generateState is UIState.Success) {
-            val storyId = generateState.getOrNull()!!
+            val storyId = generateState.getOrNull()
+            if (storyId != null) {
             navController.navigate(AppRoute.generateShotRoute(storyId))
-
+            storyViewModel.clearGenerateState() // 清空状态
+            }
         }
         if (generateState is UIState.Error) {
             val message = (generateState as UIState.Error).message ?: "生成失败"
@@ -113,15 +118,14 @@ fun CreateScreen(
             }
         }
     ) { paddingValues ->
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(colorResource(id = R.color.background))
-                .padding(22.dp)
-                .padding(paddingValues)
-        ) {
-
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(colorResource(id = R.color.background))
+                    .padding(22.dp)
+                    .padding(paddingValues)
+            ) {
             Text(
                 text = stringResource(id = R.string.story_flow),
                 color = colorResource(id = R.color.text_tertiary),
@@ -197,12 +201,40 @@ fun CreateScreen(
                     .padding(top = 12.dp)
                     .align(Alignment.CenterHorizontally)
             )
+            }
+            
+            // Loading 弹窗
+            if (isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.5f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        CircularProgressIndicator(
+                            color = colorResource(id = R.color.primary),
+                            modifier = Modifier.size(48.dp)
+                        )
+                        Spacer(modifier = Modifier.padding(top = 16.dp))
+                        Text(
+                            text = "Loading...",
+                            color = Color.White,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+            }
         }
-    }
+        }
 }
 
 @Composable
-private fun StyleButton(
+fun StyleButton(
     title: String,
     isSelected: Boolean,
     onClick: () -> Unit
@@ -216,6 +248,6 @@ private fun StyleButton(
         fontSize = 18,
         horizontalPadding = 16,
         verticalPadding = 8
-    )
-}
+    )}
+
 

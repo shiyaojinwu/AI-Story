@@ -28,9 +28,11 @@ fun AppNavigation(navController: NavHostController) {
     val database = (applicationContext as MyApplication).database
     val storyDao = database.storyDao()
     val shotDao = database.shotDao()
+    val assetDao = database.assetDao()
 
     val storyRepository = StoryRepository.getInstance(storyDao)
     val shotRepository = ShotRepository.getInstance(shotDao)
+    val assetRepository = AssetRepository.getInstance(assetDao)
 
     val storyViewModel: StoryViewModel = viewModel(
         factory = ViewModelFactory { StoryViewModel(storyRepository) }
@@ -40,11 +42,6 @@ fun AppNavigation(navController: NavHostController) {
     val shotViewModel: ShotViewModel = viewModel(
         factory = ViewModelFactory { ShotViewModel(shotRepository) }
     )
-
-    val assetDao = database.assetDao()
-
-    // 初始化 Repository
-    val assetRepository = AssetRepository.getInstance(assetDao)
 
     // 初始化 ViewModel
     val assetsViewModel: AssetsViewModel = viewModel(

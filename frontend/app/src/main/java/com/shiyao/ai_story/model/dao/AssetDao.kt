@@ -1,4 +1,4 @@
-package com.shiyao.story_creat.model.dao
+package com.shiyao.ai_story.model.dao
 
 import androidx.room.Dao
 import androidx.room.Insert

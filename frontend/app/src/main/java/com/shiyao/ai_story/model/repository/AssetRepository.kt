@@ -3,7 +3,7 @@ package com.shiyao.ai_story.model.repository
 import com.shiyao.ai_story.model.entity.Asset
 import com.shiyao.ai_story.model.network.ApiService
 import com.shiyao.ai_story.model.network.NetworkClient
-import com.shiyao.story_creat.model.dao.AssetDao
+import com.shiyao.ai_story.model.dao.AssetDao
 import kotlinx.coroutines.flow.Flow
 
 /**
