@@ -25,10 +25,20 @@ interface ApiService {
 
     /**
      * 创建故事（生成故事分镜）
+     * POST /api/story/create
      */
-    @POST("/api/story")
+    @POST("/api/story/create")
     suspend fun generateStoryboard(
         @Body request: CreateStoryRequest
+    ): Response<ApiResponse<CreateStoryResponse>>
+    
+    /**
+     * 查询故事状态（用于轮询）
+     * GET /api/story/{id}/status
+     */
+    @GET("/api/story/{id}/status")
+    suspend fun getStoryStatus(
+        @Path("id") storyId: String
     ): Response<ApiResponse<CreateStoryResponse>>
 
     /**
