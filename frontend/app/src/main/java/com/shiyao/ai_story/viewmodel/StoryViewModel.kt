@@ -139,29 +139,6 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
                 } else {
                     // 真实模式：调用 API
                     val response = storyRepository.generateStoryVideo(storyId)
-                    
-                    // 检查初始状态
-                    when (response.status.lowercase()) {
-                        "completed" -> {
-                            _generateVideoState.value = UIState.Success(response.id)
-                        }
-                        "failed" -> {
-                            _generateVideoState.value = UIState.Error(
-                                Exception("Video generation failed"),
-                                "视频生成失败"
-                            )
-                        }
-                        "processing" -> {
-                            videoPollingJob = safeLaunchJob {
-                                pollVideoStatus(response.id, storyId, maxAttempts = 20)
-                            }
-                        }
-                        else -> {
-                            videoPollingJob = safeLaunchJob {
-                                pollVideoStatus(response.id, storyId, maxAttempts = 20)
-                            }
-                        }
-                    }
                 }
             } catch (e: Exception) {
                 Log.e("StoryViewModel", "generateVideo error", e)
