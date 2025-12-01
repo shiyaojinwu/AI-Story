@@ -126,14 +126,11 @@ fun CreateScreen(
                     .padding(22.dp)
                     .padding(paddingValues)
             ) {
-            Text(
-                text = stringResource(id = R.string.story_flow),
-                color = colorResource(id = R.color.text_tertiary),
-                fontSize = 38.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .padding(top = 16.dp, bottom = 32.dp)
-            )
+            // 顶部栏
+            StoryTopBar(showBack = false, showTitle = true)
+
+            Spacer(modifier = Modifier.padding(bottom = 16.dp))
+
 
             Text(
                 text = stringResource(id = R.string.create),

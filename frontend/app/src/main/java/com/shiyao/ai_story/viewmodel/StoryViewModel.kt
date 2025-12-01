@@ -21,7 +21,7 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
          * 设置为 true 时，使用 Mock 数据
          * 设置为 false 时，使用真实 API
          */
-        private const val USE_MOCK_MODE = false
+        private const val USE_MOCK_MODE = true
     }
 
     // 当前选择的风格

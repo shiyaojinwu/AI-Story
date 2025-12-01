@@ -149,7 +149,7 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
     }
 
     /**
-     * ⚠️ 新增：生成最终视频
+     * ⚠️ 新增：生成最终视频（已弃用，视频生成现在在 StoryViewModel 中处理）
      */
     fun generateVideo(storyId: String) {
         // 实际应用中：调用 API 开始视频生成，并设置轮询
@@ -159,6 +159,14 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
             "ShotViewModel",
             "Video generated successfully for story ID: $storyId, Path: $MOCK_VIDEO_PATH"
         )
+    }
+
+    /**
+     * 设置预览视频路径
+     */
+    fun setPreviewVideoPath(videoUrl: String) {
+        _previewVideoPath.value = videoUrl
+        Log.d("ShotViewModel", "Preview video path set: $videoUrl")
     }
 
     /**
@@ -283,50 +291,44 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
      * 生成 mock 数据
      */
     private fun createMockShots(storyId: String): List<Shot> {
+        // 占位图 URL
+        val placeholderImageUrl = "https://www.keaitupian.cn/cjpic/frombd/0/253/4061721412/2857814056.jpg"
+
         return listOf(
             Shot(
                 id = "shot_001",
-                title = "分镜 1: 帐篷",
+                title = "Shot 1",
                 storyId = storyId,
                 sortOrder = 1,
-                prompt = "Camp in the morning fog",
-                imageUrl = "https://www.keaitupian.cn/cjpic/frombd/0/253/4061721412/2857814056.jpg",
+                prompt = "Opening scene in the morning fog",
+                imageUrl = placeholderImageUrl,
                 status = "completed"
             ),
             Shot(
                 id = "shot_002",
-                title = "分镜 2: 远足者",
+                title = "Shot 2",
                 storyId = storyId,
                 sortOrder = 2,
-                prompt = "Hikers in the mist",
-                imageUrl = "https://ts1.tc.mm.bing.net/th/id/R-C.987f582c510be58755c4933cda68d525",
-                status = "completed" // 确保状态是 completed 才能显示
+                prompt = "Hikers walking through the forest",
+                imageUrl = placeholderImageUrl,
+                status = "completed"
             ),
             Shot(
                 id = "shot_003",
-                title = "分镜 3: 山顶",
+                title = "Shot 3",
                 storyId = storyId,
                 sortOrder = 3,
-                prompt = "View from the mountain top",
-                imageUrl = "https://images.pexels.com/photos/1684880/pexels-photo-1684880.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+                prompt = "Mountain peak at sunset",
+                imageUrl = placeholderImageUrl,
                 status = "completed"
             ),
             Shot(
                 id = "shot_004",
-                title = "分镜 4: 森林小径",
+                title = "Shot 4",
                 storyId = storyId,
                 sortOrder = 4,
-                prompt = "Path in the deep forest",
-                imageUrl = "https://images.pexels.com/photos/15286/pexels-photo.jpg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-                status = "completed"
-            ),
-            Shot(
-                id = "shot_005",
-                title = "分镜 5: 星空",
-                storyId = storyId,
-                sortOrder = 5,
-                prompt = "Night sky with stars",
-                imageUrl = "https://images.pexels.com/photos/1252890/pexels-photo-1252890.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+                prompt = "Campfire scene at night",
+                imageUrl = placeholderImageUrl,
                 status = "completed"
             )
         )

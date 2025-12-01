@@ -14,16 +14,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,17 +31,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.shiyao.ai_story.R
+import com.shiyao.ai_story.components.CommonButton
 import com.shiyao.ai_story.components.CommonCard
 import com.shiyao.ai_story.model.enums.ShotStatus
 import com.shiyao.ai_story.navigation.AppRoute
 import com.shiyao.ai_story.utils.ToastUtils
 import com.shiyao.ai_story.viewmodel.ShotViewModel
 import com.shiyao.ai_story.viewmodel.StoryViewModel
+import com.shiyao.ai_story.viewmodel.UIState
 
 /**
  * 分镜生成与视频创建屏幕
@@ -59,6 +62,8 @@ fun ShotScreen(
     val storyTitle = storyViewModel.storyTitle.collectAsState()
     val allShotsCompletedOrFail = shotViewModel.allShotsCompletedOrFail.collectAsState()
     val context = LocalContext.current
+    val generateVideoState by storyViewModel.generateVideoState.collectAsState()
+    val videoProgress by storyViewModel.videoProgress.collectAsState()
 
     val pagerState = rememberPagerState(
         initialPage = 0,
@@ -88,35 +93,30 @@ fun ShotScreen(
         verticalArrangement = Arrangement.Top
     ) {
 
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.Start
-        ) {
-            Spacer(modifier = Modifier.height(5.dp))
-            Text(
-                "←",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = colorResource(id = R.color.primary)
-            )
-            Text(
-                " Back",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = colorResource(id = R.color.primary)
-            )
-            Text(
-                text = "Storyboard",
-                fontSize = 28.sp
-            )
+        // 顶部栏：只显示 Back，不显示 StoryFlow 标题
+        StoryTopBar(
+            showBack = true,
+            showTitle = false,
+            onBack = { navController.popBackStack() }
+        )
 
-            Text(
-                text = storyTitle.value,
-                fontSize = 18.sp,
-                color = Color.Gray,
-                modifier = Modifier.padding(bottom = 24.dp)
-            )
-        }
+        Spacer(modifier = Modifier.padding(bottom = 16.dp))
+
+        // 副标题和故事标题
+        Text(
+            text = "Storyboard",
+            color = colorResource(id = R.color.text_secondary),
+            fontSize = 40.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        Text(
+            text = storyTitle.value,
+            fontSize = 18.sp,
+            color = colorResource(id = R.color.text_hint),
+            modifier = Modifier.padding(bottom = 24.dp)
+        )
 
         Surface(
             modifier = Modifier.fillMaxWidth(),
@@ -228,7 +228,15 @@ fun ShotScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Button(
+        CommonButton(
+            text = "Generate Video",
+            backgroundColor = colorResource(id = R.color.primary),
+            contentColor = Color.White,
+            fontSize = 25,
+            horizontalPadding = 16,
+            verticalPadding = 16,
+            enabled = shots.value.isNotEmpty(),
+            modifier = Modifier.fillMaxWidth(),
             onClick = {
                 if (!allCompleted) {
                     ToastUtils.showShort(context, "Please wait for all shots to be completed")
@@ -238,20 +246,37 @@ fun ShotScreen(
                 // 全部生成完成，生成视频
                 shotViewModel.generateVideo(storyId)
                 navController.navigate(AppRoute.PREVIEW.route)
-            },
+            }
+        )
+    }
+    // Loading 弹窗
+    if (isLoadingVideo) {
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(55.dp),
-            shape = RoundedCornerShape(8.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = if (allCompleted) Color(0xFF3B82F6) else Color.Gray,
-                contentColor = Color.White
-            )
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.5f)),
+            contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "Generate Video",
-                fontSize = 18.sp
-            )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                CircularProgressIndicator(
+                    color = colorResource(id = R.color.primary),
+                    modifier = Modifier.size(48.dp)
+                )
+                Spacer(modifier = Modifier.padding(top = 16.dp))
+                Text(
+                    text = if (videoProgress != null) {
+                        "Loading... $videoProgress%"
+                    } else {
+                        "Loading..."
+                    },
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
         }
     }
 }
