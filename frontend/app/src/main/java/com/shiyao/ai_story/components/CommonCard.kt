@@ -47,10 +47,11 @@ import com.shiyao.ai_story.R
  */
 @Composable
 fun CommonCard(
-    title: String,
-    tag: String,
-    imageUrl: String,
     modifier: Modifier = Modifier,
+    title: String,
+    tag: String? = null,
+    content: String? = null,
+    imageUrl: String,
     backgroundColor: Color = colorResource(id = R.color.card_background),
     imageHeight: Dp = 180.dp
 ) {
@@ -84,18 +85,20 @@ fun CommonCard(
                     placeholder = null // 加载中占位
                 )
 
-                Text(
-                    text = tag,
-                    fontSize = 12.sp,
-                    color = colorResource(id = R.color.tag_text),
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .background(
-                            color = colorResource(id = R.color.tag_background),
-                            shape = RoundedCornerShape(bottomStart = 8.dp, topEnd = 12.dp)
-                        )
-                        .padding(horizontal = 12.dp, vertical = 4.dp)
-                )
+                tag?.let {
+                    Text(
+                        text = it,
+                        fontSize = 12.sp,
+                        color = colorResource(id = R.color.tag_text),
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .background(
+                                color = colorResource(id = R.color.tag_background),
+                                shape = RoundedCornerShape(bottomStart = 8.dp, topEnd = 12.dp)
+                            )
+                            .padding(horizontal = 12.dp, vertical = 4.dp)
+                    )
+                }
             }
 
             Column(modifier = Modifier.padding(16.dp)) {
@@ -106,11 +109,13 @@ fun CommonCard(
                     color = colorResource(id = R.color.text),
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
-                Text(
-                    text = tag,
-                    fontSize = 14.sp,
-                    color = colorResource(id = R.color.text_hint),
-                )
+                content?.let {
+                    Text(
+                        text = it,
+                        fontSize = 14.sp,
+                        color = colorResource(id = R.color.text_hint),
+                    )
+                }
             }
         }
     }

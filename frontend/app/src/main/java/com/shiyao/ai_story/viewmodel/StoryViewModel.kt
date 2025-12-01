@@ -49,7 +49,6 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
     private val _videoProgress = MutableStateFlow<Int?>(null)
     val videoProgress: StateFlow<Int?> = _videoProgress
     
-    private var pollingJob: Job? = null
     private var videoPollingJob: Job? = null
     
     /**
@@ -71,46 +70,39 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
      * 轮询状态，每1秒一次，最多20次，直到返回 completed 或 failed
      */
     fun generateStory() {
-        // 取消之前的轮询任务
-        pollingJob?.cancel()
-        
         safeLaunch {
             _generateStoryState.value = UIState.Loading
 
             try {
                 if (USE_MOCK_MODE) {
                     // Mock 模式：模拟生成故事
-                    mockGenerateStory()
+                    val mockStoryId = "mock_story_${System.currentTimeMillis()}"
+                    _generateStoryState.value = UIState.Success(mockStoryId)
+                    _storyTitle.value = _storyContent.value.take(20).ifEmpty { "Mock 故事" }
                 } else {
                     // 真实模式：调用 API
-                    val styleValue = selectedStyle.value.name.lowercase()
+                    val styleValue = _selectedStyle.value.name.lowercase()
                     val createStoryResponse = storyRepository.generateStoryboard(
                         CreateStoryRequest(
-                            content = storyContent.value,
+                            content = _storyContent.value,
                             style = styleValue
                         )
                     )
-                    
                     // 检查初始状态
                     when (createStoryResponse.status.lowercase()) {
                         "completed" -> {
                             _generateStoryState.value = UIState.Success(createStoryResponse.storyId)
+                            _storyTitle.value = createStoryResponse.title?: ""
                         }
-                        "failed" -> {
+                        "0" -> {
+                            _generateStoryState.value = UIState.Success(createStoryResponse.storyId)
+                            _storyTitle.value = createStoryResponse.title?: ""
+                        }
+                        else -> {
                             _generateStoryState.value = UIState.Error(
                                 Exception("Story generation failed"),
                                 "加载失败"
                             )
-                        }
-                        "generating" -> {
-                            pollingJob = safeLaunchJob {
-                                pollStoryStatus(createStoryResponse.storyId, maxAttempts = 20)
-                            }
-                        }
-                        else -> {
-                            pollingJob = safeLaunchJob {
-                                pollStoryStatus(createStoryResponse.storyId, maxAttempts = 20)
-                            }
                         }
                     }
                 }
@@ -119,93 +111,6 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
                 _generateStoryState.value = UIState.Error(e, e.message ?: "生成失败")
             }
         }
-    }
-    
-    /**
-     * Mock 模式：模拟生成故事
-     */
-    private suspend fun mockGenerateStory() {
-        // 模拟网络延迟
-        delay(800)
-        
-        // 生成 Mock storyId
-        val mockStoryId = "mock_story_${System.currentTimeMillis()}"
-        
-        // 设置故事标题
-        _storyTitle.value = storyContent.value.take(20).ifEmpty { "Mock 故事" }
-        
-        // 模拟生成中状态，然后完成
-        pollingJob = safeLaunchJob {
-            delay(1500) // 模拟生成过程
-            _generateStoryState.value = UIState.Success(mockStoryId)
-        }
-    }
-    
-    /**
-     * 轮询故事状态
-     * @param storyId 故事ID
-     * @param maxAttempts 最大轮询次数，默认20次
-     */
-    private suspend fun pollStoryStatus(storyId: String, maxAttempts: Int = 20) {
-        var attempts = 0
-        while (attempts < maxAttempts) {
-            try {
-                delay(1000) // 等待1秒
-                attempts++
-                
-                // 查询故事状态
-                val statusResponse = storyRepository.getStoryStatus(storyId)
-                
-                when (statusResponse.status.lowercase()) {
-                    "completed" -> {
-                        // 状态为 completed，跳转页面
-                        _generateStoryState.value = UIState.Success(storyId)
-                        return
-                    }
-                    "failed" -> {
-                        // 状态为 failed，报错
-                        _generateStoryState.value = UIState.Error(
-                            Exception("Story generation failed"),
-                            "加载失败"
-                        )
-                        return
-                    }
-                    "generating" -> {
-                        // 继续轮询
-                        Log.d("StoryViewModel", "Polling attempt $attempts/$maxAttempts, status: generating")
-                    }
-                    else -> {
-                        Log.w("StoryViewModel", "Unknown status: ${statusResponse.status}")
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e("StoryViewModel", "pollStoryStatus error", e)
-                // 网络错误时继续重试
-            }
-        }
-        
-        // 20次后仍未完成，报错超时
-        _generateStoryState.value = UIState.Error(
-            Exception("Timeout"),
-            "请求超时，请稍后重试"
-        )
-    }
-    
-    /**
-     * 停止轮询
-     */
-    fun stopPolling() {
-        pollingJob?.cancel()
-        pollingJob = null
-    }
-
-
-    fun setStoryTitle(storyId: String): String {
-        safeLaunch {
-            // TODO 获取故事标题
-            _storyTitle.value = "生成的故事"
-        }
-        return _storyTitle.value
     }
 
     fun setBottomNavSelected(item: BottomTab) {

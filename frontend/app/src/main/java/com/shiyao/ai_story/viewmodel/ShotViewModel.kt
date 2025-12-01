@@ -6,12 +6,15 @@ import com.shiyao.ai_story.model.enums.ShotStatus
 import com.shiyao.ai_story.model.repository.ShotRepository
 import com.shiyao.ai_story.model.response.ShotItem
 import com.shiyao.ai_story.model.ui.ShotUI
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
+import kotlin.coroutines.coroutineContext
 
 /**
  * ⚠️ 新增：用于分镜详情页编辑的状态
@@ -29,13 +32,19 @@ data class ShotEditingState(
  * 分镜 ViewModel
  */
 class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel() {
+    private var pollingJob: Job? = null
+
+    // 所有分镜是否完成
+    private val _allShotsCompleted = MutableStateFlow(false)
+    val allShotsCompleted: StateFlow<Boolean> = _allShotsCompleted.asStateFlow()
 
     private val _shots = MutableStateFlow<List<ShotUI>>(emptyList())
     val shots: StateFlow<List<ShotUI>> = _shots
 
     // ⚠️ 关键修改点：使用一个公共的视频 URL 作为模拟路径
     // 如果您有自己的视频链接，请替换此 URL。
-    private val MOCK_VIDEO_PATH = "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_1MB.mp4"
+    private val MOCK_VIDEO_PATH =
+        "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_1MB.mp4"
 
     // ⚠️ 新增：用于管理分镜详情页的编辑状态
     private val _currentEditingShot = MutableStateFlow<ShotEditingState?>(null)
@@ -115,7 +124,10 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
         // 实际应用中：调用 API 开始视频生成，并设置轮询
         // 这里：直接模拟生成成功，并设置预览路径为公共 URL
         _previewVideoPath.value = MOCK_VIDEO_PATH
-        Log.i("ShotViewModel", "Video generated successfully for story ID: $storyId, Path: $MOCK_VIDEO_PATH")
+        Log.i(
+            "ShotViewModel",
+            "Video generated successfully for story ID: $storyId, Path: $MOCK_VIDEO_PATH"
+        )
     }
 
     /**
@@ -138,61 +150,62 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
     }
 
     /**
-     * 加载指定 storyId 的分镜
+     * 轮询加载网络分镜，直到全部完成
      */
-    fun loadShotsByNetwork(storyId: String, title: String) {
-        safeLaunch {
-            try {
-                val response = shotRepository.getStoryShots(storyId)
-                val shots = response.shots
-                val uiList = if (!shots.isNullOrEmpty()) {
-                    shots.map { mapShotToUI(it, title,response.storyId) }
-                } else {
-                    createMockShots(storyId).map { mapShotToUI(it, title) }
+    fun pollShotsUntilCompleted(storyId: String, title: String, intervalMillis: Long = 2000): Job {
+        pollingJob?.cancel()
+        pollingJob = safeLaunchJob {
+            while (coroutineContext.isActive) {
+
+                // 加载数据
+                try {
+                    val response = shotRepository.getStoryShots(storyId)
+                    val shots = response.shots
+                    val uiList = if (!shots.isNullOrEmpty()) {
+                        shots.map { mapShotToUI(it, title, response.storyId) }
+                    } else {
+                        createMockShots(storyId).map { mapShotToUI(it, title) }
+                    }
+                    _shots.value = uiList
+                } catch (e: Exception) {
+                    Log.e("ShotViewModel", "loadShotsByNetwork error", e)
                 }
-                _shots.value = uiList
-            } catch (e: Exception) {
-                Log.e("ShotViewModel", "loadShotsByNetwork error", e)
-                _shots.value = emptyList() // 或者处理错误状态
+
+                // 判断完成状态
+                val currentShots = _shots.value
+                if (currentShots.isNotEmpty() &&
+                    currentShots.all { it.status == ShotStatus.COMPLETED.value || it.status == ShotStatus.FAILED.value }
+                ) {
+                    Log.i("ShotViewModel", "所有分镜已完成（或部分失败），停止轮询")
+                    _allShotsCompleted.value = true
+                    break
+                } else {
+                    // 未完成 → 等待
+                    Log.i("ShotViewModel", "分镜未完成，继续轮询...")
+                    _allShotsCompleted.value = false
+                    delay(intervalMillis)
+                }
             }
         }
+        return pollingJob!!
+    }
+
+    fun stopPolling() {
+        pollingJob?.cancel()
+        pollingJob = null
     }
 
     private fun mapShotToUI(shot: ShotItem, title: String, storyId: String): ShotUI {
         return ShotUI(
-            id = shot.id,
+            id = shot.shotId,
             storyId = storyId,
             storyTitle = title,
             title = shot.title,
             sortOrder = shot.sortOrder,
-            prompt = null,
+            prompt = shot.prompt,
             imageUrl = shot.imageUrl,
             status = shot.status
         )
-    }
-
-    /**
-     * 轮询加载网络分镜，直到全部完成
-     */
-    fun pollShotsUntilCompleted(storyId: String, title: String, intervalMillis: Long = 2000) {
-        safeLaunch {
-            while (true) {
-                // 加载数据
-                loadShotsByNetwork(storyId, title)
-                // 获取当前 UI 数据
-                val currentShots = _shots.value
-                // 检查是否全部完成
-                if (currentShots.isNotEmpty() && currentShots.all { it.status == ShotStatus.COMPLETED.value }) {
-                    Log.i("ShotViewModel", "所有分镜已完成，停止轮询")
-                    break
-                } else {
-                    Log.i("ShotViewModel", "分镜未完成，继续轮询...")
-                }
-
-                // 等待间隔
-                delay(intervalMillis)
-            }
-        }
     }
 
     private fun mapShotToUI(shot: Shot, title: String): ShotUI {
@@ -210,7 +223,6 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
 
     /**
      * 生成 mock 数据
-     * ⚠️ 关键修改：将分镜数量从 2 个增加到 5 个
      */
     private fun createMockShots(storyId: String): List<Shot> {
         return listOf(

@@ -7,17 +7,19 @@ import com.google.gson.annotations.SerializedName
  */
 data class CreateStoryResponse(
     val storyId: String,
-    val status: String, // generating/completed/failed
-    val createdAt: Long
+    val status: String, // completed/failed
+    val createdAt: String,
+    val title: String?,
 )
 
 /**
  * 分镜项
  */
 data class ShotItem(
-    val id: String,
+    val shotId: String,
     val sortOrder: Int,
     val title: String,
+    val prompt: String,
     val imageUrl: String?,
     val status: String // generating/completed/failed
 )

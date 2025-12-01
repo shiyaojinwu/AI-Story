@@ -22,13 +22,14 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -36,7 +37,7 @@ import androidx.navigation.NavController
 import com.shiyao.ai_story.R
 import com.shiyao.ai_story.components.CommonCard
 import com.shiyao.ai_story.model.enums.ShotStatus
-import com.shiyao.ai_story.navigation.AppRoute // ⚠️ 导入 AppRoute
+import com.shiyao.ai_story.navigation.AppRoute
 import com.shiyao.ai_story.viewmodel.ShotViewModel
 import com.shiyao.ai_story.viewmodel.StoryViewModel
 
@@ -53,15 +54,20 @@ fun GenerateStoryScreen(
 ) {
     val shots = shotViewModel.shots.collectAsState()
     val storyTitle = storyViewModel.storyTitle.collectAsState()
+    val allShotsCompleted = shotViewModel.allShotsCompleted.collectAsState()
 
     val pagerState = rememberPagerState(
         initialPage = 0,
         pageCount = { shots.value.size }
     )
 
-    LaunchedEffect(storyId) {
+    DisposableEffect(Unit) {
         val title = storyViewModel.storyTitle.value
         shotViewModel.pollShotsUntilCompleted(storyId, title)
+
+        onDispose {
+            shotViewModel.stopPolling()   // 停止轮询
+        }
     }
 
     Column(
@@ -76,14 +82,9 @@ fun GenerateStoryScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.Start
         ) {
-            Text(
-                text = "← Back",
-                fontSize = 18.sp,
-                modifier = Modifier
-                    .padding(bottom = 8.dp)
-                    .clickable { navController.popBackStack() }
-            )
-
+            Spacer(modifier = Modifier.height(5.dp))
+            Text("←", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = colorResource(id = R.color.primary))
+            Text(" Back", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorResource(id = R.color.primary))
             Text(
                 text = "Storyboard",
                 fontSize = 28.sp
@@ -134,27 +135,44 @@ fun GenerateStoryScreen(
                                 shot.imageUrl?.let {
                                     CommonCard(
                                         title = shot.title,
-                                        tag = "Generated",
+                                        tag = shot.status,
+                                        content = shot.prompt,
                                         imageUrl = it,
                                         backgroundColor = colorResource(id = R.color.card_background),
-                                        // ⚠️ 新增：点击卡片跳转到分镜详情页
-                                        modifier = Modifier.clickable {
-                                            shotViewModel.selectShotForEditing(shot) // 设置当前编辑的分镜
-                                            navController.navigate(AppRoute.SHOT_DETAIL.route)
+                                        // 添加点击事件,只有所有分镜都完成时才允许点击
+                                        modifier = if (allShotsCompleted.value) {
+                                            Modifier.clickable {
+                                                shotViewModel.selectShotForEditing(shot)
+                                                navController.navigate(AppRoute.SHOT_DETAIL.route)
+                                            }
+                                        } else {
+                                            Modifier
                                         }
                                     )
                                 }
                             }
-
-                            ShotStatus.GENERATING, ShotStatus.FAILED -> {
+                            ShotStatus.GENERATING -> {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize(),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        text = "Loading shots...",
-                                        color = Color.Gray,
+                                        text = "生成中...",
+                                        color = Color.Blue.copy(alpha = 0.7f),
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+                            }
+                            else -> {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "生成失败",
+                                        color =  Color.Red.copy(alpha = 0.7f),
                                         textAlign = TextAlign.Center
                                     )
                                 }

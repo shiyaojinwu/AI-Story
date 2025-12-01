@@ -11,10 +11,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Photo
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -77,7 +77,7 @@ fun CreateScreen(
         }
         if (generateState is UIState.Error) {
             val message = (generateState as UIState.Error).message ?: "生成失败"
-            ToastUtils.showShort( context, message)
+            ToastUtils.showLong( context, message)
         }
     }
 

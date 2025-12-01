@@ -24,8 +24,8 @@ abstract class BaseRepository {
         val body = response.body()
             ?: throw NetworkException("HTTP BODY IS NULL")
 
-        // API文档：code: 0 表示成功
-        if (body.code != 0) {
+        // code: 200 表示成功
+        if (body.code != 200) {
             throw NetworkException(
                 "API ERROR: ${body.code} - ${body.message}"
             )
