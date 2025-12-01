@@ -90,7 +90,7 @@ class StoryRepository private constructor(
     suspend fun getStoryShots(storyId: String): StoryShotsResponse =
         handleResponse(apiService.getStoryShots(storyId))
 
-    suspend fun getShotPreview(shotId: String): ShotPreviewResponse =
+    suspend fun getShotPreview(shotId: String): ShotDetailResponse =
         handleResponse(apiService.getShotPreview(shotId))
 
     suspend fun getShotDetail(shotId: String): ShotDetailResponse =

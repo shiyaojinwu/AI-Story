@@ -27,7 +27,7 @@ interface ApiService {
      * 创建故事（生成故事分镜）
      * POST /api/story/create
      */
-    @POST("/api/story")
+    @POST("/api/story/create")
     suspend fun generateStoryboard(
         @Body request: CreateStoryRequest
     ): Response<ApiResponse<CreateStoryResponse>>
@@ -55,7 +55,7 @@ interface ApiService {
     @GET("/api/shot/{id}/preview")
     suspend fun getShotPreview(
         @Path("id") shotId: String
-    ): Response<ApiResponse<ShotPreviewResponse>>
+    ): Response<ApiResponse<ShotDetailResponse>>
 
     /**
      * 获取分镜详情

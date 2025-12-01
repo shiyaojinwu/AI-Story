@@ -78,7 +78,7 @@ class ShotRepository private constructor(
     /**
      * 获取单张分镜生成进度 / 轮询接口
      */
-    suspend fun getShotPreview(shotId: String): ShotPreviewResponse =
+    suspend fun getShotPreview(shotId: String): ShotDetailResponse =
         handleResponse(apiService.getShotPreview(shotId))
 
     /**

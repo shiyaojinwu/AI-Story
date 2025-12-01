@@ -67,7 +67,6 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
 
     /**
      * 生成故事：调 Repository 请求后端生成 story
-     * 轮询状态，每1秒一次，最多20次，直到返回 completed 或 failed
      */
     fun generateStory() {
         safeLaunch {
@@ -94,7 +93,7 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
                             _generateStoryState.value = UIState.Success(createStoryResponse.storyId)
                             _storyTitle.value = createStoryResponse.title?: ""
                         }
-                        "0" -> {
+                        "0" -> {// TODO 待删除 先适配现有接口
                             _generateStoryState.value = UIState.Success(createStoryResponse.storyId)
                             _storyTitle.value = createStoryResponse.title?: ""
                         }

@@ -16,7 +16,7 @@ UIState<out T> {
     data class Success<out T>(val data: T) : UIState<T>()
 
     // 错误状态，包含异常信息f
-    data class Error(val exception: Throwable, val message: String? = null) : UIState<Nothing>()
+    data class Error(val exception: Throwable? = null, val message: String? = null) : UIState<Nothing>()
 
     // 空数据状态
     object Empty : UIState<Nothing>()

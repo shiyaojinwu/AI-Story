@@ -68,14 +68,14 @@ fun CreateScreen(
     val isLoading = generateState is UIState.Loading
 
     LaunchedEffect(generateState) {
-        if (generateState is UIState.Success) {
+        if (generateState.isSuccess) {
             val storyId = generateState.getOrNull()
             if (storyId != null) {
             navController.navigate(AppRoute.generateShotRoute(storyId))
             storyViewModel.clearGenerateState() // 清空状态
             }
         }
-        if (generateState is UIState.Error) {
+        if (generateState.isError) {
             val message = (generateState as UIState.Error).message ?: "生成失败"
             ToastUtils.showLong( context, message)
         }
@@ -202,7 +202,7 @@ fun CreateScreen(
                     .align(Alignment.CenterHorizontally)
             )
             }
-            
+
             // Loading 弹窗
             if (isLoading) {
                 Box(
@@ -230,7 +230,7 @@ fun CreateScreen(
                 }
             }
         }
-        }
+    }
 }
 
 @Composable

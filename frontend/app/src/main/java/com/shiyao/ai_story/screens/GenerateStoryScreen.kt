@@ -48,7 +48,7 @@ import com.shiyao.ai_story.viewmodel.StoryViewModel
 @Composable
 fun GenerateStoryScreen(
     navController: NavController,
-    storyId: String,
+    storyId: String?,
     shotViewModel: ShotViewModel,
     storyViewModel: StoryViewModel
 ) {
@@ -61,12 +61,18 @@ fun GenerateStoryScreen(
         pageCount = { shots.value.size }
     )
 
+    if (storyId == null) {
+        navController.popBackStack()
+        return
+    }
+
     DisposableEffect(Unit) {
         val title = storyViewModel.storyTitle.value
         shotViewModel.pollShotsUntilCompleted(storyId, title)
 
         onDispose {
-            shotViewModel.stopPolling()   // 停止轮询
+            shotViewModel.stopPolling()
+            shotViewModel.refreshShots()
         }
     }
 
@@ -83,8 +89,18 @@ fun GenerateStoryScreen(
             horizontalAlignment = Alignment.Start
         ) {
             Spacer(modifier = Modifier.height(5.dp))
-            Text("←", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = colorResource(id = R.color.primary))
-            Text(" Back", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = colorResource(id = R.color.primary))
+            Text(
+                "←",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = colorResource(id = R.color.primary)
+            )
+            Text(
+                " Back",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = colorResource(id = R.color.primary)
+            )
             Text(
                 text = "Storyboard",
                 fontSize = 28.sp
@@ -142,8 +158,7 @@ fun GenerateStoryScreen(
                                         // 添加点击事件,只有所有分镜都完成时才允许点击
                                         modifier = if (allShotsCompleted.value) {
                                             Modifier.clickable {
-                                                shotViewModel.selectShotForEditing(shot)
-                                                navController.navigate(AppRoute.SHOT_DETAIL.route)
+                                                navController.navigate(AppRoute.shotDetailRoute(shot.id))
                                             }
                                         } else {
                                             Modifier
@@ -151,6 +166,7 @@ fun GenerateStoryScreen(
                                     )
                                 }
                             }
+
                             ShotStatus.GENERATING -> {
                                 Box(
                                     modifier = Modifier
@@ -164,6 +180,7 @@ fun GenerateStoryScreen(
                                     )
                                 }
                             }
+
                             else -> {
                                 Box(
                                     modifier = Modifier
@@ -172,7 +189,7 @@ fun GenerateStoryScreen(
                                 ) {
                                     Text(
                                         text = "生成失败",
-                                        color =  Color.Red.copy(alpha = 0.7f),
+                                        color = Color.Red.copy(alpha = 0.7f),
                                         textAlign = TextAlign.Center
                                     )
                                 }

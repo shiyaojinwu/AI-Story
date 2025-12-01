@@ -9,7 +9,7 @@ data class ShotUI(
     val storyTitle: String,
     val title: String,
     val sortOrder: Int,
-    val prompt: String?,
+    val prompt: String,
     val imageUrl: String?,
     val status: String?
 )
