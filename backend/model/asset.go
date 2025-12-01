@@ -9,7 +9,7 @@ type Asset struct {
 	VideoURL     string    `json:"videoUrl"`
 	ThumbnailURL string    `json:"thumbnailUrl"`
 	Duration     int       `json:"duration"`
-	Status       int       `json:"status"`
+	Status       string    `json:"status" gorm:"default:'pending'"`
 	CreatedAt    time.Time `json:"createdAt"`
 }
 

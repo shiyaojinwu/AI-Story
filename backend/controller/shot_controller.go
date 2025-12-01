@@ -96,22 +96,22 @@ func GenMockShots(c *gin.Context) {
 
 	mockShots := []model.Shot{
 		{
-			StoryID: storyId, Order: 1, Title: "城市夜景", Status: 2,
+			StoryID: storyId, Order: 1, Title: "城市夜景", Status: "completed",
 			Prompt:   "Cyberpunk city night view...",
 			ImageURL: "https://www.bing.com/images/search?q=%e5%9b%be%e7%89%87&id=457EC80FCD5EE9AB67B2B3E8F5624312D6F6400B&FORM=IACFIR ",
 		},
 		{
-			StoryID: storyId, Order: 2, Title: "主角背影", Status: 2,
+			StoryID: storyId, Order: 2, Title: "主角背影", Status: "completed",
 			Prompt:   "Hero back view... ",
 			ImageURL: "https://www.bing.com/images/search?q=%e5%9b%be%e7%89%87&id=822363F23ADD7A8BEE0FEC29EF03BC9873E7B472&FORM=IACFIR ",
 		},
 		{
-			StoryID: storyId, Order: 3, Title: "代码特写", Status: 1,
+			StoryID: storyId, Order: 3, Title: "代码特写", Status: "generating",
 			Prompt:   "Coding screen... ",
 			ImageURL: "",
 		},
 		{
-			StoryID: storyId, Order: 4, Title: "警报响起", Status: 0,
+			StoryID: storyId, Order: 4, Title: "警报响起", Status: "pending",
 			Prompt:   "Red alert... ",
 			ImageURL: "",
 		},

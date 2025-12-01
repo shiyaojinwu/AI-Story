@@ -14,27 +14,26 @@ import (
 )
 
 func main() {
-	//加载环境变量
+	// 加载环境变量
 	if err := godotenv.Load(); err != nil {
 		log.Println("can find file .env")
 	}
-	//加载配置
+	// 加载配置
 	cfg := config.LoadConfig()
 
-	//初始化数据库
+	// 初始化数据库
 	database := db.InitDB(cfg)
-
-	//更新数据表
+	// 更新数据表
 	err := database.AutoMigrate(&model.Story{}, &model.Shot{}, &model.Asset{})
 	if err != nil {
 		log.Fatalf("数据库初始化失败：%v", err)
 	}
 	log.Println("=^w^= 数据库连接成功")
 
-	//初始化路由
+	// 初始化路由
 	r := router.InitRouter()
 
-	//start the service and print port
+	// start the service and print port
 	address := fmt.Sprintf(":%d", cfg.Port)
 	fmt.Println("-------------------------------------------------")
 	fmt.Printf("Ai Story Running on Port %d\n", cfg.Port)
@@ -45,5 +44,4 @@ func main() {
 		log.Fatalf("启动服务失败: %v", err)
 		os.Exit(1)
 	}
-
 }

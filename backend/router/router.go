@@ -23,7 +23,7 @@ func InitRouter() *gin.Engine {
 	api := r.Group("/api")
 	{
 		// story模块
-		api.POST("/story", controller.CreateStory)
+		api.POST("/story/create", controller.CreateStory)
 		api.GET("/story/:id", controller.GetStoryDetail)
 
 		// shot模块

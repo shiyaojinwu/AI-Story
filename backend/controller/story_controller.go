@@ -32,7 +32,7 @@ func CreateStory(c *gin.Context) {
 	story := model.Story{
 		Content:   req.Content,
 		Style:     req.Style,
-		Status:    0,
+		Status:    "pending",
 		CreatedAt: time.Now(),
 	}
 
@@ -46,6 +46,8 @@ func CreateStory(c *gin.Context) {
 		return
 	}
 
+	mockTitle := "This is mock title"
+
 	// 返回结果
 	c.JSON(http.StatusOK, gin.H{
 		"code":   200,
@@ -54,6 +56,7 @@ func CreateStory(c *gin.Context) {
 			"storyId":   story.ID,
 			"status":    story.Status,
 			"createdAt": story.CreatedAt,
+			"title":     mockTitle,
 		},
 	})
 }

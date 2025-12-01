@@ -7,7 +7,7 @@ type Story struct {
 	Title     string    `json:"title"`
 	Content   string    `json:"content"`
 	Style     string    `json:"style"`
-	Status    int       `json:"status"`
+	Status    string    `json:"status" gorm:"default:'pending'"`
 	CreatedAt time.Time `json:"createdAt"`
 }
 
