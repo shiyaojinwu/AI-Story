@@ -25,11 +25,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -97,52 +98,40 @@ fun GenerateStoryScreen(
     }
 
 
-    Box(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(colorResource(id = R.color.background))
                 .padding(22.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+            horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Top
         ) {
 
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.Start
-        ) {
-            Text(
-                text = "← Back",
-                fontSize = 18.sp,
-                modifier = Modifier
-                    .padding(bottom = 8.dp)
-                    .clickable { navController.popBackStack() }
-            )
+        // 顶部栏：只显示 Back，不显示 StoryFlow 标题
+        StoryTopBar(
+            showBack = true,
+            showTitle = false,
+            onBack = { navController.popBackStack() }
+        )
 
-            Text(
-                text = "StoryFlow",
-                color = colorResource(id = R.color.text_tertiary),
-                fontSize = 38.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .padding(top = 16.dp, bottom = 32.dp)
-            )
+        Spacer(modifier = Modifier.padding(bottom = 16.dp))
 
-            Text(
-                text = "Storyboard",
-                color = colorResource(id = R.color.text_secondary),
-                fontSize = 40.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
+        // 副标题和故事标题
+        Text(
+            text = "Storyboard",
+            color = colorResource(id = R.color.text_secondary),
+            fontSize = 40.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
 
-            Text(
-                text = storyTitle.value,
-                fontSize = 18.sp,
-                color = colorResource(id = R.color.text_hint),
-                modifier = Modifier.padding(bottom = 24.dp)
-            )
-        }
+        Text(
+            text = storyTitle.value,
+            fontSize = 18.sp,
+            color = colorResource(id = R.color.text_hint),
+            modifier = Modifier.padding(bottom = 24.dp)
+        )
 
         Surface(
             modifier = Modifier.fillMaxWidth(),
