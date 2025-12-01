@@ -14,10 +14,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,7 +31,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -64,6 +63,7 @@ fun ShotScreen(
     val context = LocalContext.current
     val generateVideoState by storyViewModel.generateVideoState.collectAsState()
     val videoProgress by storyViewModel.videoProgress.collectAsState()
+    val isLoadingVideo = generateVideoState is UIState.Loading
 
     val pagerState = rememberPagerState(
         initialPage = 0,
@@ -240,7 +240,7 @@ fun ShotScreen(
             onClick = {
                 if (!allCompleted) {
                     ToastUtils.showShort(context, "Please wait for all shots to be completed")
-                    return@Button
+                    return@CommonButton
                 }
 
                 // 全部生成完成，生成视频
