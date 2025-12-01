@@ -24,9 +24,9 @@ import kotlin.coroutines.coroutineContext
 class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel() {
     private var pollingJob: Job? = null
 
-    // 所有分镜是否完成
-    private val _allShotsCompleted = MutableStateFlow(false)
-    val allShotsCompleted: StateFlow<Boolean> = _allShotsCompleted.asStateFlow()
+    // 所有分镜是否完成或否失败
+    private val _allShotsCompletedOrFail = MutableStateFlow(false)
+    val allShotsCompletedOrFail: StateFlow<Boolean> = _allShotsCompletedOrFail.asStateFlow()
 
     private val _shots = MutableStateFlow<List<ShotUI>>(emptyList())
     val shots: StateFlow<List<ShotUI>> = _shots
@@ -228,12 +228,12 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
                     currentShots.all { it.status == ShotStatus.COMPLETED.value || it.status == ShotStatus.FAILED.value }
                 ) {
                     Log.i("ShotViewModel", "所有分镜已完成（或部分失败），停止轮询")
-                    _allShotsCompleted.value = true
+                    _allShotsCompletedOrFail.value = true
                     break
                 } else {
                     // 未完成 → 等待
                     Log.i("ShotViewModel", "分镜未完成，继续轮询...")
-                    _allShotsCompleted.value = false
+                    _allShotsCompletedOrFail.value = false
                     delay(intervalMillis)
                 }
             }

@@ -38,14 +38,13 @@ data class StoryShotsResponse(
  */
 data class GenerateVideoResponse(
     val id: String, // 视频ID
-    val status: String // 状态：processing/completed/failed
 )
 
 /**
  * 视频预览轮询响应
  */
 data class StoryPreviewResponse(
-    val status: String,      // pending / generating / completed / failed
+    val status: String,      // generating / completed / failed
     val progress: Int?,      // 0 - 100
     val previewUrl: String?, // 视频预览地址
     val coverUrl: String?,   // 封面

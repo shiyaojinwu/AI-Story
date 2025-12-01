@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -38,6 +39,7 @@ import com.shiyao.ai_story.R
 import com.shiyao.ai_story.components.CommonCard
 import com.shiyao.ai_story.model.enums.ShotStatus
 import com.shiyao.ai_story.navigation.AppRoute
+import com.shiyao.ai_story.utils.ToastUtils
 import com.shiyao.ai_story.viewmodel.ShotViewModel
 import com.shiyao.ai_story.viewmodel.StoryViewModel
 
@@ -46,15 +48,17 @@ import com.shiyao.ai_story.viewmodel.StoryViewModel
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun GenerateStoryScreen(
+fun ShotScreen(
     navController: NavController,
     storyId: String?,
     shotViewModel: ShotViewModel,
     storyViewModel: StoryViewModel
 ) {
     val shots = shotViewModel.shots.collectAsState()
+    val allCompleted = shots.value.all { it.status == ShotStatus.COMPLETED.value }
     val storyTitle = storyViewModel.storyTitle.collectAsState()
-    val allShotsCompleted = shotViewModel.allShotsCompleted.collectAsState()
+    val allShotsCompletedOrFail = shotViewModel.allShotsCompletedOrFail.collectAsState()
+    val context = LocalContext.current
 
     val pagerState = rememberPagerState(
         initialPage = 0,
@@ -155,8 +159,8 @@ fun GenerateStoryScreen(
                                         content = shot.prompt,
                                         imageUrl = it,
                                         backgroundColor = colorResource(id = R.color.card_background),
-                                        // 添加点击事件,只有所有分镜都完成时才允许点击
-                                        modifier = if (allShotsCompleted.value) {
+                                        // 添加点击事件,只有所有分镜都停止生成时才允许点击
+                                        modifier = if (allShotsCompletedOrFail.value) {
                                             Modifier.clickable {
                                                 navController.navigate(AppRoute.shotDetailRoute(shot.id))
                                             }
@@ -226,7 +230,12 @@ fun GenerateStoryScreen(
 
         Button(
             onClick = {
-                // ⚠️ 修改：调用 ViewModel 生成视频，并跳转到预览页
+                if (!allCompleted) {
+                    ToastUtils.showShort(context, "Please wait for all shots to be completed")
+                    return@Button
+                }
+
+                // 全部生成完成，生成视频
                 shotViewModel.generateVideo(storyId)
                 navController.navigate(AppRoute.PREVIEW.route)
             },
@@ -235,7 +244,7 @@ fun GenerateStoryScreen(
                 .height(55.dp),
             shape = RoundedCornerShape(8.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF3B82F6),
+                containerColor = if (allCompleted) Color(0xFF3B82F6) else Color.Gray,
                 contentColor = Color.White
             )
         ) {
