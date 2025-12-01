@@ -21,6 +21,7 @@ import com.shiyao.ai_story.R
  * 顶部通用栏：
  * - 在需要返回的页面显示 Back 按钮
  * - 在 CreateScreen 等首页不显示 Back，但保留同样的高度，保证下方标题对齐
+ * TODO 完善成顶部导航栏
  */
 
 //文本字号
