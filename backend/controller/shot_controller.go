@@ -60,10 +60,10 @@ func GetShotDetail(c *gin.Context) {
 }
 
 func GetShotProgress(c *gin.Context) {
-	id := c.Param("id")
+	// id := c.Param("id")
 	var shot model.Shot
 
-	if err := db.DB.First(&shot, "id = ?", id).Error; err != nil {
+	if err := db.DB.First(&shot, "id = ?", 1).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"code":    404,
 			"message": "分镜不存在" + err.Error(),
@@ -111,7 +111,7 @@ func GenMockShots(c *gin.Context) {
 			ImageURL: "",
 		},
 		{
-			StoryID: storyId, Order: 4, Title: "警报响起", Status: "pending",
+			StoryID: storyId, Order: 4, Title: "警报响起", Status: "generating",
 			Prompt:   "Red alert... ",
 			ImageURL: "",
 		},
@@ -154,7 +154,7 @@ func UpdateShot(c *gin.Context) {
 		"prompt":     req.Prompt,
 		"narration":  req.Narration,
 		"transition": req.Transition,
-		"status":     0,
+		"status":     model.StatusGenerating,
 	}
 
 	// 执行更新

@@ -24,6 +24,7 @@ func main() {
 	// 初始化数据库
 	database := db.InitDB(cfg)
 	// 更新数据表
+	database.Migrator().DropTable(&model.Asset{}, &model.Shot{}, &model.Story{})
 	err := database.AutoMigrate(&model.Story{}, &model.Shot{}, &model.Asset{})
 	if err != nil {
 		log.Fatalf("数据库初始化失败：%v", err)

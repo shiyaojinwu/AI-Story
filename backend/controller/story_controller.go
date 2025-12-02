@@ -54,7 +54,7 @@ func CreateStory(c *gin.Context) {
 		"messge": "success",
 		"data": gin.H{
 			"storyId":   story.ID,
-			"status":    story.Status,
+			"status":    model.StatusCompleted,
 			"createdAt": story.CreatedAt,
 			"title":     mockTitle,
 		},
