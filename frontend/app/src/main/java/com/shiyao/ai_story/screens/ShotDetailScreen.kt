@@ -114,14 +114,25 @@ fun ShotDetailScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(horizontal = 22.dp)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.Top
         ) {
 
             // 顶部返回栏，使用统一的 TopBackBar 组件
             TopBackBar(
-                title = "Back",
-                content = "Shot Detail",
                 onBack = { navController.popBackStack() }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Shot Detail 标题
+            Text(
+                text = "Shot Detail",
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold,
+                color = colorResource(id = R.color.text_secondary),
+                modifier = Modifier.padding(bottom = 16.dp)
             )
 
             // 1. 视频/图像预览区域
