@@ -1,17 +1,10 @@
 package com.shiyao.ai_story.screens
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,8 +26,12 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.navigation.NavController
 import com.shiyao.ai_story.R
+import com.shiyao.ai_story.components.BottomNavBar
 import com.shiyao.ai_story.components.CommonButton
+import com.shiyao.ai_story.components.CommonLoadingOverlay
 import com.shiyao.ai_story.components.CommonVideoPlayer
+import com.shiyao.ai_story.components.LoadingType
+import com.shiyao.ai_story.components.TopBackBar
 import com.shiyao.ai_story.utils.StorageUtils.saveNetworkVideoToMediaStore
 import com.shiyao.ai_story.utils.ToastUtils
 import kotlinx.coroutines.launch
@@ -43,7 +40,7 @@ import kotlinx.coroutines.launch
 fun PreviewScreen(
     navController: NavController,
     url: String,
-    title: String
+    title: String,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -53,7 +50,19 @@ fun PreviewScreen(
     var progress by remember { mutableIntStateOf(0) }
 
     Scaffold(
-        containerColor = Color.White
+        containerColor = Color.White,
+        bottomBar = {
+            BottomNavBar(
+                navController = navController
+            )
+
+        },
+        topBar = {
+            TopBackBar(
+                title = "Back",
+                onBack = { navController.popBackStack() }
+            )
+        }
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -61,33 +70,11 @@ fun PreviewScreen(
                 .padding(paddingValues)
                 .padding(horizontal = 20.dp)
         ) {
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp, bottom = 8.dp)
-                    .clickable { navController.popBackStack() },
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    "←",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = colorResource(id = R.color.primary)
-                )
-                Text(
-                    " Back",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = colorResource(id = R.color.primary)
-                )
-            }
-
             Text(
                 text = "Preview",
-                fontSize = 32.sp,
+                fontSize = 35.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 0.dp),
+                modifier = Modifier.padding(top = 10.dp),
                 color = colorResource(id = R.color.text_secondary)
             )
 
@@ -96,7 +83,7 @@ fun PreviewScreen(
                 autoPlay = true,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 50.dp)
+                    .padding(top = 60.dp)
                     .clip(RoundedCornerShape(16.dp)),
                 height = 280.dp
             )
@@ -107,10 +94,10 @@ fun PreviewScreen(
                 fontSize = 14.sp,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
-                    .padding(top = 20.dp)
+                    .padding(top = 28.dp)
             )
 
-            // 📥 导出按钮
+            // 导出按钮
             CommonButton(
                 text = "Export Video",
                 backgroundColor = colorResource(id = R.color.primary),
@@ -120,7 +107,7 @@ fun PreviewScreen(
                 verticalPadding = 18,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 30.dp),
+                    .padding(top = 38.dp),
                 onClick = {
                     scope.launch {
                         isDownloading = true
@@ -147,21 +134,11 @@ fun PreviewScreen(
             )
 
         }
-        // ⚠下载进度遮罩
-        if (isDownloading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.5f))
-                    .clickable(enabled = false) {}, // 阻止点击
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    CircularProgressIndicator(color = colorResource(id = R.color.primary))
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text("下载中... $progress%", color = Color.White, fontSize = 16.sp)
-                }
-            }
-        }
+        // 下载进度遮罩
+        CommonLoadingOverlay(
+            loading = isDownloading,
+            type = LoadingType.DOWNLOADING,
+            progress = progress
+        )
     }
 }

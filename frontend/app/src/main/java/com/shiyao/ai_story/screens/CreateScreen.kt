@@ -11,14 +11,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Photo
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,11 +30,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import com.shiyao.ai_story.R
+import com.shiyao.ai_story.components.BottomNavBar
 import com.shiyao.ai_story.components.CommonButton
 import com.shiyao.ai_story.components.CommonTextField
-import com.shiyao.ai_story.model.enums.BottomTab
 import com.shiyao.ai_story.model.enums.Style
 import com.shiyao.ai_story.navigation.AppRoute
 import com.shiyao.ai_story.utils.ToastUtils
@@ -55,15 +48,12 @@ import com.shiyao.ai_story.viewmodel.UIState
 @Composable
 fun CreateScreen(
     navController: NavController,
-    storyViewModel: StoryViewModel
+    storyViewModel: StoryViewModel,
 ) {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
-
     val selectedStyle by storyViewModel.selectedStyle.collectAsState()
     val storyContent by storyViewModel.storyContent.collectAsState()
-    val bottomNavSelected by storyViewModel.bottomNavSelected.collectAsState()
     val generateState by storyViewModel.generateStoryState.collectAsState()
+
     val context = LocalContext.current
     val isLoading = generateState is UIState.Loading
 
@@ -71,51 +61,21 @@ fun CreateScreen(
         if (generateState.isSuccess) {
             val storyId = generateState.getOrNull()
             if (storyId != null) {
-            navController.navigate(AppRoute.generateShotRoute(storyId))
-            storyViewModel.clearGenerateState() // 清空状态
+                navController.navigate(AppRoute.generateShotRoute(storyId))
+                storyViewModel.clearGenerateState() // 清空状态
             }
         }
         if (generateState.isError) {
             val message = (generateState as UIState.Error).message ?: "生成失败"
-            ToastUtils.showLong( context, message)
+            ToastUtils.showLong(context, message)
         }
     }
 
     Scaffold(
         bottomBar = {
-            NavigationBar(
-                containerColor = colorResource(id = R.color.card_background),
-            ) {
-                NavigationBarItem(
-                    icon = { Icon(Icons.Filled.Edit, null) },
-                    label = { Text(stringResource(id = R.string.create)) },
-                    selected = bottomNavSelected == BottomTab.CREATE,
-                    onClick = {
-                        storyViewModel.setBottomNavSelected(BottomTab.CREATE)
-                        if (currentRoute != AppRoute.CREATE.route &&
-                            currentRoute != AppRoute.GENERATE_STORY.route
-                        ) {
-                            navController.navigate(AppRoute.CREATE.route) {
-                                launchSingleTop = true
-                            }
-                        }
-                    }
-                )
-
-                NavigationBarItem(
-                    icon = { Icon(Icons.Filled.Photo, null) },
-                    label = { Text(stringResource(id = R.string.assets)) },
-                    selected = bottomNavSelected == BottomTab.ASSETS,
-                    onClick = {
-                        storyViewModel.setBottomNavSelected(BottomTab.ASSETS)
-                        if (currentRoute != AppRoute.ASSETS.route) {
-                            navController.navigate(AppRoute.ASSETS.route) {
-                                launchSingleTop = true
-                            }
-                        }
-                    }
-                )
-            }
+            BottomNavBar(
+                navController = navController
+            )
         }
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize()) {
@@ -126,78 +86,78 @@ fun CreateScreen(
                     .padding(22.dp)
                     .padding(paddingValues)
             ) {
-            // 顶部栏
-            StoryTopBar(showBack = false, showTitle = true)
+                // 顶部栏
+                StoryTopBar(showBack = false, showTitle = true)
 
-            Spacer(modifier = Modifier.padding(bottom = 16.dp))
+                Spacer(modifier = Modifier.padding(bottom = 16.dp))
 
 
-            Text(
-                text = stringResource(id = R.string.create),
-                color = colorResource(id = R.color.text_secondary),
-                fontSize = 40.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
+                Text(
+                    text = stringResource(id = R.string.create),
+                    color = colorResource(id = R.color.text_secondary),
+                    fontSize = 40.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
 
-            CommonTextField(
-                placeholder = stringResource(id = R.string.write_your_story),
-                value = storyContent,
-                onValueChange = { storyViewModel.setStoryContent(it) },
-                height = 160.dp,
-                modifier = Modifier.padding(bottom = 24.dp)
-            )
+                CommonTextField(
+                    placeholder = stringResource(id = R.string.write_your_story),
+                    value = storyContent,
+                    onValueChange = { storyViewModel.setStoryContent(it) },
+                    height = 160.dp,
+                    modifier = Modifier.padding(bottom = 24.dp)
+                )
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 24.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                StyleButton(
-                    title = stringResource(id = R.string.movie),
-                    isSelected = selectedStyle == Style.MOVIE
-                ) { storyViewModel.setStyle(Style.MOVIE) }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 24.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    StyleButton(
+                        title = stringResource(id = R.string.movie),
+                        isSelected = selectedStyle == Style.MOVIE
+                    ) { storyViewModel.setStyle(Style.MOVIE) }
 
-                Spacer(Modifier.width(8.dp))
+                    Spacer(Modifier.width(8.dp))
 
-                StyleButton(
-                    title = stringResource(id = R.string.animation),
-                    isSelected = selectedStyle == Style.ANIMATION
-                ) { storyViewModel.setStyle(Style.ANIMATION) }
+                    StyleButton(
+                        title = stringResource(id = R.string.animation),
+                        isSelected = selectedStyle == Style.ANIMATION
+                    ) { storyViewModel.setStyle(Style.ANIMATION) }
 
-                Spacer(Modifier.width(8.dp))
+                    Spacer(Modifier.width(8.dp))
 
-                StyleButton(
-                    title = stringResource(id = R.string.realistic),
-                    isSelected = selectedStyle == Style.REALISTIC
-                ) { storyViewModel.setStyle(Style.REALISTIC) }
-            }
-
-            CommonButton(
-                text = stringResource(id = R.string.generate_storyboard),
-                backgroundColor = colorResource(id = R.color.primary),
-                contentColor = Color.White,
-                fontSize = 25,
-                horizontalPadding = 16,
-                verticalPadding = 16,
-                enabled = storyContent.isNotEmpty(),
-                modifier = Modifier.fillMaxWidth(),
-                onClick = {
-                    storyViewModel.generateStory()
+                    StyleButton(
+                        title = stringResource(id = R.string.realistic),
+                        isSelected = selectedStyle == Style.REALISTIC
+                    ) { storyViewModel.setStyle(Style.REALISTIC) }
                 }
-            )
 
-            Text(
-                text = stringResource(id = R.string.the_storyboard_will_open_n_automatically_after_generation),
-                color = colorResource(id = R.color.text_hint),
-                fontSize = 15.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .padding(top = 12.dp)
-                    .align(Alignment.CenterHorizontally)
-            )
+                CommonButton(
+                    text = stringResource(id = R.string.generate_storyboard),
+                    backgroundColor = colorResource(id = R.color.primary),
+                    contentColor = Color.White,
+                    fontSize = 25,
+                    horizontalPadding = 16,
+                    verticalPadding = 16,
+                    enabled = storyContent.isNotEmpty(),
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        storyViewModel.generateStory()
+                    }
+                )
+
+                Text(
+                    text = stringResource(id = R.string.the_storyboard_will_open_n_automatically_after_generation),
+                    color = colorResource(id = R.color.text_hint),
+                    fontSize = 15.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .padding(top = 12.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
             }
 
             // Loading 弹窗
@@ -245,6 +205,7 @@ fun StyleButton(
         fontSize = 18,
         horizontalPadding = 16,
         verticalPadding = 8
-    )}
+    )
+}
 
 

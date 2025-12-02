@@ -46,7 +46,7 @@ fun StoryTopBar(
                 text = "< Back",
                 fontSize = StoryBackFontSize,
                 fontWeight = FontWeight.Bold,
-                color = colorResource(id = R.color.text_tertiary),
+                color = colorResource(id = R.color.primary),
                 modifier = Modifier.clickable { onBack() }
             )
             Spacer(modifier = Modifier.width(12.dp))

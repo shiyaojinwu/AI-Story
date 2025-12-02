@@ -93,10 +93,6 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
                             _generateStoryState.value = UIState.Success(createStoryResponse.storyId)
                             _storyTitle.value = createStoryResponse.title?: ""
                         }
-                        "0" -> {// TODO 待删除 先适配现有接口
-                            _generateStoryState.value = UIState.Success(createStoryResponse.storyId)
-                            _storyTitle.value = createStoryResponse.title?: ""
-                        }
                         else -> {
                             _generateStoryState.value = UIState.Error(
                                 Exception("Story generation failed"),

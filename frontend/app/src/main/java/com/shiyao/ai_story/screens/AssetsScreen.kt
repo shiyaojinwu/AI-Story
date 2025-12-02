@@ -10,12 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Photo
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,20 +18,18 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.shiyao.ai_story.R
+import com.shiyao.ai_story.components.BottomNavBar
 import com.shiyao.ai_story.components.CommonCard
 import com.shiyao.ai_story.components.CommonTextField
 import com.shiyao.ai_story.model.entity.Asset
-import com.shiyao.ai_story.model.enums.BottomTab
 import com.shiyao.ai_story.model.enums.Status
 import com.shiyao.ai_story.navigation.AppRoute
 import com.shiyao.ai_story.viewmodel.AssetsViewModel
-import com.shiyao.ai_story.viewmodel.StoryViewModel
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -46,36 +38,21 @@ import java.util.Locale
 @Composable
 fun AssetsScreen(
     navController: NavController,
-    storyViewModel: StoryViewModel,
     assetsViewModel: AssetsViewModel
 ) {
     val assets by assetsViewModel.assetsList.collectAsState()
     val searchText by assetsViewModel.searchQuery.collectAsState()
-    val bottomNavSelected by storyViewModel.bottomNavSelected.collectAsState()
+
     LaunchedEffect(Unit) {
         assetsViewModel.refreshQuery()
         assetsViewModel.loadAssetsFromRepository()
     }
     Scaffold(
         bottomBar = {
-            // 底部导航栏
-            NavigationBar(containerColor = colorResource(id = R.color.card_background)) {
-                NavigationBarItem(
-                    icon = { Icon(Icons.Filled.Edit, null) },
-                    label = { Text(stringResource(id = R.string.create)) },
-                    selected = bottomNavSelected == BottomTab.CREATE,
-                    onClick = {
-                        storyViewModel.setBottomNavSelected(BottomTab.CREATE)
-                        navController.navigate(AppRoute.CREATE.route) { launchSingleTop = true }
-                    }
-                )
-                NavigationBarItem(
-                    icon = { Icon(Icons.Filled.Photo, null) },
-                    label = { Text(stringResource(id = R.string.assets)) },
-                    selected = bottomNavSelected == BottomTab.ASSETS,
-                    onClick = { /* 当前页 */ }
-                )
-            }
+            BottomNavBar(
+                navController = navController
+            )
+
         }
     ) { paddingValues ->
         Column(
@@ -115,7 +92,7 @@ fun AssetsScreen(
                 items(assets) { asset ->
                     val cover = getAssetCover(asset)
                     var isCompleted = asset.status == Status.COMPLETED.value
-                    if (asset.videoUrl== null)isCompleted= false
+                    if (asset.videoUrl == null) isCompleted = false
                     CommonCard(
                         title = asset.title,
                         imageUrl = cover,
@@ -128,7 +105,12 @@ fun AssetsScreen(
                         modifier = Modifier.clickable(
                             enabled = isCompleted,
                             onClick = {
-                                navController.navigate(AppRoute.previewRoute(asset.videoUrl!!,asset.title))
+                                navController.navigate(
+                                    AppRoute.previewRoute(
+                                        asset.videoUrl!!,
+                                        asset.title
+                                    )
+                                )
                             }
                         ),
                         imageHeight = 150.dp
@@ -138,12 +120,14 @@ fun AssetsScreen(
         }
     }
 }
+
 fun formatToPretty(dateString: String): String {
     val instant = Instant.parse(dateString)
     val zoned = instant.atZone(ZoneId.systemDefault())
     val formatter = DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.US)
     return zoned.format(formatter)
 }
+
 @Composable
 fun getAssetCover(asset: Asset): Any {
     return when (asset.status) {

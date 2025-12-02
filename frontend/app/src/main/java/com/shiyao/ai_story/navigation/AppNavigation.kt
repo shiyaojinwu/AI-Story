@@ -66,7 +66,6 @@ fun AppNavigation(navController: NavHostController) {
         composable(AppRoute.ASSETS.route) {
             AssetsScreen(
                 navController = navController,
-                storyViewModel = storyViewModel,
                 assetsViewModel = assetsViewModel
             )
         }
