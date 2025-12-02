@@ -16,7 +16,10 @@ data class CreateStoryResponse(
  * 分镜项
  */
 data class ShotItem(
-    val shotId: String,
+    @SerializedName("id")
+    val id: Long,
+    @SerializedName("storyId")
+    val storyId: Long,
     val sortOrder: Int,
     val title: String,
     val prompt: String,
@@ -28,7 +31,7 @@ data class ShotItem(
  * 故事分镜列表响应
  */
 data class StoryShotsResponse(
-    @SerializedName("story_id")
+    @SerializedName("storyId")
     val storyId: String,
     val shots: List<ShotItem>?
 )

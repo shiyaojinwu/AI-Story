@@ -17,6 +17,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,10 +38,10 @@ import coil.request.ImageRequest
 import com.shiyao.ai_story.R
 
 /**
- * 带网络图片+标签的通用卡片组件（仅支持网络URL图片）
+ * 带网络图片+标签的通用卡片组件（支持图片加载中占位）
  * @param title 卡片标题
  * @param tag 卡片标签（如"Generated"）
- * @param imageUrl 网络图片地址（必传，无需空值校验）
+ * @param imageUrl 网络图片地址（允许为空）
  * @param modifier 布局修饰符
  * @param backgroundColor 卡片背景色
  * @param imageHeight 图片区域高度（默认180dp）
@@ -51,9 +52,11 @@ fun CommonCard(
     title: String,
     tag: String? = null,
     content: String? = null,
-    imageUrl: String,
+    imageUrl: String?,
     backgroundColor: Color = colorResource(id = R.color.card_background),
-    imageHeight: Dp = 180.dp
+    imageHeight: Dp = 180.dp,
+    // 当 imageUrl 为空时，是否在图片区域显示 Loading 占位
+    showLoadingWhenNoImage: Boolean = false
 ) {
     Card(
         modifier = modifier
@@ -73,17 +76,43 @@ fun CommonCard(
                     .height(imageHeight)
                     .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
             ) {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(imageUrl)
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = title,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop,
-                    error = null, // 错误图
-                    placeholder = null // 加载中占位
-                )
+                if (imageUrl != null) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(imageUrl)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = title,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop,
+                        error = null, // 错误图
+                        placeholder = null // 加载中占位
+                    )
+                } else if (showLoadingWhenNoImage) {
+                    // 图片 URL 为空时显示 Loading 占位
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(colorResource(id = R.color.card_background)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            CircularProgressIndicator(
+                                color = colorResource(id = R.color.primary),
+                                modifier = Modifier.size(32.dp)
+                            )
+                            Text(
+                                text = "生成中...",
+                                fontSize = 14.sp,
+                                color = colorResource(id = R.color.text_hint),
+                                modifier = Modifier.padding(top = 8.dp)
+                            )
+                        }
+                    }
+                }
 
                 tag?.let {
                     Text(

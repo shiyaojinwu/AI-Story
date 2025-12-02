@@ -6,8 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,7 +14,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -65,15 +65,15 @@ fun ShotScreen(
     val videoProgress by storyViewModel.videoProgress.collectAsState()
     val isLoadingVideo = generateVideoState is UIState.Loading
 
-    val pagerState = rememberPagerState(
-        initialPage = 0,
-        pageCount = { shots.value.size }
-    )
-
     if (storyId == null) {
         navController.popBackStack()
         return
     }
+
+    val pagerState = rememberPagerState(
+        initialPage = 0,
+        pageCount = { shots.value.size.coerceAtLeast(1) }
+    )
 
     DisposableEffect(Unit) {
         val title = storyViewModel.storyTitle.value
@@ -88,8 +88,9 @@ fun ShotScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Top
     ) {
 
@@ -119,7 +120,8 @@ fun ShotScreen(
         )
 
         Surface(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth(),
             color = Color(0xFFF5F5F5),
             shape = RoundedCornerShape(12.dp)
         ) {
@@ -138,57 +140,55 @@ fun ShotScreen(
                         modifier = Modifier.padding(20.dp)
                     )
                 } else {
-
                     HorizontalPager(
                         state = pagerState,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(400.dp),
-                        contentPadding = PaddingValues(horizontal = 24.dp),
-                        pageSpacing = 16.dp
+                            .height(400.dp)
                     ) { page ->
                         val shot = shots.value[page]
                         val status = ShotStatus.from(shot.status)
 
                         when (status) {
                             ShotStatus.COMPLETED -> {
-                                shot.imageUrl?.let {
-                                    CommonCard(
-                                        title = shot.title,
-                                        tag = shot.status,
-                                        content = shot.prompt,
-                                        imageUrl = it,
-                                        backgroundColor = colorResource(id = R.color.card_background),
-                                        // 添加点击事件,只有所有分镜都停止生成时才允许点击
-                                        modifier = if (allShotsCompletedOrFail.value) {
-                                            Modifier.clickable {
-                                                navController.navigate(AppRoute.shotDetailRoute(shot.id))
-                                            }
-                                        } else {
-                                            Modifier
+                                // completed：正常显示，如果 URL 为空则在卡片内显示 Loading 图片
+                                CommonCard(
+                                    title = shot.title,
+                                    tag = shot.status,
+                                    content = shot.prompt,
+                                    imageUrl = shot.imageUrl,
+                                    backgroundColor = colorResource(id = R.color.card_background),
+                                    showLoadingWhenNoImage = true,
+                                    // 添加点击事件,只有所有分镜都停止生成时才允许点击
+                                    modifier = if (allShotsCompletedOrFail.value) {
+                                        Modifier.clickable {
+                                            navController.navigate(AppRoute.shotDetailRoute(shot.id))
                                         }
-                                    )
-                                }
+                                    } else {
+                                        Modifier
+                                    }
+                                )
                             }
 
                             ShotStatus.GENERATING -> {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = "生成中...",
-                                        color = Color.Blue.copy(alpha = 0.7f),
-                                        textAlign = TextAlign.Center
-                                    )
-                                }
+                                // generating：始终显示 Loading 图片
+                                CommonCard(
+                                    title = shot.title,
+                                    tag = shot.status,
+                                    content = shot.prompt,
+                                    imageUrl = null,
+                                    backgroundColor = colorResource(id = R.color.card_background),
+                                    showLoadingWhenNoImage = true
+                                )
                             }
+
+
 
                             else -> {
                                 Box(
                                     modifier = Modifier
-                                        .fillMaxSize(),
+                                        .fillMaxWidth()
+                                        .height(120.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
@@ -198,28 +198,6 @@ fun ShotScreen(
                                     )
                                 }
                             }
-                        }
-                    }
-
-                    Row(
-                        modifier = Modifier
-                            .padding(top = 16.dp)
-                            .align(Alignment.CenterHorizontally),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        repeat(pagerState.pageCount) { index ->
-                            val color =
-                                if (pagerState.currentPage == index) Color(0xFFFFFFFF)
-                                else Color.Gray.copy(alpha = 0.5f)
-
-                            Box(
-                                modifier = Modifier
-                                    .size(20.dp)
-                                    .padding(horizontal = 4.dp)
-                                    .clip(RoundedCornerShape(4.dp))
-                                    .background(color)
-                            )
                         }
                     }
                 }
@@ -243,8 +221,8 @@ fun ShotScreen(
                     return@CommonButton
                 }
 
-                // 全部生成完成，生成视频
-                shotViewModel.generateVideo(storyId)
+                // 全部生成完成，生成视频（POST /api/story/{id}/generate-video）
+                storyViewModel.generateVideo(storyId)
                 navController.navigate(AppRoute.PREVIEW.route)
             }
         )

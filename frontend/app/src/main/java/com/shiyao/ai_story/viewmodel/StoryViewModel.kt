@@ -21,7 +21,7 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
          * 设置为 true 时，使用 Mock 数据
          * 设置为 false 时，使用真实 API
          */
-        private const val USE_MOCK_MODE = true
+        private const val USE_MOCK_MODE = false
     }
 
     // 当前选择的风格
@@ -91,11 +91,11 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
                     when (createStoryResponse.status.lowercase()) {
                         "completed" -> {
                             _generateStoryState.value = UIState.Success(createStoryResponse.storyId)
-                            _storyTitle.value = createStoryResponse.title?: ""
+                            _storyTitle.value = createStoryResponse.title ?: ""
                         }
-                        "0" -> {// TODO 待删除 先适配现有接口
+                        "failed" -> {
                             _generateStoryState.value = UIState.Success(createStoryResponse.storyId)
-                            _storyTitle.value = createStoryResponse.title?: ""
+                            _storyTitle.value = createStoryResponse.title ?: ""
                         }
                         else -> {
                             _generateStoryState.value = UIState.Error(
@@ -137,8 +137,12 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
                     // Mock 模式：模拟生成视频
                     mockGenerateVideo(storyId)
                 } else {
-                    // 真实模式：调用 API
+                    // 真实模式：调用 POST /api/story/{id}/generate-video
                     val response = storyRepository.generateStoryVideo(storyId)
+                    // 拿到视频 ID 后开始轮询预览状态（GET /api/story/{id}/preview）
+                    videoPollingJob = safeLaunchJob {
+                        pollVideoStatus(response.id, storyId)
+                    }
                 }
             } catch (e: Exception) {
                 Log.e("StoryViewModel", "generateVideo error", e)

@@ -31,11 +31,6 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
     private val _shots = MutableStateFlow<List<ShotUI>>(emptyList())
     val shots: StateFlow<List<ShotUI>> = _shots
 
-    // ⚠️ 关键修改点：使用一个公共的视频 URL 作为模拟路径
-    // 如果您有自己的视频链接，请替换此 URL。
-    private val MOCK_VIDEO_PATH =
-        "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_1MB.mp4"
-
     // ⚠️ 新增：用于管理分镜详情页的编辑状态
     private val _currentEditingShot = MutableStateFlow<ShotDetailResponse?>(null)
     val currentEditingShot: StateFlow<ShotDetailResponse?> = _currentEditingShot.asStateFlow()
@@ -110,8 +105,8 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
                 )
                 // 开启轮询
                 pollShot(shot.id)
-            }catch (e: Exception){
-                // mock数据
+            } catch (e: Exception) {
+                // TODO: 后端 updateShotImage 接口异常时的处理逻辑待完善（目前直接标记为失败）
                 updateShotStatue(ShotStatus.FAILED.value)
                 _generateShotState.value = UIState.Error(e, "Generate Shot Failed")
             }
@@ -149,19 +144,6 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
     }
 
     /**
-     * ⚠️ 新增：生成最终视频（已弃用，视频生成现在在 StoryViewModel 中处理）
-     */
-    fun generateVideo(storyId: String) {
-        // 实际应用中：调用 API 开始视频生成，并设置轮询
-        // 这里：直接模拟生成成功，并设置预览路径为公共 URL
-        _previewVideoPath.value = MOCK_VIDEO_PATH
-        Log.i(
-            "ShotViewModel",
-            "Video generated successfully for story ID: $storyId, Path: $MOCK_VIDEO_PATH"
-        )
-    }
-
-    /**
      * 设置预览视频路径
      */
     fun setPreviewVideoPath(videoUrl: String) {
@@ -178,11 +160,9 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
 
                 if (dbShots.isNotEmpty()) {
                     _shots.value = dbShots.map { mapShotToUI(it, title) }
-
                 } else {
-                    // DB 为空： mock
-                    val mockShots = createMockShots(storyId)
-                    _shots.value = mockShots.map { mapShotToUI(it, title) }
+                    // TODO: DB 为空时可考虑直接从网络拉取，当前先返回空列表
+                    _shots.value = emptyList()
                 }
             }
         }
@@ -220,12 +200,11 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
                 try {
                     val response = shotRepository.getStoryShots(storyId)
                     val shots = response.shots
-                    val uiList = if (!shots.isNullOrEmpty()) {
+                    _shots.value = if (!shots.isNullOrEmpty()) {
                         shots.map { mapShotToUI(it, title, response.storyId) }
                     } else {
-                        createMockShots(storyId).map { mapShotToUI(it, title) }
+                        emptyList()
                     }
-                    _shots.value = uiList
                 } catch (e: Exception) {
                     Log.e("ShotViewModel", "loadShotsByNetwork error", e)
                 }
@@ -263,7 +242,7 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
 
     private fun mapShotToUI(shot: ShotItem, title: String, storyId: String): ShotUI {
         return ShotUI(
-            id = shot.shotId,
+            id = shot.id.toString(),
             storyId = storyId,
             storyTitle = title,
             title = shot.title,
@@ -287,50 +266,4 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
         )
     }
 
-    /**
-     * 生成 mock 数据
-     */
-    private fun createMockShots(storyId: String): List<Shot> {
-        // 占位图 URL
-        val placeholderImageUrl = "https://www.keaitupian.cn/cjpic/frombd/0/253/4061721412/2857814056.jpg"
-
-        return listOf(
-            Shot(
-                id = "shot_001",
-                title = "Shot 1",
-                storyId = storyId,
-                sortOrder = 1,
-                prompt = "Opening scene in the morning fog",
-                imageUrl = placeholderImageUrl,
-                status = "completed"
-            ),
-            Shot(
-                id = "shot_002",
-                title = "Shot 2",
-                storyId = storyId,
-                sortOrder = 2,
-                prompt = "Hikers walking through the forest",
-                imageUrl = placeholderImageUrl,
-                status = "completed"
-            ),
-            Shot(
-                id = "shot_003",
-                title = "Shot 3",
-                storyId = storyId,
-                sortOrder = 3,
-                prompt = "Mountain peak at sunset",
-                imageUrl = placeholderImageUrl,
-                status = "completed"
-            ),
-            Shot(
-                id = "shot_004",
-                title = "Shot 4",
-                storyId = storyId,
-                sortOrder = 4,
-                prompt = "Campfire scene at night",
-                imageUrl = placeholderImageUrl,
-                status = "completed"
-            )
-        )
-    }
 }

@@ -67,6 +67,7 @@ fun CreateScreen(
     val context = LocalContext.current
     val isLoading = generateState is UIState.Loading
 
+    //todo 限制生成次数
     LaunchedEffect(generateState) {
         if (generateState.isSuccess) {
             val storyId = generateState.getOrNull()
