@@ -161,7 +161,6 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
                 if (dbShots.isNotEmpty()) {
                     _shots.value = dbShots.map { mapShotToUI(it, title) }
                 } else {
-                    // TODO: DB 为空时可考虑直接从网络拉取，当前先返回空列表
                     _shots.value = emptyList()
                 }
             }
