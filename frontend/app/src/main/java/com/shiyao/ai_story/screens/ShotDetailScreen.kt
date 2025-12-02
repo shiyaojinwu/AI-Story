@@ -1,7 +1,6 @@
 package com.shiyao.ai_story.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -51,6 +49,7 @@ import coil.compose.AsyncImage
 import com.shiyao.ai_story.R
 import com.shiyao.ai_story.components.CommonButton
 import com.shiyao.ai_story.components.CommonTextField
+import com.shiyao.ai_story.components.TopBackBar
 import com.shiyao.ai_story.model.enums.Status
 import com.shiyao.ai_story.viewmodel.ShotViewModel
 
@@ -118,27 +117,12 @@ fun ShotDetailScreen(
                 .verticalScroll(rememberScrollState())
         ) {
 
-            // 顶部导航和标题
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp, bottom = 16.dp)
-                    .clickable { navController.popBackStack() },
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "← Back",
-                    fontSize = 18.sp,
-                    color = colorResource(id = R.color.text_secondary),
-                )
-                Spacer(Modifier.width(16.dp))
-                Text(
-                    text = "Shot Detail",
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = colorResource(id = R.color.text_secondary)
-                )
-            }
+            // 顶部返回栏，使用统一的 TopBackBar 组件
+            TopBackBar(
+                title = "Back",
+                content = "Shot Detail",
+                onBack = { navController.popBackStack() }
+            )
 
             // 1. 视频/图像预览区域
             Card(
