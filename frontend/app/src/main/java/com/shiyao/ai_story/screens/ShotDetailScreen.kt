@@ -225,7 +225,6 @@ fun ShotDetailScreen(
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = transitionExpanded) },
                     placeholder = { Text("Ken Burns Effect") },
                     modifier = Modifier
-                        .menuAnchor()
                         .fillMaxWidth()
                         .height(55.dp),
                     shape = RoundedCornerShape(8.dp),
