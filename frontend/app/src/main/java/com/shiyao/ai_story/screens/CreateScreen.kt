@@ -107,6 +107,7 @@ fun CreateScreen(
                     value = storyContent,
                     onValueChange = { storyViewModel.setStoryContent(it) },
                     height = 320.dp,
+                    textSizeSp = 18,
                     modifier = Modifier.padding(bottom = 24.dp)
                 )
 

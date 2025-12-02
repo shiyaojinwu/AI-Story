@@ -49,6 +49,7 @@ fun CommonTextField(
     width: Dp = Dp.Unspecified,
     height: Dp = Dp.Unspecified,
     backgroundColor: Color = colorResource(id = R.color.edit_background),
+    textSizeSp: Int = 16,
     enabled: Boolean = true,
     readOnly: Boolean = false
 ) {
@@ -70,7 +71,7 @@ fun CommonTextField(
         placeholder = { Text(text = placeholder, color = colorResource(id = R.color.text_hint)) },
         enabled = enabled,
         readOnly = readOnly,
-        textStyle = TextStyle(fontSize = 16.sp),
+        textStyle = TextStyle(fontSize = textSizeSp.sp),
         shape = RoundedCornerShape(8.dp),
         maxLines = Int.MAX_VALUE,
 
@@ -107,7 +108,8 @@ fun CommonTextFieldWithState(
     label: String = "",
     width: Dp = Dp.Unspecified,
     height: Dp = Dp.Unspecified,
-    backgroundColor: Color = colorResource(id = R.color.edit_background)
+    backgroundColor: Color = colorResource(id = R.color.edit_background),
+    textSizeSp: Int = 16
 ) {
     var textValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(""))
@@ -124,7 +126,8 @@ fun CommonTextFieldWithState(
         label = label,
         width = width,
         height = height,
-        backgroundColor = backgroundColor
+        backgroundColor = backgroundColor,
+        textSizeSp = textSizeSp
     )
 }
 
