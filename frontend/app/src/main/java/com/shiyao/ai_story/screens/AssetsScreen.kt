@@ -18,6 +18,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -30,6 +31,7 @@ import androidx.navigation.NavController
 import com.shiyao.ai_story.R
 import com.shiyao.ai_story.components.CommonCard
 import com.shiyao.ai_story.components.CommonTextField
+import com.shiyao.ai_story.model.entity.Asset
 import com.shiyao.ai_story.model.enums.BottomTab
 import com.shiyao.ai_story.navigation.AppRoute
 import com.shiyao.ai_story.viewmodel.AssetsViewModel
@@ -44,7 +46,10 @@ fun AssetsScreen(
     val assets by assetsViewModel.assetsList.collectAsState()
     val searchText by assetsViewModel.searchQuery.collectAsState()
     val bottomNavSelected by storyViewModel.bottomNavSelected.collectAsState()
-
+    LaunchedEffect(Unit){
+        assetsViewModel.refreshQuery()
+        assetsViewModel.loadAssetsFromRepository()
+    }
     Scaffold(
         bottomBar = {
             // 底部导航栏
@@ -106,17 +111,27 @@ fun AssetsScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(assets) { asset ->
+                    val cover = getAssetCover(asset)
                     CommonCard(
                         title = asset.title,
                         tag = asset.status,
-                        imageUrl = asset.thumbnailUrl ?: "", // 处理空值
+                        imageUrl = cover,
                         modifier = Modifier.clickable {
                             // 跳转到预览页
-                            navController.navigate(AppRoute.previewRoute(asset.title))
+                            navController.navigate(AppRoute.previewRoute(asset.id))
                         }
                     )
                 }
             }
         }
+    }
+}
+@Composable
+fun getAssetCover(asset: Asset): Any {
+    return when (asset.status) {
+        "completed" -> asset.thumbnailUrl ?: R.drawable.placeholder_completed
+        "generating" -> R.drawable.placeholder_generating
+        "failed" -> R.drawable.placeholder_failed
+        else -> R.drawable.placeholder_default
     }
 }

@@ -51,7 +51,7 @@ fun CommonCard(
     title: String,
     tag: String? = null,
     content: String? = null,
-    imageUrl: String,
+    imageUrl: Any,
     backgroundColor: Color = colorResource(id = R.color.card_background),
     imageHeight: Dp = 180.dp
 ) {

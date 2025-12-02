@@ -1,17 +1,15 @@
 package com.shiyao.ai_story.viewmodel
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import android.util.Log
 import com.shiyao.ai_story.model.entity.Asset
 import com.shiyao.ai_story.model.repository.AssetRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 class AssetsViewModel(
     private val assetRepository: AssetRepository
-) : ViewModel() {
+) : BaseViewModel() {
 
     // UI 观察的数据流
     private val _assetsList = MutableStateFlow<List<Asset>>(emptyList())
@@ -19,13 +17,6 @@ class AssetsViewModel(
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
-
-    init {
-        // 调试模式
-        loadMockData()
-        // 真实模式
-        // loadAssetsFromRepository()
-    }
 
     // 1. 加载假数据 (用于调试 UI)
     private fun loadMockData() {
@@ -63,11 +54,14 @@ class AssetsViewModel(
         _assetsList.value = mocks
     }
 
-    // 2. 从仓库加载真实数据 (后续对接用)
-    private fun loadAssetsFromRepository() {
-        viewModelScope.launch {
-            assetRepository.getAllAssets().collect { list ->
-                _assetsList.value = list
+    // 2. 网络请求加载真实数据 (后续对接用)
+    fun loadAssetsFromRepository() {
+        safeLaunch {
+            try {
+                _assetsList.value =assetRepository.fetchAllRemoteAssets()
+            } catch (e: Exception) {
+                Log.e("AssetsViewModel", "Error loading assets: ${e.message}")
+                loadMockData()
             }
         }
     }
@@ -76,12 +70,15 @@ class AssetsViewModel(
         _searchQuery.value = query
         // 本地搜索过滤逻辑
         if (query.isEmpty()) {
-            loadMockData() // 恢复所有数据
+            loadAssetsFromRepository() // 恢复所有数据
         } else {
             val currentList = _assetsList.value
             _assetsList.value = currentList.filter {
                 it.title.contains(query, ignoreCase = true)
             }
         }
+    }
+    fun refreshQuery() {
+        _searchQuery.value = ""
     }
 }
