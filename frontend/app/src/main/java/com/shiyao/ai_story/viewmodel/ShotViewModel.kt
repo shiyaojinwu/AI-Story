@@ -241,7 +241,7 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
 
     private fun mapShotToUI(shot: ShotItem, title: String, storyId: String): ShotUI {
         return ShotUI(
-            id = shot.shotId,
+            id = shot.id.toString(),
             storyId = storyId,
             storyTitle = title,
             title = shot.title,

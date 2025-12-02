@@ -66,11 +66,6 @@ fun ShotScreen(
     val videoProgress by storyViewModel.videoProgress.collectAsState()
     val isLoadingVideo = generateVideoState is UIState.Loading
 
-    val pagerState = rememberPagerState(
-        initialPage = 0,
-        pageCount = { shots.value.size }
-    )
-
     if (storyId == null) {
         navController.popBackStack()
         return
