@@ -1,10 +1,13 @@
 package com.shiyao.ai_story.navigation
 
+import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.shiyao.ai_story.app.MyApplication
 import com.shiyao.ai_story.model.repository.AssetRepository
 import com.shiyao.ai_story.model.repository.ShotRepository
@@ -69,13 +72,23 @@ fun AppNavigation(navController: NavHostController) {
         }
 
         // 3. 预览页 (PreviewScreen) - 正确传递 shotViewModel
-        composable(AppRoute.PREVIEW.route)
+        composable(AppRoute.PREVIEW.route,
+            arguments = listOf(
+                navArgument("title") { type = NavType.StringType },
+                navArgument("url") { type = NavType.StringType }
+            ))
         { backStackEntry ->
-            val assetName = backStackEntry.arguments?.getString("assetName") ?: ""
+            val encodedUrl = backStackEntry.arguments?.getString("url") ?: ""
+            val encodedTitle = backStackEntry.arguments?.getString("title") ?: ""
+
+            // decode 回原始值
+            val url = Uri.decode(encodedUrl)
+            val title = Uri.decode(encodedTitle)
+
             PreviewScreen(
                 navController = navController,
-                assetName = assetName,
-                shotViewModel = shotViewModel // 修复：正确传递参数
+                url = url,
+                title = title,
             )
         }
 

@@ -38,7 +38,7 @@ import androidx.navigation.NavController
 import com.shiyao.ai_story.R
 import com.shiyao.ai_story.components.CommonButton
 import com.shiyao.ai_story.components.CommonCard
-import com.shiyao.ai_story.model.enums.ShotStatus
+import com.shiyao.ai_story.model.enums.Status
 import com.shiyao.ai_story.navigation.AppRoute
 import com.shiyao.ai_story.utils.ToastUtils
 import com.shiyao.ai_story.viewmodel.ShotViewModel
@@ -57,7 +57,7 @@ fun ShotScreen(
     storyViewModel: StoryViewModel
 ) {
     val shots = shotViewModel.shots.collectAsState()
-    val allCompleted = shots.value.all { it.status == ShotStatus.COMPLETED.value }
+    val allCompleted = shots.value.all { it.status == Status.COMPLETED.value }
     val storyTitle = storyViewModel.storyTitle.collectAsState()
     val allShotsCompletedOrFail = shotViewModel.allShotsCompletedOrFail.collectAsState()
     val context = LocalContext.current
@@ -148,10 +148,10 @@ fun ShotScreen(
                         pageSpacing = 16.dp
                     ) { page ->
                         val shot = shots.value[page]
-                        val status = ShotStatus.from(shot.status)
+                        val status = Status.from(shot.status)
 
                         when (status) {
-                            ShotStatus.COMPLETED -> {
+                            Status.COMPLETED -> {
                                 shot.imageUrl?.let {
                                     CommonCard(
                                         title = shot.title,
@@ -171,7 +171,7 @@ fun ShotScreen(
                                 }
                             }
 
-                            ShotStatus.GENERATING -> {
+                            Status.GENERATING -> {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize(),

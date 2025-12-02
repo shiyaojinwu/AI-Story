@@ -1,5 +1,6 @@
 package com.shiyao.ai_story.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -33,9 +34,14 @@ import com.shiyao.ai_story.components.CommonCard
 import com.shiyao.ai_story.components.CommonTextField
 import com.shiyao.ai_story.model.entity.Asset
 import com.shiyao.ai_story.model.enums.BottomTab
+import com.shiyao.ai_story.model.enums.Status
 import com.shiyao.ai_story.navigation.AppRoute
 import com.shiyao.ai_story.viewmodel.AssetsViewModel
 import com.shiyao.ai_story.viewmodel.StoryViewModel
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @Composable
 fun AssetsScreen(
@@ -46,7 +52,7 @@ fun AssetsScreen(
     val assets by assetsViewModel.assetsList.collectAsState()
     val searchText by assetsViewModel.searchQuery.collectAsState()
     val bottomNavSelected by storyViewModel.bottomNavSelected.collectAsState()
-    LaunchedEffect(Unit){
+    LaunchedEffect(Unit) {
         assetsViewModel.refreshQuery()
         assetsViewModel.loadAssetsFromRepository()
     }
@@ -95,36 +101,48 @@ fun AssetsScreen(
                 onValueChange = { assetsViewModel.updateSearchQuery(it) },
                 modifier = Modifier.padding(top = 16.dp)
             )
-            Text(
-                text = "Assets",
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Bold,
-                color = colorResource(id = R.color.text_secondary),
-                modifier = Modifier.padding(top = 20.dp, bottom = 12.dp)
-            )
 
             // 列表 (使用 CommonCard)
             LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.fillMaxSize()
+                columns = GridCells.Fixed(1),
+                horizontalArrangement = Arrangement.spacedBy(18.dp),
+                verticalArrangement = Arrangement.spacedBy(18.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 16.dp)
+                    .padding(horizontal = 22.dp)
             ) {
                 items(assets) { asset ->
                     val cover = getAssetCover(asset)
+                    var isCompleted = asset.status == Status.COMPLETED.value
+                    if (asset.videoUrl== null)isCompleted= false
                     CommonCard(
                         title = asset.title,
-                        tag = asset.status,
                         imageUrl = cover,
-                        modifier = Modifier.clickable {
-                            // 跳转到预览页
-                            navController.navigate(AppRoute.previewRoute(asset.id))
-                        }
+                        content = try {
+                            formatToPretty(asset.createdAt!!)
+                        } catch (e: Exception) {
+                            Log.e("AssetsScreen", "Error parsing date: $e")
+                            ""
+                        },
+                        modifier = Modifier.clickable(
+                            enabled = isCompleted,
+                            onClick = {
+                                navController.navigate(AppRoute.previewRoute(asset.videoUrl!!,asset.title))
+                            }
+                        ),
+                        imageHeight = 150.dp
                     )
                 }
             }
         }
     }
+}
+fun formatToPretty(dateString: String): String {
+    val instant = Instant.parse(dateString)
+    val zoned = instant.atZone(ZoneId.systemDefault())
+    val formatter = DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.US)
+    return zoned.format(formatter)
 }
 @Composable
 fun getAssetCover(asset: Asset): Any {

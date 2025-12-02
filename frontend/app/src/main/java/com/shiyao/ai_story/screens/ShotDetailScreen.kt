@@ -51,7 +51,7 @@ import coil.compose.AsyncImage
 import com.shiyao.ai_story.R
 import com.shiyao.ai_story.components.CommonButton
 import com.shiyao.ai_story.components.CommonTextField
-import com.shiyao.ai_story.model.enums.ShotStatus
+import com.shiyao.ai_story.model.enums.Status
 import com.shiyao.ai_story.viewmodel.ShotViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -126,7 +126,7 @@ fun ShotDetailScreen(
 
                     when (shot?.status) {
 
-                        ShotStatus.GENERATING.value -> {
+                        Status.GENERATING.value -> {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 CircularProgressIndicator()
                                 Spacer(Modifier.height(8.dp))
@@ -134,7 +134,7 @@ fun ShotDetailScreen(
                             }
                         }
 
-                        ShotStatus.COMPLETED.value -> {
+                        Status.COMPLETED.value -> {
                             AsyncImage(
                                 model = shot?.imageUrl,
                                 contentDescription = "Shot Image",
@@ -143,7 +143,7 @@ fun ShotDetailScreen(
                             )
                         }
 
-                        ShotStatus.FAILED.value -> {
+                        Status.FAILED.value -> {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Icon(
                                     imageVector = Icons.Default.ErrorOutline,
@@ -161,7 +161,7 @@ fun ShotDetailScreen(
                         }
                     }
 
-                    if (shot?.status == ShotStatus.COMPLETED.value) {
+                    if (shot?.status == Status.COMPLETED.value) {
                         Text(
                             text = "Generated",
                             color = Color.White,

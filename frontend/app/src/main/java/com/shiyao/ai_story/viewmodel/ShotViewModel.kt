@@ -2,7 +2,7 @@ package com.shiyao.ai_story.viewmodel
 
 import android.util.Log
 import com.shiyao.ai_story.model.entity.Shot
-import com.shiyao.ai_story.model.enums.ShotStatus
+import com.shiyao.ai_story.model.enums.Status
 import com.shiyao.ai_story.model.repository.ShotRepository
 import com.shiyao.ai_story.model.request.GenerateShotRequest
 import com.shiyao.ai_story.model.response.ShotDetailResponse
@@ -103,7 +103,7 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
             _generateShotState.value = UIState.Loading
             // 生成
             try {
-                updateShotStatue(ShotStatus.GENERATING.value)
+                updateShotStatue(Status.GENERATING.value)
                 shotRepository.updateShotImage(
                     shot.id,
                     GenerateShotRequest(shot.prompt, shot.narration, shot.transition)
@@ -112,7 +112,7 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
                 pollShot(shot.id)
             }catch (e: Exception){
                 // mock数据
-                updateShotStatue(ShotStatus.FAILED.value)
+                updateShotStatue(Status.FAILED.value)
                 _generateShotState.value = UIState.Error(e, "Generate Shot Failed")
             }
         }
@@ -123,23 +123,23 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
             while (coroutineContext.isActive) {
                 val shot = shotRepository.getShotPreview(shotId)
                 when (shot.status) {
-                    ShotStatus.GENERATING.value -> {
+                    Status.GENERATING.value -> {
                         // 显示加载中
                         _generateShotState.value = UIState.Loading
-                        updateShotStatue(ShotStatus.GENERATING.value)
+                        updateShotStatue(Status.GENERATING.value)
                     }
 
-                    ShotStatus.COMPLETED.value -> {
+                    Status.COMPLETED.value -> {
                         _generateShotState.value = UIState.Success("Generate Shot Success")
                         _currentEditingShot.value = shot
-                        updateShotStatue(ShotStatus.COMPLETED.value)
+                        updateShotStatue(Status.COMPLETED.value)
                         break
                     }
 
-                    ShotStatus.FAILED.value -> {
+                    Status.FAILED.value -> {
                         _generateShotState.value = UIState.Error(null, "Generate Shot Failed")
                         _currentEditingShot.value = shot
-                        updateShotStatue(ShotStatus.FAILED.value)
+                        updateShotStatue(Status.FAILED.value)
                         break
                     }
                 }
@@ -233,7 +233,7 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
                 // 判断完成状态
                 val currentShots = _shots.value
                 if (currentShots.isNotEmpty() &&
-                    currentShots.all { it.status == ShotStatus.COMPLETED.value || it.status == ShotStatus.FAILED.value }
+                    currentShots.all { it.status == Status.COMPLETED.value || it.status == Status.FAILED.value }
                 ) {
                     Log.i("ShotViewModel", "所有分镜已完成（或部分失败），停止轮询")
                     _allShotsCompletedOrFail.value = true

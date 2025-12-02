@@ -47,7 +47,9 @@ object StorageUtils {
         inputStream: InputStream,
         fileName: String,
         mimeType: String = "video/mp4",
-        description: String = "AI Story Generated Video"
+        description: String = "AI Story Generated Video",
+        onProgress: (Int) -> Unit = {},
+        totalSize: Long?= null
     ): Uri? {
         val resolver = context.contentResolver
         var uri: Uri? = null
@@ -57,21 +59,34 @@ object StorageUtils {
                 put(MediaStore.Video.Media.DISPLAY_NAME, fileName)
                 put(MediaStore.Video.Media.MIME_TYPE, mimeType)
                 put(MediaStore.Video.Media.DESCRIPTION, description)
-                put(MediaStore.Video.Media.RELATIVE_PATH, "${Environment.DIRECTORY_MOVIES}/$APP_DIR_NAME")
+                put(
+                    MediaStore.Video.Media.RELATIVE_PATH,
+                    "${Environment.DIRECTORY_MOVIES}/$APP_DIR_NAME"
+                )
             }
 
             uri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values)
+            if (uri == null) return null
 
-            uri?.let {
-                resolver.openOutputStream(it)?.use { out ->
-                    inputStream.copyTo(out)
+            resolver.openOutputStream(uri)?.use { out ->
+                val buffer = ByteArray(8 * 1024)
+                var bytesCopied = 0L
+                var bytesRead = inputStream.read(buffer)
+                val size = totalSize ?: 1L // 避免除零错误
+
+                while (bytesRead != -1) {
+                    out.write(buffer, 0, bytesRead)
+                    bytesCopied += bytesRead
+                    if (totalSize != null) {
+                        onProgress((bytesCopied * 100 / size).toInt())
+                    }
+                    bytesRead = inputStream.read(buffer)
                 }
             }
 
             uri
         } catch (e: Exception) {
             e.printStackTrace()
-            // 出现异常时删除已创建的 MediaStore 条目
             uri?.let { resolver.delete(it, null, null) }
             null
         }
@@ -85,14 +100,24 @@ object StorageUtils {
         url: String,
         fileName: String,
         mimeType: String = "video/mp4",
-        description: String = "AI Story Network Video"
+        description: String = "AI Story Network Video",
+        onProgress: (Int) -> Unit = {}
+
     ): Uri? = withContext(Dispatchers.IO) {
         try {
             val request = okhttp3.Request.Builder().url(url).build()
             NetworkClient.okHttpClient.newCall(request).execute().use { response ->
                 val body = response.body
                 body.byteStream().use { inputStream ->
-                    saveVideoToMediaStore(context, inputStream, fileName, mimeType, description)
+                    saveVideoToMediaStore(
+                        context,
+                        inputStream,
+                        fileName,
+                        mimeType,
+                        description,
+                        onProgress,
+                        body.contentLength()
+                    )
                 }
             }
         } catch (e: Exception) {
