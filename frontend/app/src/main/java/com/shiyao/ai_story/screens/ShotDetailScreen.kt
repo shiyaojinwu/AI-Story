@@ -302,8 +302,11 @@ fun ShotDetailScreen(
                     fontSize = 16,
                     horizontalPadding = 16,
                     verticalPadding = 12,
+                    enabled = !isLoading,
                     onClick = {
-                        shotViewModel.updateAndGenerateShot()
+                        if (!isLoading) {
+                            shotViewModel.updateAndGenerateShot()
+                        }
                     }
                 )
             }

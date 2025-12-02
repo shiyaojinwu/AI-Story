@@ -75,6 +75,18 @@ fun ShotScreen(
         pageCount = { shots.value.size.coerceAtLeast(1) }
     )
 
+    // 监听生成视频状态：成功后再跳转预览页；失败时给出提示
+    androidx.compose.runtime.LaunchedEffect(generateVideoState) {
+        if (generateVideoState.isSuccess) {
+            // 生成成功才跳转预览页
+            navController.navigate(AppRoute.PREVIEW.route)
+            storyViewModel.clearGenerateVideoState()
+        } else if (generateVideoState.isError) {
+            val message = (generateVideoState as UIState.Error).message ?: "生成视频失败"
+            ToastUtils.showLong(context, message)
+        }
+    }
+
     DisposableEffect(Unit) {
         val title = storyViewModel.storyTitle.value
         shotViewModel.pollShotsUntilCompleted(storyId, title)
@@ -213,7 +225,7 @@ fun ShotScreen(
             fontSize = 25,
             horizontalPadding = 16,
             verticalPadding = 16,
-            enabled = shots.value.isNotEmpty(),
+            enabled = shots.value.isNotEmpty() && !isLoadingVideo,
             modifier = Modifier.fillMaxWidth(),
             onClick = {
                 if (!allCompleted) {
@@ -223,7 +235,6 @@ fun ShotScreen(
 
                 // 全部生成完成，生成视频（POST /api/story/{id}/generate-video）
                 storyViewModel.generateVideo(storyId)
-                navController.navigate(AppRoute.PREVIEW.route)
             }
         )
     }
