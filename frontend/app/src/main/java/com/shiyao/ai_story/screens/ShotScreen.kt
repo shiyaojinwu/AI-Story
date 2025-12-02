@@ -98,6 +98,7 @@ fun ShotScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(colorResource(id = R.color.background))
             .padding(16.dp),
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Top

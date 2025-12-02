@@ -106,7 +106,7 @@ fun CreateScreen(
                     placeholder = stringResource(id = R.string.write_your_story),
                     value = storyContent,
                     onValueChange = { storyViewModel.setStoryContent(it) },
-                    height = 168.dp,
+                    height = 320.dp,
                     modifier = Modifier.padding(bottom = 24.dp)
                 )
 
