@@ -59,7 +59,7 @@ fun PreviewScreen(
         },
         topBar = {
             TopBackBar(
-                title = "Back",
+                content = "Video",
                 onBack = { navController.popBackStack() }
             )
         }

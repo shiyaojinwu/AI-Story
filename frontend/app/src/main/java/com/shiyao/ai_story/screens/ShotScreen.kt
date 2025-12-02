@@ -38,6 +38,7 @@ import androidx.navigation.NavController
 import com.shiyao.ai_story.R
 import com.shiyao.ai_story.components.CommonButton
 import com.shiyao.ai_story.components.CommonCard
+import com.shiyao.ai_story.components.TopBackBar
 import com.shiyao.ai_story.model.enums.Status
 import com.shiyao.ai_story.navigation.AppRoute
 import com.shiyao.ai_story.utils.ToastUtils
@@ -94,11 +95,7 @@ fun ShotScreen(
     ) {
 
         // 顶部栏：只显示 Back，不显示 StoryFlow 标题
-        StoryTopBar(
-            showBack = true,
-            showTitle = false,
-            onBack = { navController.popBackStack() }
-        )
+        TopBackBar(onBack = { navController.popBackStack() })
 
         Spacer(modifier = Modifier.padding(bottom = 16.dp))
 

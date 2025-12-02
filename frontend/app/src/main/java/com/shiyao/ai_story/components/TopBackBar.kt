@@ -1,6 +1,8 @@
 package com.shiyao.ai_story.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,33 +30,51 @@ import com.shiyao.ai_story.R
  */
 @Composable
 fun TopBackBar(
-    title: String = "",
+    title: String = "Back",
+    content: String? = null,
     onBack: (() -> Unit)? = null
 ) {
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .statusBarsPadding()
-            .padding(horizontal = 16.dp, vertical = 12.dp)
-            .clickable { onBack?.invoke() },
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+
     ) {
-        // 返回箭头图标
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-            contentDescription = "Back",
-            tint = colorResource(id = R.color.primary),
-            modifier = Modifier.size(28.dp)
-        )
+        onBack?.let {
+            Row(
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .clickable { onBack.invoke() },
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // 返回箭头图标
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = colorResource(id = R.color.primary),
+                    modifier = Modifier.size(28.dp)
+                )
 
-        Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(12.dp))
 
-        // 标题文字
-        Text(
-            text = title,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = colorResource(id = R.color.primary)
-        )
+                // 标题文字
+                Text(
+                    text = title,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = colorResource(id = R.color.primary)
+                )
+            }
+        }
+
+        content?.let {
+            Text(
+                text = it,
+                fontSize = 38.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = colorResource(id = R.color.text_tertiary)
+            )
+        }
     }
 }

@@ -34,6 +34,7 @@ import com.shiyao.ai_story.R
 import com.shiyao.ai_story.components.BottomNavBar
 import com.shiyao.ai_story.components.CommonButton
 import com.shiyao.ai_story.components.CommonTextField
+import com.shiyao.ai_story.components.TopBackBar
 import com.shiyao.ai_story.model.enums.Style
 import com.shiyao.ai_story.navigation.AppRoute
 import com.shiyao.ai_story.utils.ToastUtils
@@ -87,7 +88,7 @@ fun CreateScreen(
                     .padding(paddingValues)
             ) {
                 // 顶部栏
-                StoryTopBar(showBack = false, showTitle = true)
+                TopBackBar(content = "StoryFlow")
 
                 Spacer(modifier = Modifier.padding(bottom = 16.dp))
 
@@ -95,16 +96,16 @@ fun CreateScreen(
                 Text(
                     text = stringResource(id = R.string.create),
                     color = colorResource(id = R.color.text_secondary),
-                    fontSize = 40.sp,
+                    fontSize = 36.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    modifier = Modifier.padding(bottom = 18.dp)
                 )
 
                 CommonTextField(
                     placeholder = stringResource(id = R.string.write_your_story),
                     value = storyContent,
                     onValueChange = { storyViewModel.setStoryContent(it) },
-                    height = 160.dp,
+                    height = 168.dp,
                     modifier = Modifier.padding(bottom = 24.dp)
                 )
 
