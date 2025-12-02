@@ -80,6 +80,33 @@ fun ShotDetailScreen(
     var transitionExpanded by remember { mutableStateOf(false) }
     val transitionOptions = listOf("Ken Burns Effect", "Fade In/Out", "Slide Transition")
 
+    // 避免空数据下使用 shot!! 闪退
+    if (shot == null) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(colorResource(id = R.color.background)),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                CircularProgressIndicator(
+                    color = colorResource(id = R.color.primary),
+                    modifier = Modifier.size(48.dp)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = "Loading shot...",
+                    color = colorResource(id = R.color.text_secondary),
+                    fontSize = 16.sp
+                )
+            }
+        }
+        return
+    }
+
     Scaffold(
         containerColor = colorResource(id = R.color.background)
     ) { paddingValues ->
@@ -185,7 +212,7 @@ fun ShotDetailScreen(
             )
             CommonTextField(
                 placeholder = "A misty forest at dawn with a tent",
-                value = shot!!.prompt,
+                value = shot?.prompt ?: "",
                 onValueChange = shotViewModel::updateShotDescription,
                 height = 55.dp,
                 modifier = Modifier.padding(vertical = 8.dp)
@@ -208,7 +235,7 @@ fun ShotDetailScreen(
             ) {
                 // OutlinedTextField 作为锚点，使用 CommonTextField 的样式
                 OutlinedTextField(
-                    value = shot!!.transition,
+                    value = shot?.transition ?: "",
                     onValueChange = {},
                     readOnly = true,
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = transitionExpanded) },
@@ -252,7 +279,7 @@ fun ShotDetailScreen(
             )
             CommonTextField(
                 placeholder = "Here is the narration text...",
-                value = shot!!.narration,
+                value = shot?.narration ?: "",
                 onValueChange = shotViewModel::updateShotNarration,
                 height = 100.dp,
                 modifier = Modifier.padding(vertical = 8.dp)
@@ -275,8 +302,11 @@ fun ShotDetailScreen(
                     fontSize = 16,
                     horizontalPadding = 16,
                     verticalPadding = 12,
+                    enabled = !isLoading,
                     onClick = {
-                        shotViewModel.updateAndGenerateShot()
+                        if (!isLoading) {
+                            shotViewModel.updateAndGenerateShot()
+                        }
                     }
                 )
             }

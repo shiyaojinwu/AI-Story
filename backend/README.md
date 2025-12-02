@@ -54,13 +54,10 @@ db.go
 router.go
 model/story.go
 
-## In Progress
-完成model层中
+## 栈 
+删掉其中一个对话
+写一下文档
 
-## Not Done yet
-to write
-
-## Problem
 
 ## Design Decisions
 

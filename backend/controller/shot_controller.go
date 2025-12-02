@@ -2,20 +2,20 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
+
 	"story-video-backend/db"
 	"story-video-backend/model"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
-//to do 按故事获取分镜
-
+// to do 按故事获取分镜
 func GetShotsByStory(c *gin.Context) {
 	storyIdStr := c.Param("id")
 
 	var shots []model.Shot
-	//数据库查询
+	// 数据库查询
 	result := db.DB.Where("story_id = ?", storyIdStr).Order("sort_order asc").Find(&shots)
 
 	if result.Error != nil {
@@ -27,7 +27,7 @@ func GetShotsByStory(c *gin.Context) {
 		return
 	}
 
-	//返回数据
+	// 返回数据
 	c.JSON(http.StatusOK, gin.H{
 		"code":    200,
 		"message": "success",
@@ -36,13 +36,13 @@ func GetShotsByStory(c *gin.Context) {
 			"shots":   shots,
 		},
 	})
-
 }
+
 func GetShotDetail(c *gin.Context) {
 	id := c.Param("id")
 	var shot model.Shot
 
-	//根据id查询
+	// 根据id查询
 	if err := db.DB.First(&shot, "id = ?", id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"code":    404,
@@ -56,6 +56,28 @@ func GetShotDetail(c *gin.Context) {
 		"code":    200,
 		"message": "success",
 		"data":    shot,
+	})
+}
+
+func GetShotProgress(c *gin.Context) {
+	// id := c.Param("id")
+	var shot model.Shot
+
+	if err := db.DB.First(&shot, "id = ?", 1).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"code":    404,
+			"message": "分镜不存在" + err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    200,
+		"message": "success",
+		"data": gin.H{
+			"status": shot.Status,
+		},
 	})
 }
 
@@ -74,27 +96,27 @@ func GenMockShots(c *gin.Context) {
 
 	mockShots := []model.Shot{
 		{
-			StoryID: storyId, Order: 1, Title: "城市夜景", Status: 2,
+			StoryID: storyId, Order: 1, Title: "城市夜景", Status: "completed",
 			Prompt:   "Cyberpunk city night view...",
 			ImageURL: "https://www.bing.com/images/search?q=%e5%9b%be%e7%89%87&id=457EC80FCD5EE9AB67B2B3E8F5624312D6F6400B&FORM=IACFIR ",
 		},
 		{
-			StoryID: storyId, Order: 2, Title: "主角背影", Status: 2,
+			StoryID: storyId, Order: 2, Title: "主角背影", Status: "completed",
 			Prompt:   "Hero back view... ",
 			ImageURL: "https://www.bing.com/images/search?q=%e5%9b%be%e7%89%87&id=822363F23ADD7A8BEE0FEC29EF03BC9873E7B472&FORM=IACFIR ",
 		},
 		{
-			StoryID: storyId, Order: 3, Title: "代码特写", Status: 1,
+			StoryID: storyId, Order: 3, Title: "代码特写", Status: "generating",
 			Prompt:   "Coding screen... ",
 			ImageURL: "",
 		},
 		{
-			StoryID: storyId, Order: 4, Title: "警报响起", Status: 0,
+			StoryID: storyId, Order: 4, Title: "警报响起", Status: "generating",
 			Prompt:   "Red alert... ",
 			ImageURL: "",
 		},
 	}
-	//批量写入数据库
+	// 批量写入数据库
 	if err := db.DB.Create(&mockShots).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    500,
@@ -132,7 +154,7 @@ func UpdateShot(c *gin.Context) {
 		"prompt":     req.Prompt,
 		"narration":  req.Narration,
 		"transition": req.Transition,
-		"status":     0,
+		"status":     model.StatusGenerating,
 	}
 
 	// 执行更新

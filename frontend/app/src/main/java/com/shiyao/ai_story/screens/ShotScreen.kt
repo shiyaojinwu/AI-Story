@@ -6,8 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,7 +14,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -74,6 +74,23 @@ fun ShotScreen(
     if (storyId == null) {
         navController.popBackStack()
         return
+    }
+
+    val pagerState = rememberPagerState(
+        initialPage = 0,
+        pageCount = { shots.value.size.coerceAtLeast(1) }
+    )
+
+    // 监听生成视频状态：成功后再跳转预览页；失败时给出提示
+    androidx.compose.runtime.LaunchedEffect(generateVideoState) {
+        if (generateVideoState.isSuccess) {
+            // 生成成功才跳转预览页
+            navController.navigate(AppRoute.PREVIEW.route)
+            storyViewModel.clearGenerateVideoState()
+        } else if (generateVideoState.isError) {
+            val message = (generateVideoState as UIState.Error).message ?: "生成视频失败"
+            ToastUtils.showLong(context, message)
+        }
     }
 
     DisposableEffect(Unit) {
@@ -135,57 +152,53 @@ fun ShotScreen(
                         modifier = Modifier.padding(20.dp)
                     )
                 } else {
-
                     HorizontalPager(
                         state = pagerState,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(400.dp),
-                        contentPadding = PaddingValues(horizontal = 24.dp),
-                        pageSpacing = 16.dp
+                            .height(400.dp)
                     ) { page ->
                         val shot = shots.value[page]
                         val status = Status.from(shot.status)
 
                         when (status) {
                             Status.COMPLETED -> {
-                                shot.imageUrl?.let {
-                                    CommonCard(
-                                        title = shot.title,
-                                        tag = shot.status,
-                                        content = shot.prompt,
-                                        imageUrl = it,
-                                        backgroundColor = colorResource(id = R.color.card_background),
-                                        // 添加点击事件,只有所有分镜都停止生成时才允许点击
-                                        modifier = if (allShotsCompletedOrFail.value) {
-                                            Modifier.clickable {
-                                                navController.navigate(AppRoute.shotDetailRoute(shot.id))
-                                            }
-                                        } else {
-                                            Modifier
+                                // completed：正常显示，如果 URL 为空则在卡片内显示 Loading 图片
+                                CommonCard(
+                                    title = shot.title,
+                                    tag = shot.status,
+                                    content = shot.prompt,
+                                    imageUrl = shot.imageUrl,
+                                    backgroundColor = colorResource(id = R.color.card_background),
+                                    showLoadingWhenNoImage = true,
+                                    // 添加点击事件,只有所有分镜都停止生成时才允许点击
+                                    modifier = if (allShotsCompletedOrFail.value) {
+                                        Modifier.clickable {
+                                            navController.navigate(AppRoute.shotDetailRoute(shot.id))
                                         }
-                                    )
-                                }
+                                    } else {
+                                        Modifier
+                                    }
+                                )
                             }
 
                             Status.GENERATING -> {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = "生成中...",
-                                        color = Color.Blue.copy(alpha = 0.7f),
-                                        textAlign = TextAlign.Center
-                                    )
-                                }
+                                // generating：始终显示 Loading 图片
+                                CommonCard(
+                                    title = shot.title,
+                                    tag = shot.status,
+                                    content = shot.prompt,
+                                    imageUrl = null,
+                                    backgroundColor = colorResource(id = R.color.card_background),
+                                    showLoadingWhenNoImage = true
+                                )
                             }
 
                             else -> {
                                 Box(
                                     modifier = Modifier
-                                        .fillMaxSize(),
+                                        .fillMaxWidth()
+                                        .height(120.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
@@ -195,28 +208,6 @@ fun ShotScreen(
                                     )
                                 }
                             }
-                        }
-                    }
-
-                    Row(
-                        modifier = Modifier
-                            .padding(top = 16.dp)
-                            .align(Alignment.CenterHorizontally),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        repeat(pagerState.pageCount) { index ->
-                            val color =
-                                if (pagerState.currentPage == index) Color(0xFFFFFFFF)
-                                else Color.Gray.copy(alpha = 0.5f)
-
-                            Box(
-                                modifier = Modifier
-                                    .size(20.dp)
-                                    .padding(horizontal = 4.dp)
-                                    .clip(RoundedCornerShape(4.dp))
-                                    .background(color)
-                            )
                         }
                     }
                 }
@@ -232,7 +223,7 @@ fun ShotScreen(
             fontSize = 25,
             horizontalPadding = 16,
             verticalPadding = 16,
-            enabled = shots.value.isNotEmpty(),
+            enabled = shots.value.isNotEmpty() && !isLoadingVideo,
             modifier = Modifier.fillMaxWidth(),
             onClick = {
                 if (!allCompleted) {
@@ -240,9 +231,8 @@ fun ShotScreen(
                     return@CommonButton
                 }
 
-                // 全部生成完成，生成视频
-                shotViewModel.generateVideo(storyId)
-                navController.navigate(AppRoute.PREVIEW.route)
+                // 全部生成完成，生成视频（POST /api/story/{id}/generate-video）
+                storyViewModel.generateVideo(storyId)
             }
         )
     }
