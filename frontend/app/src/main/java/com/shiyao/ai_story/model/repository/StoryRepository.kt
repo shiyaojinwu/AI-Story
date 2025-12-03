@@ -4,13 +4,9 @@ import com.shiyao.ai_story.model.entity.Story
 import com.shiyao.ai_story.model.network.ApiService
 import com.shiyao.ai_story.model.network.NetworkClient
 import com.shiyao.ai_story.model.request.CreateStoryRequest
-import com.shiyao.ai_story.model.request.GenerateShotRequest
 import com.shiyao.ai_story.model.response.CreateStoryResponse
 import com.shiyao.ai_story.model.response.GenerateVideoResponse
-import com.shiyao.ai_story.model.response.ShotDetailResponse
-import com.shiyao.ai_story.model.response.ShotPreviewResponse
 import com.shiyao.ai_story.model.response.StoryPreviewResponse
-import com.shiyao.ai_story.model.response.StoryShotsResponse
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -76,28 +72,6 @@ class StoryRepository private constructor(
      */
     suspend fun generateStoryboard(request: CreateStoryRequest): CreateStoryResponse =
         handleResponse(apiService.generateStoryboard(request))
-    
-    /**
-     * 查询故事状态（用于轮询）
-     */
-    suspend fun getStoryStatus(storyId: String): CreateStoryResponse =
-        handleResponse(apiService.getStoryStatus(storyId))
-
-    /**
-     * 获取故事分镜列表
-     * GET /api/story/:id/shots
-     */
-    suspend fun getStoryShots(storyId: String): StoryShotsResponse =
-        handleResponse(apiService.getStoryShots(storyId))
-
-    suspend fun getShotPreview(shotId: String): ShotDetailResponse =
-        handleResponse(apiService.getShotPreview(shotId))
-
-    suspend fun getShotDetail(shotId: String): ShotDetailResponse =
-        handleResponse(apiService.getShotDetail(shotId))
-
-    suspend fun updateShotImage(shotId: String, request: GenerateShotRequest): ShotPreviewResponse =
-        handleResponse(apiService.updateShotImage(shotId, request))
 
     suspend fun generateStoryVideo(storyId: String): GenerateVideoResponse =
         handleResponse(apiService.generateStoryVideo(storyId))

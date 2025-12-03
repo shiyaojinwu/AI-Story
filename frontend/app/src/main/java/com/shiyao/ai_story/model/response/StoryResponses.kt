@@ -17,9 +17,9 @@ data class CreateStoryResponse(
  */
 data class ShotItem(
     @SerializedName("id")
-    val id: Long,
+    val id: String,
     @SerializedName("storyId")
-    val storyId: Long,
+    val storyId: String,
     val sortOrder: Int,
     val title: String,
     val prompt: String,

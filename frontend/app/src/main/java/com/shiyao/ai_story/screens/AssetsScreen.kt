@@ -130,10 +130,10 @@ fun formatToPretty(dateString: String): String {
 
 @Composable
 fun getAssetCover(asset: Asset): Any {
-    return when (asset.status) {
-        "completed" -> asset.thumbnailUrl ?: R.drawable.placeholder_completed
-        "generating" -> R.drawable.placeholder_generating
-        "failed" -> R.drawable.placeholder_failed
-        else -> R.drawable.placeholder_default
+    val status = Status.from(asset.status)
+    return when (status) {
+        Status.COMPLETED -> asset.videoUrl?:R.drawable.placeholder_completed
+        Status.GENERATING -> R.drawable.placeholder_generating
+        Status.FAILED -> R.drawable.placeholder_failed
     }
 }

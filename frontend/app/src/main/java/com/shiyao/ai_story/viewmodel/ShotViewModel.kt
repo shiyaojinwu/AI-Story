@@ -190,7 +190,7 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
     /**
      * 轮询加载网络分镜，直到全部完成
      */
-    fun pollShotsUntilCompleted(storyId: String, title: String, intervalMillis: Long = 2000): Job {
+    fun pollShotsUntilCompleted(storyId: String, title: String, intervalMillis: Long = 2000) {
         pollingJob?.cancel()
         pollingJob = safeLaunchJob {
             while (coroutineContext.isActive) {
@@ -224,7 +224,6 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
                 }
             }
         }
-        return pollingJob!!
     }
 
     /**
@@ -241,7 +240,7 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
 
     private fun mapShotToUI(shot: ShotItem, title: String, storyId: String): ShotUI {
         return ShotUI(
-            id = shot.shotId,
+            id = shot.id,
             storyId = storyId,
             storyTitle = title,
             title = shot.title,

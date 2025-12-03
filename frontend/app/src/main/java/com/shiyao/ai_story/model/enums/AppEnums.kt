@@ -1,6 +1,5 @@
 package com.shiyao.ai_story.model.enums
 
-enum class BottomTab { CREATE, ASSETS }
 enum class Style { MOVIE, ANIMATION, REALISTIC }
 
 enum class Status(val value: String) {

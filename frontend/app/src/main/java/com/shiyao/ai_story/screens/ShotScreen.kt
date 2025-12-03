@@ -1,45 +1,41 @@
 package com.shiyao.ai_story.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.shiyao.ai_story.R
 import com.shiyao.ai_story.components.CommonButton
 import com.shiyao.ai_story.components.CommonCard
+import com.shiyao.ai_story.components.CommonLoadingOverlay
+import com.shiyao.ai_story.components.LoadingType
 import com.shiyao.ai_story.components.TopBackBar
 import com.shiyao.ai_story.model.enums.Status
+import com.shiyao.ai_story.model.ui.ShotUI
 import com.shiyao.ai_story.navigation.AppRoute
 import com.shiyao.ai_story.utils.ToastUtils
 import com.shiyao.ai_story.viewmodel.ShotViewModel
@@ -66,11 +62,6 @@ fun ShotScreen(
     val videoProgress by storyViewModel.videoProgress.collectAsState()
     val isLoadingVideo = generateVideoState is UIState.Loading
 
-    val pagerState = rememberPagerState(
-        initialPage = 0,
-        pageCount = { shots.value.size }
-    )
-
     if (storyId == null) {
         navController.popBackStack()
         return
@@ -78,11 +69,11 @@ fun ShotScreen(
 
     val pagerState = rememberPagerState(
         initialPage = 0,
-        pageCount = { shots.value.size.coerceAtLeast(1) }
+        pageCount = { shots.value.size }
     )
 
     // 监听生成视频状态：成功后再跳转预览页；失败时给出提示
-    androidx.compose.runtime.LaunchedEffect(generateVideoState) {
+    LaunchedEffect(generateVideoState) {
         if (generateVideoState.isSuccess) {
             // 生成成功才跳转预览页
             navController.navigate(AppRoute.PREVIEW.route)
@@ -116,21 +107,28 @@ fun ShotScreen(
 
         Spacer(modifier = Modifier.padding(bottom = 16.dp))
 
-        // 副标题和故事标题
-        Text(
-            text = "Storyboard",
-            color = colorResource(id = R.color.text_secondary),
-            fontSize = 40.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.Start
+        ) {
+            // 副标题和故事标题
+            Text(
+                text = "Storyboard",
+                color = colorResource(id = R.color.text_secondary),
+                fontSize = 40.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 18.dp)
 
-        Text(
-            text = storyTitle.value,
-            fontSize = 18.sp,
-            color = colorResource(id = R.color.text_hint),
-            modifier = Modifier.padding(bottom = 24.dp)
-        )
+            )
+
+            Text(
+                text = storyTitle.value,
+                fontSize = 36.sp,
+                color = colorResource(id = R.color.text_tertiary),
+                fontWeight = FontWeight.Medium,
+            )
+
+        }
 
         Surface(
             modifier = Modifier.fillMaxWidth(),
@@ -144,72 +142,29 @@ fun ShotScreen(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(400.dp)
+                ) { page ->
+                    val shot = shots.value[page]
 
-                if (shots.value.isEmpty()) {
-                    Text(
-                        text = "Loading shots...",
-                        color = Color.Gray,
-                        modifier = Modifier.padding(20.dp)
-                    )
-                } else {
-                    HorizontalPager(
-                        state = pagerState,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(400.dp)
-                    ) { page ->
-                        val shot = shots.value[page]
-                        val status = Status.from(shot.status)
-
-                        when (status) {
-                            Status.COMPLETED -> {
-                                // completed：正常显示，如果 URL 为空则在卡片内显示 Loading 图片
-                                CommonCard(
-                                    title = shot.title,
-                                    tag = shot.status,
-                                    content = shot.prompt,
-                                    imageUrl = shot.imageUrl,
-                                    backgroundColor = colorResource(id = R.color.card_background),
-                                    showLoadingWhenNoImage = true,
-                                    // 添加点击事件,只有所有分镜都停止生成时才允许点击
-                                    modifier = if (allShotsCompletedOrFail.value) {
-                                        Modifier.clickable {
-                                            navController.navigate(AppRoute.shotDetailRoute(shot.id))
-                                        }
-                                    } else {
-                                        Modifier
-                                    }
-                                )
+                    CommonCard(
+                        title = shot.title,
+                        tag = shot.status,
+                        content = shot.prompt,
+                        imageUrl = getShotImage(shot),
+                        backgroundColor = colorResource(id = R.color.card_background),
+                        // 添加点击事件,只有所有分镜都停止生成时才允许点击
+                        modifier = if (allShotsCompletedOrFail.value) {
+                            Modifier.clickable {
+                                navController.navigate(AppRoute.shotDetailRoute(shot.id))
                             }
-
-                            Status.GENERATING -> {
-                                // generating：始终显示 Loading 图片
-                                CommonCard(
-                                    title = shot.title,
-                                    tag = shot.status,
-                                    content = shot.prompt,
-                                    imageUrl = null,
-                                    backgroundColor = colorResource(id = R.color.card_background),
-                                    showLoadingWhenNoImage = true
-                                )
-                            }
-
-                            else -> {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(120.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = "生成失败",
-                                        color = Color.Red.copy(alpha = 0.7f),
-                                        textAlign = TextAlign.Center
-                                    )
-                                }
-                            }
+                        } else {
+                            Modifier
                         }
-                    }
+                    )
                 }
             }
         }
@@ -236,34 +191,19 @@ fun ShotScreen(
             }
         )
     }
-    // Loading 弹窗
-    if (isLoadingVideo) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.5f)),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                CircularProgressIndicator(
-                    color = colorResource(id = R.color.primary),
-                    modifier = Modifier.size(48.dp)
-                )
-                Spacer(modifier = Modifier.padding(top = 16.dp))
-                Text(
-                    text = if (videoProgress != null) {
-                        "Loading... $videoProgress%"
-                    } else {
-                        "Loading..."
-                    },
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium
-                )
-            }
-        }
+    // 生成进度遮罩
+    CommonLoadingOverlay(
+        loading = isLoadingVideo,
+        type = LoadingType.GENERATING,
+    )
+}
+
+@Composable
+fun getShotImage(shot: ShotUI): Any {
+    val status = Status.from(shot.status)
+    return when (status) {
+        Status.COMPLETED -> shot.imageUrl ?: R.drawable.placeholder_completed
+        Status.GENERATING -> R.drawable.placeholder_generating
+        Status.FAILED -> R.drawable.placeholder_failed
     }
 }

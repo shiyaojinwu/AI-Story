@@ -1,7 +1,6 @@
 package com.shiyao.ai_story.viewmodel
 
 import android.util.Log
-import com.shiyao.ai_story.model.enums.BottomTab
 import com.shiyao.ai_story.model.enums.Style
 import com.shiyao.ai_story.model.repository.StoryRepository
 import com.shiyao.ai_story.model.request.CreateStoryRequest
@@ -35,10 +34,6 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
     // 故事标题
     private val _storyTitle = MutableStateFlow("")
     val storyTitle: StateFlow<String> = _storyTitle
-
-    // 底部导航状态
-    private val _bottomNavSelected = MutableStateFlow(BottomTab.CREATE)
-    val bottomNavSelected: MutableStateFlow<BottomTab> = _bottomNavSelected
 
     private val _generateStoryState = MutableStateFlow<UIState<String>>(UIState.Initial)
     val generateStoryState: StateFlow<UIState<String>> = _generateStoryState
@@ -110,10 +105,6 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
                 _generateStoryState.value = UIState.Error(e, e.message ?: "生成失败")
             }
         }
-    }
-
-    fun setBottomNavSelected(item: BottomTab) {
-        _bottomNavSelected.value = item
     }
 
     fun clearGenerateState() {

@@ -64,13 +64,13 @@ fun CreateScreen(
             val storyId = generateState.getOrNull()
             if (storyId != null) {
                 navController.navigate(AppRoute.generateShotRoute(storyId))
-                storyViewModel.clearGenerateState() // 清空状态
             }
         }
         if (generateState.isError) {
             val message = (generateState as UIState.Error).message ?: "生成失败"
             ToastUtils.showLong(context, message)
         }
+        storyViewModel.clearGenerateState()
     }
 
     Scaffold(
@@ -85,14 +85,13 @@ fun CreateScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(colorResource(id = R.color.background))
-                    .padding(22.dp)
+                    .padding(25.dp)
                     .padding(paddingValues)
             ) {
                 // 顶部栏
                 TopBackBar(content = "StoryFlow")
 
                 Spacer(modifier = Modifier.padding(bottom = 16.dp))
-
 
                 Text(
                     text = stringResource(id = R.string.create),
@@ -106,7 +105,7 @@ fun CreateScreen(
                     placeholder = stringResource(id = R.string.write_your_story),
                     value = storyContent,
                     onValueChange = { storyViewModel.setStoryContent(it) },
-                    height = 168.dp,
+                    height = 188.dp,
                     modifier = Modifier.padding(bottom = 24.dp)
                 )
 
@@ -122,14 +121,14 @@ fun CreateScreen(
                         isSelected = selectedStyle == Style.MOVIE
                     ) { storyViewModel.setStyle(Style.MOVIE) }
 
-                    Spacer(Modifier.width(8.dp))
+                    Spacer(Modifier.width(10.dp))
 
                     StyleButton(
                         title = stringResource(id = R.string.animation),
                         isSelected = selectedStyle == Style.ANIMATION
                     ) { storyViewModel.setStyle(Style.ANIMATION) }
 
-                    Spacer(Modifier.width(8.dp))
+                    Spacer(Modifier.width(10.dp))
 
                     StyleButton(
                         title = stringResource(id = R.string.realistic),
@@ -157,7 +156,7 @@ fun CreateScreen(
                     fontSize = 15.sp,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
-                        .padding(top = 12.dp)
+                        .padding(top = 15.dp)
                         .align(Alignment.CenterHorizontally)
                 )
             }
