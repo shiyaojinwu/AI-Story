@@ -14,3 +14,12 @@ type LLMResp struct {
 	} `json:"shots"`
 	Title string `json:"title"`
 }
+
+type ImageReq struct {
+	Prompt string `json:"prompt"`
+	Size   string `json:"size"`
+}
+
+type ImageResp struct {
+	ImageURL string `json:"image_url"`
+}
