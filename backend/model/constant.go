@@ -6,3 +6,8 @@ const (
 	StatusGenerating string = "generating"
 	StatusFailed     string = "failed"
 )
+
+const (
+	LLMUrl   = "http://113.240.112.32:5000/llm"
+	ImageUrl = "http://113.240.112.32:5000/pic"
+)

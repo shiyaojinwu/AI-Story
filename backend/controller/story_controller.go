@@ -32,7 +32,7 @@ func CreateStory(c *gin.Context) {
 	story := model.Story{
 		Content:   req.Content,
 		Style:     req.Style,
-		Status:    "pending",
+		Status:    model.StatusCompleted,
 		CreatedAt: time.Now(),
 	}
 
@@ -46,7 +46,12 @@ func CreateStory(c *gin.Context) {
 		return
 	}
 
-	mockTitle := "This is mock title"
+	// 开始异步等待生成
+	go func(s model.Story) {
+		processLLMGeneration(s)
+	}(story)
+
+	mockTitle := "Title Generating"
 
 	// 返回结果
 	c.JSON(http.StatusOK, gin.H{
@@ -54,7 +59,7 @@ func CreateStory(c *gin.Context) {
 		"messge": "success",
 		"data": gin.H{
 			"storyId":   story.ID,
-			"status":    model.StatusCompleted,
+			"status":    story.Status,
 			"createdAt": story.CreatedAt,
 			"title":     mockTitle,
 		},

@@ -12,7 +12,8 @@ import (
 
 // to do 按故事获取分镜
 func GetShotsByStory(c *gin.Context) {
-	storyIdStr := c.Param("id")
+	// storyIdStr := c.Param("id")
+	storyIdStr := string('1')
 
 	var shots []model.Shot
 	// 数据库查询
@@ -60,10 +61,10 @@ func GetShotDetail(c *gin.Context) {
 }
 
 func GetShotProgress(c *gin.Context) {
-	// id := c.Param("id")
+	id := c.Param("id")
 	var shot model.Shot
 
-	if err := db.DB.First(&shot, "id = ?", 1).Error; err != nil {
+	if err := db.DB.First(&shot, "id = ?", id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"code":    404,
 			"message": "分镜不存在" + err.Error(),
