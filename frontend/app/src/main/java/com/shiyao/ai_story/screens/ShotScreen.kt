@@ -154,31 +154,40 @@ fun ShotScreen(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                HorizontalPager(
-                    state = pagerState,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(400.dp)
-                ) { page ->
-                    val shot = shots.value[page]
-
+                if (shots.value.isEmpty()) {
+                    // 空
                     CommonCard(
-                        title = shot.title,
-                        tag = shot.status,
-                        content = shot.prompt,
-                        imageUrl = getShotUIImage(shot),
+                        tag ="No shots available yet",
+                        imageUrl = R.drawable.placeholder_failed,
                         backgroundColor = colorResource(id = R.color.card_background),
-                        modifier = Modifier.clickable {
-                            if (allShotsCompletedOrFail.value) {
-                                // 所有分镜完成 → 正常跳转
-                                navController.navigate(AppRoute.shotDetailRoute(shot.id))
-                            } else {
-                                // 未完成 → 弹窗提示
-                               // navController.navigate(AppRoute.shotDetailRoute(shot.id))
-                                ToastUtils.showLong(context, "请等待所有分镜生成完成")
-                            }
-                        }
                     )
+                } else {
+                    HorizontalPager(
+                        state = pagerState,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(400.dp)
+                    ) { page ->
+                        val shot = shots.value[page]
+
+                        CommonCard(
+                            title = shot.title,
+                            tag = shot.status,
+                            content = shot.prompt,
+                            imageUrl = getShotUIImage(shot),
+                            backgroundColor = colorResource(id = R.color.card_background),
+                            modifier = Modifier.clickable {
+                                if (allShotsCompletedOrFail.value) {
+                                    // 所有分镜完成 → 正常跳转
+                                    navController.navigate(AppRoute.shotDetailRoute(shot.id))
+                                } else {
+                                    // 未完成 → 弹窗提示
+                                    // navController.navigate(AppRoute.shotDetailRoute(shot.id))
+                                    ToastUtils.showLong(context, "请等待所有分镜生成完成")
+                                }
+                            }
+                        )
+                    }
                 }
             }
         }
