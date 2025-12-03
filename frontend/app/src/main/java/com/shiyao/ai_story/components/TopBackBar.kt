@@ -62,7 +62,7 @@ fun TopBackBar(
                 Text(
                     text = title,
                     fontSize = 20.sp,
-                    fontWeight = FontWeight.Medium,
+                    fontWeight = FontWeight.Bold,
                     color = colorResource(id = R.color.primary)
                 )
             }
