@@ -9,9 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -33,7 +31,9 @@ import androidx.navigation.NavController
 import com.shiyao.ai_story.R
 import com.shiyao.ai_story.components.BottomNavBar
 import com.shiyao.ai_story.components.CommonButton
+import com.shiyao.ai_story.components.CommonLoadingOverlay
 import com.shiyao.ai_story.components.CommonTextField
+import com.shiyao.ai_story.components.LoadingType
 import com.shiyao.ai_story.components.TopBackBar
 import com.shiyao.ai_story.model.enums.Style
 import com.shiyao.ai_story.navigation.AppRoute
@@ -51,26 +51,31 @@ fun CreateScreen(
     navController: NavController,
     storyViewModel: StoryViewModel,
 ) {
+    // 选中的风格
     val selectedStyle by storyViewModel.selectedStyle.collectAsState()
+    // 故事内容
     val storyContent by storyViewModel.storyContent.collectAsState()
+    // 生成状态
     val generateState by storyViewModel.generateStoryState.collectAsState()
-
-    val context = LocalContext.current
     val isLoading = generateState is UIState.Loading
+    // 上下文
+    val context = LocalContext.current
 
-    //todo 限制生成次数
     LaunchedEffect(generateState) {
         if (generateState.isSuccess) {
             val storyId = generateState.getOrNull()
-            if (storyId != null) {
+            if (storyId.isNullOrEmpty()){
+                ToastUtils.showLong(context, "生成失败, 请稍后再试")
+            }else {
                 navController.navigate(AppRoute.generateShotRoute(storyId))
             }
+            storyViewModel.clearGenerateState()
         }
-        if (generateState.isError) {
+        else if (generateState.isError) {
             val message = (generateState as UIState.Error).message ?: "生成失败"
             ToastUtils.showLong(context, message)
+            storyViewModel.clearGenerateState()
         }
-        storyViewModel.clearGenerateState()
     }
 
     Scaffold(
@@ -160,33 +165,11 @@ fun CreateScreen(
                         .align(Alignment.CenterHorizontally)
                 )
             }
-
-            // Loading 弹窗
-            if (isLoading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.5f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        CircularProgressIndicator(
-                            color = colorResource(id = R.color.primary),
-                            modifier = Modifier.size(48.dp)
-                        )
-                        Spacer(modifier = Modifier.padding(top = 16.dp))
-                        Text(
-                            text = "Loading...",
-                            color = Color.White,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                }
-            }
+            // 进度遮罩
+            CommonLoadingOverlay(
+                loading = isLoading,
+                type = LoadingType.GENERATING,
+            )
         }
     }
 }

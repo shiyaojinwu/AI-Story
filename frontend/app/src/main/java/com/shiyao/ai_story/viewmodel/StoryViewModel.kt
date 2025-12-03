@@ -1,9 +1,11 @@
 package com.shiyao.ai_story.viewmodel
 
 import android.util.Log
+import com.shiyao.ai_story.model.enums.Status
 import com.shiyao.ai_story.model.enums.Style
 import com.shiyao.ai_story.model.repository.StoryRepository
 import com.shiyao.ai_story.model.request.CreateStoryRequest
+import com.shiyao.ai_story.model.response.StoryPreviewResponse
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,14 +15,14 @@ import kotlinx.coroutines.flow.StateFlow
  * 故事生成 ViewModel
  */
 class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewModel() {
-    
+
     companion object {
         /**
          * Mock 模式开关
          * 设置为 true 时，使用 Mock 数据
          * 设置为 false 时，使用真实 API
          */
-        private const val USE_MOCK_MODE = false
+        private const val USE_MOCK_MODE = true
     }
 
     // 当前选择的风格
@@ -35,17 +37,18 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
     private val _storyTitle = MutableStateFlow("")
     val storyTitle: StateFlow<String> = _storyTitle
 
+    // 故事生成状态
     private val _generateStoryState = MutableStateFlow<UIState<String>>(UIState.Initial)
     val generateStoryState: StateFlow<UIState<String>> = _generateStoryState
 
-    private val _generateVideoState = MutableStateFlow<UIState<String>>(UIState.Initial)
-    val generateVideoState: StateFlow<UIState<String>> = _generateVideoState
+    // 视频生成状态
+    private val _generateVideoState =
+        MutableStateFlow<UIState<StoryPreviewResponse>>(UIState.Initial)
+    val generateVideoState: StateFlow<UIState<StoryPreviewResponse>> = _generateVideoState
 
-    private val _videoProgress = MutableStateFlow<Int?>(null)
-    val videoProgress: StateFlow<Int?> = _videoProgress
-    
+    // 视频生成任务
     private var videoPollingJob: Job? = null
-    
+
     /**
      * 设置风格
      */
@@ -66,38 +69,37 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
     fun generateStory() {
         safeLaunch {
             _generateStoryState.value = UIState.Loading
-
             try {
-                if (USE_MOCK_MODE) {
-                    // Mock 模式：模拟生成故事
-                    val mockStoryId = "mock_story_${System.currentTimeMillis()}"
-                    _generateStoryState.value = UIState.Success(mockStoryId)
-                    _storyTitle.value = _storyContent.value.take(20).ifEmpty { "Mock 故事" }
-                } else {
-                    // 真实模式：调用 API
-                    val styleValue = _selectedStyle.value.name.lowercase()
-                    val createStoryResponse = storyRepository.generateStoryboard(
-                        CreateStoryRequest(
-                            content = _storyContent.value,
-                            style = styleValue
-                        )
+                val styleValue = _selectedStyle.value.name.lowercase()
+                val createStoryResponse = storyRepository.generateStoryboard(
+                    CreateStoryRequest(
+                        content = _storyContent.value,
+                        style = styleValue
                     )
-                    // 检查初始状态
-                    when (createStoryResponse.status.lowercase()) {
-                        "completed" -> {
-                            _generateStoryState.value = UIState.Success(createStoryResponse.storyId)
-                            _storyTitle.value = createStoryResponse.title ?: ""
-                        }
-                        "failed" -> {
-                            _generateStoryState.value = UIState.Success(createStoryResponse.storyId)
-                            _storyTitle.value = createStoryResponse.title ?: ""
-                        }
-                        else -> {
-                            _generateStoryState.value = UIState.Error(
-                                Exception("Story generation failed"),
-                                "加载失败"
-                            )
-                        }
+                )
+                // 检查初始状态
+                when (createStoryResponse.status.lowercase()) {
+                    Status.COMPLETED.value -> {
+                        _generateStoryState.value = UIState.Success(createStoryResponse.storyId)
+                        _storyTitle.value = createStoryResponse.title
+                    }
+
+                    Status.FAILED.value -> {
+                        _generateStoryState.value = UIState.Error(
+                            Exception("Story generation failed"),
+                            "生成失败"
+                        )
+                    }
+
+                    else -> {
+                        Log.w(
+                            "StoryViewModel",
+                            "Unknown story status: ${createStoryResponse.status}"
+                        )
+                        _generateStoryState.value = UIState.Error(
+                            Exception("Story generation failed"),
+                            "生成失败"
+                        )
                     }
                 }
             } catch (e: Exception) {
@@ -118,11 +120,8 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
     fun generateVideo(storyId: String) {
         // 取消之前的轮询任务
         videoPollingJob?.cancel()
-        
         safeLaunch {
             _generateVideoState.value = UIState.Loading
-            _videoProgress.value = null // 重置进度
-
             try {
                 if (USE_MOCK_MODE) {
                     // Mock 模式：模拟生成视频
@@ -141,42 +140,50 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
             }
         }
     }
-    
+
     /**
      * Mock 模式：模拟生成视频
      */
     private suspend fun mockGenerateVideo(storyId: String) {
         // 模拟网络延迟
         delay(500)
-        
+
         // 生成 Mock videoId
         val mockVideoId = "mock_video_${System.currentTimeMillis()}"
-        
+
         // 开始模拟轮询进度
         videoPollingJob = safeLaunchJob {
             mockPollVideoStatus(mockVideoId, storyId)
         }
     }
-    
+
     /**
      * Mock 模式：模拟视频生成进度轮询
      */
     private suspend fun mockPollVideoStatus(videoId: String, storyId: String) {
         // 模拟进度：从 10% 逐步增加到 100%
         val progressSteps = listOf(10, 25, 40, 55, 70, 85, 100)
-        
+
         for ((index, progress) in progressSteps.withIndex()) {
             if (index > 0) {
                 delay(1200) // 每1.2秒更新一次进度
             }
-            
-            _videoProgress.value = progress
+
             Log.d("StoryViewModel", "Mock video progress: $progress%")
-            
+
             // 最后一步，标记为完成
             if (progress == 100) {
                 delay(500)
-                _generateVideoState.value = UIState.Success(videoId)
+                _generateVideoState.value = UIState.Success(
+                    StoryPreviewResponse(
+                        status = Status.COMPLETED.value,
+                        previewUrl = "http://flv4mp4.people.com.cn/videofile7/pvmsvideo/2023/4/14/DangWang-BoChenDi_7a0283ace3c035c20500c33dfaef44ed.mp4",
+                        coverUrl = null,
+                        error = null,
+                        progress = null
+
+                    )
+                )
                 return
             }
         }
@@ -196,20 +203,18 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
                     delay(1000)
                 }
                 attempts++
-                
+
                 // 查询视频预览状态（使用 GET /api/story/{id}/preview）
                 val previewResponse = storyRepository.getStoryPreview(storyId)
-                
-                // 更新进度
-                _videoProgress.value = previewResponse.progress
-                
+
                 when (previewResponse.status.lowercase()) {
-                    "completed" -> {
+                    Status.COMPLETED.value -> {
                         // 状态为 completed，成功
-                        _generateVideoState.value = UIState.Success(videoId)
+                        _generateVideoState.value = UIState.Success(previewResponse)
                         return
                     }
-                    "failed" -> {
+
+                    Status.FAILED.value -> {
                         // 状态为 failed，报错
                         _generateVideoState.value = UIState.Error(
                             Exception("Video generation failed"),
@@ -217,20 +222,24 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
                         )
                         return
                     }
-                    "generating", "pending" -> {
+
+                    Status.GENERATING.value -> {
                         // 继续轮询
-                        Log.d("StoryViewModel", "Video polling attempt $attempts/$maxAttempts, status: ${previewResponse.status}, progress: ${previewResponse.progress}%")
+                        Log.d(
+                            "StoryViewModel",
+                            "Video polling attempt $attempts/$maxAttempts, status: ${previewResponse.status}, progress: ${previewResponse.progress}%"
+                        )
                     }
+
                     else -> {
                         Log.w("StoryViewModel", "Unknown video status: ${previewResponse.status}")
                     }
                 }
             } catch (e: Exception) {
                 Log.e("StoryViewModel", "pollVideoStatus error", e)
-                // 网络错误时继续重试
             }
         }
-        
+
         // 20次后仍未完成，报错超时
         _generateVideoState.value = UIState.Error(
             Exception("Timeout"),
@@ -240,6 +249,5 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
 
     fun clearGenerateVideoState() {
         _generateVideoState.value = UIState.Initial
-        _videoProgress.value = null // 清空进度
     }
 }

@@ -9,7 +9,7 @@ data class CreateStoryResponse(
     val storyId: String,
     val status: String, // completed/failed
     val createdAt: String,
-    val title: String?,
+    val title: String,
 )
 
 /**

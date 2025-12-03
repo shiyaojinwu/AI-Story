@@ -1,6 +1,7 @@
 package com.shiyao.ai_story.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -54,20 +54,21 @@ fun ShotScreen(
     shotViewModel: ShotViewModel,
     storyViewModel: StoryViewModel
 ) {
+    // 分镜列表
     val shots = shotViewModel.shots.collectAsState()
+    // 所有分镜都完成
     val allCompleted = shots.value.all { it.status == Status.COMPLETED.value }
+    // 故事标题
     val storyTitle = storyViewModel.storyTitle.collectAsState()
+    // 所有分镜都完成或失败
     val allShotsCompletedOrFail = shotViewModel.allShotsCompletedOrFail.collectAsState()
-    val context = LocalContext.current
+    // 生成视频状态
     val generateVideoState by storyViewModel.generateVideoState.collectAsState()
-    val videoProgress by storyViewModel.videoProgress.collectAsState()
     val isLoadingVideo = generateVideoState is UIState.Loading
+    // 上下文
+    val context = LocalContext.current
 
-    if (storyId == null) {
-        navController.popBackStack()
-        return
-    }
-
+    // 翻页器
     val pagerState = rememberPagerState(
         initialPage = 0,
         pageCount = { shots.value.size }
@@ -76,18 +77,27 @@ fun ShotScreen(
     // 监听生成视频状态：成功后再跳转预览页；失败时给出提示
     LaunchedEffect(generateVideoState) {
         if (generateVideoState.isSuccess) {
-            // 生成成功才跳转预览页
-            navController.navigate(AppRoute.PREVIEW.route)
+            val videoUrl = generateVideoState.getOrNull()?.previewUrl
+            if (videoUrl.isNullOrEmpty()) {
+                ToastUtils.showLong(context, "生成视频失败")
+            } else {
+                // 生成成功才跳转预览页
+                navController.navigate(AppRoute.previewRoute(videoUrl, "Completed")) {
+                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                }
+            }
             storyViewModel.clearGenerateVideoState()
         } else if (generateVideoState.isError) {
             val message = (generateVideoState as UIState.Error).message ?: "生成视频失败"
             ToastUtils.showLong(context, message)
+            storyViewModel.clearGenerateVideoState()
         }
     }
 
     DisposableEffect(Unit) {
+        // 轮询分镜
         val title = storyViewModel.storyTitle.value
-        shotViewModel.pollShotsUntilCompleted(storyId, title)
+        shotViewModel.pollShotsUntilCompleted(storyId!!, title)
 
         onDispose {
             shotViewModel.stopPolling()
@@ -158,13 +168,14 @@ fun ShotScreen(
                         content = shot.prompt,
                         imageUrl = getShotImage(shot),
                         backgroundColor = colorResource(id = R.color.card_background),
-                        // 添加点击事件,只有所有分镜都停止生成时才允许点击
-                        modifier = if (allShotsCompletedOrFail.value) {
-                            Modifier.clickable {
+                        modifier = Modifier.clickable {
+                            if (allShotsCompletedOrFail.value) {
+                                // 所有分镜完成 → 正常跳转
                                 navController.navigate(AppRoute.shotDetailRoute(shot.id))
+                            } else {
+                                // 未完成 → 弹窗提示
+                                ToastUtils.showLong(context, "请等待所有分镜生成完成")
                             }
-                        } else {
-                            Modifier
                         }
                     )
                 }
@@ -183,13 +194,13 @@ fun ShotScreen(
             enabled = shots.value.isNotEmpty() && !isLoadingVideo,
             modifier = Modifier.fillMaxWidth(),
             onClick = {
-                if (!allCompleted) {
-                    ToastUtils.showShort(context, "Please wait for all shots to be completed")
-                    return@CommonButton
-                }
+//                if (!allCompleted) {
+//                    ToastUtils.showShort(context, "Please wait for all shots to be completed")
+//                    return@CommonButton
+//                }
 
                 // 全部生成完成，生成视频（POST /api/story/{id}/generate-video）
-                storyViewModel.generateVideo(storyId)
+                storyViewModel.generateVideo(storyId!!)
             }
         )
     }
