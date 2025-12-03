@@ -41,7 +41,7 @@ import com.shiyao.ai_story.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CommonTextField(
-    placeholder: String,
+    placeholder: String?,
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -68,7 +68,7 @@ fun CommonTextField(
         label = if (label.isNotEmpty()) {
             { Text(text = label) }
         } else null,
-        placeholder = { Text(text = placeholder, color = colorResource(id = R.color.text_hint)) },
+        placeholder = { Text(text = placeholder?: "", color = colorResource(id = R.color.text_hint)) },
         enabled = enabled,
         readOnly = readOnly,
         textStyle = TextStyle(fontSize = textSizeSp.sp),

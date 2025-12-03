@@ -1,7 +1,6 @@
 package com.shiyao.ai_story.viewmodel
 
 import android.util.Log
-import com.shiyao.ai_story.model.entity.Shot
 import com.shiyao.ai_story.model.enums.Status
 import com.shiyao.ai_story.model.repository.ShotRepository
 import com.shiyao.ai_story.model.request.GenerateShotRequest
@@ -13,7 +12,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlin.coroutines.coroutineContext
@@ -34,10 +32,6 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
     // ⚠️ 新增：用于管理分镜详情页的编辑状态
     private val _currentEditingShot = MutableStateFlow<ShotDetailResponse?>(null)
     val currentEditingShot: StateFlow<ShotDetailResponse?> = _currentEditingShot.asStateFlow()
-
-    // ⚠️ 新增：预览视频的路径，用于 PreviewScreen
-    private val _previewVideoPath = MutableStateFlow<String?>(null)
-    val previewVideoPath: StateFlow<String?> = _previewVideoPath.asStateFlow()
 
     private val _generateShotState = MutableStateFlow<UIState<String>>(UIState.Initial)
     val generateShotState: StateFlow<UIState<String>> = _generateShotState
@@ -79,6 +73,7 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
             current?.copy(narration = newNarration)
         }
     }
+
     /**
      * ⚠️ 新增：更新当前编辑分镜的状态
      */
@@ -87,6 +82,7 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
             current?.copy(status = newStatus)
         }
     }
+
     /**
      * 更新并重新 分镜图片
      */
@@ -115,57 +111,58 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
 
     fun pollShot(shotId: String, intervalMillis: Long = 2000) {
         safeLaunch {
-            while (coroutineContext.isActive) {
-                val shot = shotRepository.getShotPreview(shotId)
+            var pollCount = 0
+            val maxPollCount = 10
+
+            while (coroutineContext.isActive && pollCount < maxPollCount) {
+                pollCount++
+
+                val shot = try {
+                    shotRepository.getShotPreview(shotId)
+                } catch (e: Exception) {
+                    Log.e("ShotPolling", "轮询请求失败（网络或接口异常）", e)
+                    delay(intervalMillis)
+                    continue
+                }
+
+                Log.d("ShotPolling", "轮询结果：status=${shot.status}")
+
                 when (shot.status) {
+
                     Status.GENERATING.value -> {
-                        // 显示加载中
-                        _generateShotState.value = UIState.Loading
-                        updateShotStatue(Status.GENERATING.value)
+                        Log.d("ShotPolling", "状态：GENERATING → 加载中")
                     }
 
                     Status.COMPLETED.value -> {
+                        Log.d("ShotPolling", "状态：COMPLETED → 生成完成")
                         _generateShotState.value = UIState.Success("Generate Shot Success")
                         _currentEditingShot.value = shot
-                        updateShotStatue(Status.COMPLETED.value)
                         break
                     }
 
                     Status.FAILED.value -> {
+                        Log.d("ShotPolling", "状态：FAILED → 生成失败")
                         _generateShotState.value = UIState.Error(null, "Generate Shot Failed")
                         _currentEditingShot.value = shot
-                        updateShotStatue(Status.FAILED.value)
                         break
                     }
                 }
+
                 delay(intervalMillis)
             }
-        }
-    }
 
-    /**
-     * 设置预览视频路径
-     */
-    fun setPreviewVideoPath(videoUrl: String) {
-        _previewVideoPath.value = videoUrl
-        Log.d("ShotViewModel", "Preview video path set: $videoUrl")
-    }
-
-    /**
-     * 加载指定 storyId 的分镜
-     */
-    fun loadShotsBySql(storyId: String, title: String) {
-        safeLaunch {
-            shotRepository.getShotsByStoryId(storyId).collectLatest { dbShots ->
-
-                if (dbShots.isNotEmpty()) {
-                    _shots.value = dbShots.map { mapShotToUI(it, title) }
-                } else {
-                    _shots.value = emptyList()
-                }
+            if (pollCount >= maxPollCount) {
+                Log.w("ShotPolling", "轮询达到最大次数（$maxPollCount），停止轮询")
+                _generateShotState.value = UIState.Error(
+                    Exception("Timeout"),
+                    "请求超时，请稍后重试"
+                )
+                updateShotStatue(Status.FAILED.value)
             }
+            Log.d("ShotPolling", "轮询结束")
         }
     }
+
 
     fun getShotDetail(shotId: String) {
         safeLaunch {
@@ -250,18 +247,4 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
             status = shot.status
         )
     }
-
-    private fun mapShotToUI(shot: Shot, title: String): ShotUI {
-        return ShotUI(
-            id = shot.id,
-            storyId = shot.storyId,
-            storyTitle = title,
-            title = shot.title,
-            sortOrder = shot.sortOrder,
-            prompt = shot.prompt,
-            imageUrl = shot.imageUrl,
-            status = shot.status
-        )
-    }
-
 }

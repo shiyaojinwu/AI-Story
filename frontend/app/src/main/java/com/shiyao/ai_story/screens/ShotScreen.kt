@@ -50,7 +50,7 @@ import com.shiyao.ai_story.viewmodel.UIState
 @Composable
 fun ShotScreen(
     navController: NavController,
-    storyId: String?,
+    storyId: String,
     shotViewModel: ShotViewModel,
     storyViewModel: StoryViewModel
 ) {
@@ -96,8 +96,8 @@ fun ShotScreen(
 
     DisposableEffect(Unit) {
         // 轮询分镜
-        val title = storyViewModel.storyTitle.value
-        shotViewModel.pollShotsUntilCompleted(storyId!!, title)
+        val title = storyTitle.value
+        shotViewModel.pollShotsUntilCompleted(storyId, title)
 
         onDispose {
             shotViewModel.stopPolling()
@@ -166,7 +166,7 @@ fun ShotScreen(
                         title = shot.title,
                         tag = shot.status,
                         content = shot.prompt,
-                        imageUrl = getShotImage(shot),
+                        imageUrl = getShotUIImage(shot),
                         backgroundColor = colorResource(id = R.color.card_background),
                         modifier = Modifier.clickable {
                             if (allShotsCompletedOrFail.value) {
@@ -174,6 +174,7 @@ fun ShotScreen(
                                 navController.navigate(AppRoute.shotDetailRoute(shot.id))
                             } else {
                                 // 未完成 → 弹窗提示
+                               // navController.navigate(AppRoute.shotDetailRoute(shot.id))
                                 ToastUtils.showLong(context, "请等待所有分镜生成完成")
                             }
                         }
@@ -194,13 +195,13 @@ fun ShotScreen(
             enabled = shots.value.isNotEmpty() && !isLoadingVideo,
             modifier = Modifier.fillMaxWidth(),
             onClick = {
-//                if (!allCompleted) {
-//                    ToastUtils.showShort(context, "Please wait for all shots to be completed")
-//                    return@CommonButton
-//                }
+                if (!allCompleted) {
+                    ToastUtils.showShort(context, "Please wait for all shots to be completed")
+                    return@CommonButton
+                }
 
                 // 全部生成完成，生成视频（POST /api/story/{id}/generate-video）
-                storyViewModel.generateVideo(storyId!!)
+                storyViewModel.generateVideo(storyId)
             }
         )
     }
@@ -212,7 +213,7 @@ fun ShotScreen(
 }
 
 @Composable
-fun getShotImage(shot: ShotUI): Any {
+fun getShotUIImage(shot: ShotUI): Any {
     val status = Status.from(shot.status)
     return when (status) {
         Status.COMPLETED -> shot.imageUrl ?: R.drawable.placeholder_completed

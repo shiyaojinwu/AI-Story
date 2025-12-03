@@ -104,7 +104,7 @@ fun AppNavigation(navController: NavHostController) {
 
         // 分镜详情页路由
         composable(AppRoute.SHOT_DETAIL.route) { backStackEntry ->
-            val shotId = backStackEntry.arguments?.getString("shotId")
+            val shotId = backStackEntry.arguments?.getString("shotId")?: ""
 
             ShotDetailScreen(
                 shotId = shotId,

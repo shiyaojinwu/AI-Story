@@ -48,12 +48,12 @@ import com.shiyao.ai_story.R
 @Composable
 fun CommonCard(
     modifier: Modifier = Modifier,
-    title: String,
+    title: String? = null,
     tag: String? = null,
     content: String? = null,
     imageUrl: Any,
     backgroundColor: Color = colorResource(id = R.color.card_background),
-    imageHeight: Dp = 180.dp
+    imageHeight: Dp = 180.dp,
 ) {
     Card(
         modifier = modifier
@@ -102,13 +102,16 @@ fun CommonCard(
             }
 
             Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = title,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = colorResource(id = R.color.text),
-                    modifier = Modifier.padding(bottom = 4.dp)
-                )
+                title?.let {
+                    Text(
+                        text = it,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colorResource(id = R.color.text),
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+                }
+
                 content?.let {
                     Text(
                         text = it,
@@ -126,8 +129,8 @@ fun CommonCard(
 @Composable
 fun CommonCard_Single_Preview() {
     CommonCard(
-        title = "Camp in the mountains",
         tag = "Generated",
+        title = "Camp in the mountains",
         imageUrl = "https://www.keaitupian.cn/cjpic/frombd/0/253/4061721412/2857814056.jpg"
     )
 }

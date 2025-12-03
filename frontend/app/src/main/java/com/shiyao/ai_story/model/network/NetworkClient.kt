@@ -22,7 +22,7 @@ object NetworkClient {
     val okHttpClient: OkHttpClient by lazy {
         // 创建日志拦截器
         val loggingInterceptor = HttpLoggingInterceptor()
-        //loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
         //loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC)
 
         OkHttpClient.Builder()

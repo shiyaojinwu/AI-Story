@@ -165,13 +165,13 @@ fun CreateScreen(
                         .align(Alignment.CenterHorizontally)
                 )
             }
-            // 进度遮罩
-            CommonLoadingOverlay(
-                loading = isLoading,
-                type = LoadingType.GENERATING,
-            )
         }
     }
+    // 进度遮罩
+    CommonLoadingOverlay(
+        loading = isLoading,
+        type = LoadingType.GENERATING,
+    )
 }
 
 @Composable

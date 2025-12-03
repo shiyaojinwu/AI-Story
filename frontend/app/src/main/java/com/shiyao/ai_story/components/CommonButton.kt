@@ -66,7 +66,7 @@ fun CommonButton(
             horizontal = horizontalPadding.dp,
             vertical = verticalPadding.dp
         ),
-        shape = RoundedCornerShape(5.dp)
+        shape = RoundedCornerShape(8.dp)
     ) {
         Text(
             text = text,

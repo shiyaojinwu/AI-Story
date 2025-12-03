@@ -32,7 +32,11 @@ fun BottomNavBar(
                 AppRoute.SHOT_DETAIL.route,
             ),
             onClick = {
-                if (currentRoute != AppRoute.CREATE.route) {
+                if (currentRoute !in listOf(
+                        AppRoute.CREATE.route,
+                        AppRoute.GENERATE_STORY.route,
+                        AppRoute.SHOT_DETAIL.route,
+                    )) {
                     navController.navigate(AppRoute.CREATE.route) {
                         launchSingleTop = true
                         popUpTo(navController.graph.startDestinationId) { saveState = true }

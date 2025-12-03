@@ -52,7 +52,6 @@ fun AssetsScreen(
             BottomNavBar(
                 navController = navController
             )
-
         }
     ) { paddingValues ->
         Column(

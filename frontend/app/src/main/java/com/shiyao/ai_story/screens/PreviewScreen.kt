@@ -50,7 +50,7 @@ fun PreviewScreen(
     var progress by remember { mutableIntStateOf(0) }
 
     Scaffold(
-        containerColor = Color.White,
+        containerColor = colorResource(id = R.color.background),
         bottomBar = {
             BottomNavBar(
                 navController = navController
@@ -134,11 +134,11 @@ fun PreviewScreen(
             )
 
         }
-        // 下载进度遮罩
-        CommonLoadingOverlay(
-            loading = isDownloading,
-            type = LoadingType.DOWNLOADING,
-            progress = progress
-        )
     }
+    // 下载进度遮罩
+    CommonLoadingOverlay(
+        loading = isDownloading,
+        type = LoadingType.DOWNLOADING,
+        progress = progress
+    )
 }
