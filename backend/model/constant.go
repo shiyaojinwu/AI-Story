@@ -10,4 +10,5 @@ const (
 const (
 	LLMUrl   = "http://113.240.112.32:5000/llm"
 	ImageUrl = "http://113.240.112.32:5000/pic"
+	VideoUrl = "http://steamerless-damian-snaggy.ngrok-free.dev/video"
 )

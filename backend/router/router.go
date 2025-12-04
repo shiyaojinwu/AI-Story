@@ -40,6 +40,8 @@ func InitRouter() *gin.Engine {
 
 		// asset模块
 		api.GET("/story/all", controller.GetAllAssets)
+		api.POST("/story/:id/generate-video", controller.GenerateVideo)
+		api.GET("/story/:id/preview", controller.GetVideoPreview)
 	}
 
 	return r

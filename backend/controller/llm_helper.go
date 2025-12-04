@@ -11,6 +11,55 @@ import (
 	"story-video-backend/model"
 )
 
+func processVideoGeneration(assetID uint, storyIDstr string, shots []model.Shot) {
+	fmt.Printf("开始为asset %d 合成视频\n", assetID)
+
+	// 阻止请求参数
+	var genShots []model.VideoGenShot
+	for _, s := range shots {
+		genShots = append(genShots, model.VideoGenShot{
+			ImageURL:   s.ImageURL,
+			Narration:  s.Narration,
+			Transition: s.Transition,
+		})
+	}
+
+	reqBody := model.VideoGenReq{
+		StoryID: storyIDstr,
+		Shots:   genShots,
+	}
+	// 序列化
+	jsonData, _ := json.Marshal(reqBody)
+	resp, err := http.Post(model.VideoUrl, "application/json", bytes.NewBuffer(jsonData))
+	// 校验
+	if err != nil || resp.StatusCode != http.StatusOK {
+		fmt.Printf("视频%d合成请求失败%v\n", assetID, err)
+		db.DB.Model(&model.Asset{}).Where("id = ?", assetID).Update("status", model.StatusFailed)
+		return
+	}
+	defer resp.Body.Close()
+
+	// 解析结果
+	bodyBytes, _ := io.ReadAll(resp.Body)
+	var genResp model.VideoGenResp
+	if err := json.Unmarshal(bodyBytes, &genResp); err != nil {
+		db.DB.Model(&model.Asset{}).Where("id = ?", assetID).Update("status", model.StatusFailed)
+		return
+	}
+
+	if genResp.VideoURL != "" {
+		db.DB.Model(&model.Asset{}).Where("id = ?", assetID).Updates(map[string]any{
+			"status":    model.StatusCompleted,
+			"video_url": genResp.VideoURL,
+			"duration":  genResp.Duration,
+		})
+		fmt.Printf("视频%d合成成功%s\n", assetID, genResp.VideoURL)
+	} else {
+		db.DB.Model(&model.Asset{}).Where("id = ?", assetID).Update("status", model.StatusFailed)
+		return
+	}
+}
+
 func processLLMGeneration(story model.Story) {
 	llmReq := model.LLMReq{Story: story.Content}
 	jsonData, _ := json.Marshal(llmReq)
