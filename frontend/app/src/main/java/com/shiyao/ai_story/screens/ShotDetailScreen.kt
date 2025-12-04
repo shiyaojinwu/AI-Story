@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,6 +16,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.OutlinedTextField
@@ -59,7 +61,7 @@ fun ShotDetailScreen(
     val isLoading = generateState.isLoading
 
     var transitionExpanded by remember { mutableStateOf(false) }
-    val transitionOptions = listOf("Ken Burns Effect", "Fade In/Out", "Slide Transition")
+    val transitionOptions = listOf("Ken Burns", "Crossfade", "Volume Mix")
 
     // 拉取详情
     DisposableEffect(shotId) {
@@ -120,9 +122,12 @@ fun ShotDetailScreen(
                     placeholder = shot!!.prompt,
                     value = shot!!.prompt,
                     onValueChange = shotViewModel::updateShotDescription,
-                    height = 55.dp,
-                    modifier = Modifier.padding(vertical = 8.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 55.dp)
+                        .padding(vertical = 8.dp),
                 )
+
 
                 // Transition
                 SectionTitle("Video Transition")
@@ -141,7 +146,11 @@ fun ShotDetailScreen(
                         placeholder = { Text("Ken Burns Effect") },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(55.dp),
+                            .height(55.dp)
+                            .menuAnchor(
+                                type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                                enabled = true
+                            ),
                         shape = RoundedCornerShape(8.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedContainerColor = colorResource(id = R.color.edit_background),
@@ -173,8 +182,9 @@ fun ShotDetailScreen(
                     placeholder = shot!!.narration,
                     value = shot!!.narration,
                     onValueChange = shotViewModel::updateShotNarration,
-                    height = 100.dp,
                     modifier = Modifier.padding(vertical = 8.dp)
+                        .heightIn(min = 55.dp)
+                        .padding(vertical = 8.dp),
                 )
             }
 
@@ -186,12 +196,13 @@ fun ShotDetailScreen(
                 horizontalArrangement = Arrangement.Center
             ) {
                 CommonButton(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .padding(end = 8.dp, start = 8.dp),
                     text = "Generate Image",
                     backgroundColor = colorResource(id = R.color.primary),
                     contentColor = colorResource(id = R.color.text),
-                    fontSize = 16,
+                    fontSize = 22,
                     enabled = !isLoading,
                     onClick = { if (!isLoading) shotViewModel.updateAndGenerateShot() }
                 )

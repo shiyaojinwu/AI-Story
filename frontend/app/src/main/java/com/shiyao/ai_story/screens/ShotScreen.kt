@@ -1,10 +1,10 @@
 package com.shiyao.ai_story.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.shiyao.ai_story.R
+import com.shiyao.ai_story.components.BottomNavBar
 import com.shiyao.ai_story.components.CommonButton
 import com.shiyao.ai_story.components.CommonCard
 import com.shiyao.ai_story.components.CommonLoadingOverlay
@@ -59,7 +61,7 @@ fun ShotScreen(
     // 所有分镜都完成
     val allCompleted = shots.value.all { it.status == Status.COMPLETED.value }
     // 故事标题
-    val storyTitle = storyViewModel.storyTitle.collectAsState()
+    val storyTitle = shotViewModel.storyTitle.collectAsState()
     // 所有分镜都完成或失败
     val allShotsCompletedOrFail = shotViewModel.allShotsCompletedOrFail.collectAsState()
     // 生成视频状态
@@ -96,32 +98,26 @@ fun ShotScreen(
 
     DisposableEffect(Unit) {
         // 轮询分镜
-        val title = storyTitle.value
-        shotViewModel.pollShotsUntilCompleted(storyId, title)
+        shotViewModel.pollShotsUntilCompleted(storyId)
 
         onDispose {
             shotViewModel.stopPolling()
             shotViewModel.refreshShots()
+            shotViewModel.clearStoryTitle()
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colorResource(id = R.color.background))
-            .padding(16.dp),
-        horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.Top
-    ) {
-
-        // 顶部栏：只显示 Back，不显示 StoryFlow 标题
-        TopBackBar(onBack = { navController.popBackStack() })
-
-        Spacer(modifier = Modifier.padding(bottom = 16.dp))
+    Scaffold(
+        containerColor = colorResource(id = R.color.background),
+        topBar = { TopBackBar { navController.popBackStack() } },
+        bottomBar = { BottomNavBar(navController = navController) }
+    ) { paddingValues ->
 
         Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.Start
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
             // 副标题和故事标题
             Text(
@@ -129,96 +125,95 @@ fun ShotScreen(
                 color = colorResource(id = R.color.text_secondary),
                 fontSize = 40.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 18.dp)
-
+                modifier = Modifier.padding(top = 10.dp)
             )
-
             Text(
                 text = storyTitle.value,
-                fontSize = 36.sp,
+                fontSize = 30.sp,
+                lineHeight = 35.sp,
                 color = colorResource(id = R.color.text_tertiary),
                 fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(top = 18.dp)
             )
 
-        }
-
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            color = Color(0xFFF5F5F5),
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = Color(0xFFF5F5F5),
+                shape = RoundedCornerShape(12.dp)
             ) {
-                if (shots.value.isEmpty()) {
-                    // 空
-                    CommonCard(
-                        tag ="No shots available yet",
-                        imageUrl = R.drawable.placeholder_failed,
-                        backgroundColor = colorResource(id = R.color.card_background),
-                    )
-                } else {
-                    HorizontalPager(
-                        state = pagerState,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(400.dp)
-                    ) { page ->
-                        val shot = shots.value[page]
-
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    if (shots.value.isEmpty()) {
+                        // 空状态
                         CommonCard(
-                            title = shot.title,
-                            tag = shot.status,
-                            content = shot.prompt,
-                            imageUrl = getShotUIImage(shot),
+                            tag = "please wait for generating",
                             backgroundColor = colorResource(id = R.color.card_background),
-                            modifier = Modifier.clickable {
-                                if (allShotsCompletedOrFail.value) {
-                                    // 所有分镜完成 → 正常跳转
-                                    navController.navigate(AppRoute.shotDetailRoute(shot.id))
-                                } else {
-                                    // 未完成 → 弹窗提示
-                                    // navController.navigate(AppRoute.shotDetailRoute(shot.id))
-                                    ToastUtils.showLong(context, "请等待所有分镜生成完成")
-                                }
-                            }
+                            imageHeight = 230.dp
                         )
+                    } else {
+                        HorizontalPager(
+                            state = pagerState,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(300.dp),
+                            contentPadding = PaddingValues(end = 90.dp),
+                            pageSpacing = 16.dp
+                        ) { page ->
+                            val shot = shots.value[page]
+                            CommonCard(
+                                title = shot.title,
+                                tag = shot.status,
+                                content = shot.prompt,
+                                imageUrl = getShotUIImage(shot),
+                                backgroundColor = colorResource(id = R.color.card_background),
+                                imageHeight = 200.dp,
+                                modifier = Modifier.clickable {
+                                    if (allShotsCompletedOrFail.value) {
+                                        navController.navigate(AppRoute.shotDetailRoute(shot.id))
+                                    } else {
+                                        //navController.navigate(AppRoute.shotDetailRoute(shot.id))
+                                        ToastUtils.showLong(context, "请等待所有分镜生成完成")
+                                    }
+                                }
+                            )
+                        }
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // 生成视频按钮
+            CommonButton(
+                text = "Generate Video",
+                backgroundColor = colorResource(id = R.color.primary),
+                contentColor = Color.White,
+                fontSize = 30,
+                horizontalPadding = 16,
+                verticalPadding = 16,
+                enabled = shots.value.isNotEmpty() && !isLoadingVideo,
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    if (!allCompleted) {
+                        ToastUtils.showShort(context, "Please wait for all shots to be completed")
+                        return@CommonButton
+                    }
+                    storyViewModel.generateVideo(storyId)
+                }
+            )
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
-
-        CommonButton(
-            text = "Generate Video",
-            backgroundColor = colorResource(id = R.color.primary),
-            contentColor = Color.White,
-            fontSize = 25,
-            horizontalPadding = 16,
-            verticalPadding = 16,
-            enabled = shots.value.isNotEmpty() && !isLoadingVideo,
-            modifier = Modifier.fillMaxWidth(),
-            onClick = {
-                if (!allCompleted) {
-                    ToastUtils.showShort(context, "Please wait for all shots to be completed")
-                    return@CommonButton
-                }
-
-                // 全部生成完成，生成视频（POST /api/story/{id}/generate-video）
-                storyViewModel.generateVideo(storyId)
-            }
+        // 加载遮罩
+        CommonLoadingOverlay(
+            loading = isLoadingVideo,
+            type = LoadingType.GENERATING
         )
     }
-    // 生成进度遮罩
-    CommonLoadingOverlay(
-        loading = isLoadingVideo,
-        type = LoadingType.GENERATING,
-    )
 }
 
 @Composable

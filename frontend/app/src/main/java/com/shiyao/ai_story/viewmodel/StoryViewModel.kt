@@ -33,10 +33,6 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
     private val _storyContent = MutableStateFlow("")
     val storyContent: StateFlow<String> = _storyContent
 
-    // 故事标题
-    private val _storyTitle = MutableStateFlow("")
-    val storyTitle: StateFlow<String> = _storyTitle
-
     // 故事生成状态
     private val _generateStoryState = MutableStateFlow<UIState<String>>(UIState.Initial)
     val generateStoryState: StateFlow<UIState<String>> = _generateStoryState
@@ -81,7 +77,6 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
                 when (createStoryResponse.status.lowercase()) {
                     Status.COMPLETED.value -> {
                         _generateStoryState.value = UIState.Success(createStoryResponse.storyId)
-                        _storyTitle.value = createStoryResponse.title
                     }
 
                     Status.FAILED.value -> {

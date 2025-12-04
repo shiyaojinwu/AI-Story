@@ -33,6 +33,7 @@ data class ShotItem(
 data class StoryShotsResponse(
     @SerializedName("storyId")
     val storyId: String,
+    val storyTitle: String,
     val shots: List<ShotItem>?
 )
 

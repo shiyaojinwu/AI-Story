@@ -17,6 +17,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,7 +28,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -51,7 +54,7 @@ fun CommonCard(
     title: String? = null,
     tag: String? = null,
     content: String? = null,
-    imageUrl: Any,
+    imageUrl: Any? = null,
     backgroundColor: Color = colorResource(id = R.color.card_background),
     imageHeight: Dp = 180.dp,
 ) {
@@ -66,24 +69,38 @@ fun CommonCard(
             pressedElevation = 20.dp
         )
     ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.fillMaxWidth()
+            .wrapContentHeight()) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(imageHeight)
-                    .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
+                    .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)),
+                contentAlignment = Alignment.Center
             ) {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(imageUrl)
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = title,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop,
-                    error = null, // 错误图
-                    placeholder = null // 加载中占位
-                )
+                if (imageUrl != null) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(imageUrl)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = title,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(imageHeight)
+                            .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)),
+                        contentScale = ContentScale.Fit,
+                        error =painterResource(id = R.drawable.error),
+                        placeholder = painterResource(id = R.drawable.ing)
+                    )
+                } else {
+                    // 转圈动画
+                    CircularProgressIndicator(
+                        color = colorResource(id = R.color.primary),
+                        strokeWidth = 4.dp,
+                        modifier = Modifier.size(48.dp)
+                    )
+                }
 
                 tag?.let {
                     Text(
@@ -101,7 +118,9 @@ fun CommonCard(
                 }
             }
 
-            Column(modifier = Modifier.padding(16.dp)) {
+            Column(modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()) {
                 title?.let {
                     Text(
                         text = it,
@@ -117,6 +136,8 @@ fun CommonCard(
                         text = it,
                         fontSize = 14.sp,
                         color = colorResource(id = R.color.text_hint),
+                        maxLines = Int.MAX_VALUE,
+                        overflow = TextOverflow.Visible
                     )
                 }
             }
@@ -131,7 +152,7 @@ fun CommonCard_Single_Preview() {
     CommonCard(
         tag = "Generated",
         title = "Camp in the mountains",
-        imageUrl = "https://www.keaitupian.cn/cjpic/frombd/0/253/4061721412/2857814056.jpg"
+       // imageUrl = "https://www.keaitupian.cn/cjpic/frombd/0/253/4061721412/2857814056.jpg"
     )
 }
 

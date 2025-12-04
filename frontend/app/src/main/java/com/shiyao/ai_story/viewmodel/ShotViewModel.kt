@@ -26,6 +26,10 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
     private val _allShotsCompletedOrFail = MutableStateFlow(false)
     val allShotsCompletedOrFail: StateFlow<Boolean> = _allShotsCompletedOrFail.asStateFlow()
 
+    // 故事标题
+    private val _storyTitle = MutableStateFlow("Title Generating")
+    val storyTitle: StateFlow<String> = _storyTitle
+
     private val _shots = MutableStateFlow<List<ShotUI>>(emptyList())
     val shots: StateFlow<List<ShotUI>> = _shots
 
@@ -187,7 +191,7 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
     /**
      * 轮询加载网络分镜，直到全部完成
      */
-    fun pollShotsUntilCompleted(storyId: String, title: String, intervalMillis: Long = 2000) {
+    fun pollShotsUntilCompleted(storyId: String, intervalMillis: Long = 2000) {
         pollingJob?.cancel()
         pollingJob = safeLaunchJob {
             while (coroutineContext.isActive) {
@@ -197,10 +201,11 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
                     val response = shotRepository.getStoryShots(storyId)
                     val shots = response.shots
                     _shots.value = if (!shots.isNullOrEmpty()) {
-                        shots.map { mapShotToUI(it, title, response.storyId) }
+                        shots.map { mapShotToUI(it, response.storyTitle, response.storyId) }
                     } else {
                         emptyList()
                     }
+                    if (response.storyTitle.isNotBlank()) _storyTitle.value = response.storyTitle
                 } catch (e: Exception) {
                     Log.e("ShotViewModel", "loadShotsByNetwork error", e)
                 }
@@ -234,7 +239,9 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
         pollingJob?.cancel()
         pollingJob = null
     }
-
+    fun clearStoryTitle(){
+        _storyTitle.value = "Title Generating"
+    }
     private fun mapShotToUI(shot: ShotItem, title: String, storyId: String): ShotUI {
         return ShotUI(
             id = shot.id,
