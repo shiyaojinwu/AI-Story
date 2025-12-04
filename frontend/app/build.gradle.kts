@@ -78,6 +78,7 @@ dependencies {
     implementation(libs.logging.interceptor)
     // Coil
     implementation(libs.coil)
+    implementation(libs.coil.gif)
     // ExoPlayer
     implementation(libs.media3.exoplayer)
     implementation(libs.media3.ui)

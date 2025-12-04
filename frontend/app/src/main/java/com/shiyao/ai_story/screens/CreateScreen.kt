@@ -186,7 +186,7 @@ fun StyleButton(
         backgroundColor = if (isSelected) colorResource(id = R.color.primary)
         else colorResource(id = R.color.edit_background),
         contentColor = if (isSelected) Color.White else colorResource(id = R.color.text),
-        fontSize = 18,
+        fontSize = 16,
         horizontalPadding = 16,
         verticalPadding = 8
     )

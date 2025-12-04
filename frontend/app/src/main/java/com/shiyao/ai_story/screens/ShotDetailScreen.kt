@@ -227,11 +227,11 @@ fun SectionTitle(text: String) {
 }
 
 @Composable
-fun getShotImage(shot: ShotDetailResponse): Any {
+fun getShotImage(shot: ShotDetailResponse): Any? {
     val status = Status.from(shot.status)
     return when (status) {
-        Status.COMPLETED -> shot.imageUrl ?: R.drawable.placeholder_completed
-        Status.GENERATING -> R.drawable.placeholder_generating
+        Status.COMPLETED -> shot.imageUrl ?: R.drawable.placeholder_default
+        Status.GENERATING -> null
         Status.FAILED -> R.drawable.placeholder_failed
     }
 }

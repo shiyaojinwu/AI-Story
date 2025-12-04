@@ -217,11 +217,11 @@ fun ShotScreen(
 }
 
 @Composable
-fun getShotUIImage(shot: ShotUI): Any {
+fun getShotUIImage(shot: ShotUI): Any? {
     val status = Status.from(shot.status)
     return when (status) {
-        Status.COMPLETED -> shot.imageUrl ?: R.drawable.placeholder_completed
-        Status.GENERATING -> R.drawable.placeholder_generating
+        Status.COMPLETED -> shot.imageUrl?:R.drawable.placeholder_default
+        Status.GENERATING -> null
         Status.FAILED -> R.drawable.placeholder_failed
     }
 }

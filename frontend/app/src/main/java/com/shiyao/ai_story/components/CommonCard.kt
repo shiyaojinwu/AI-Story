@@ -28,7 +28,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -82,16 +81,14 @@ fun CommonCard(
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
                             .data(imageUrl)
+                            .placeholder(R.drawable.loading)
+                            .error(R.drawable.error)
                             .crossfade(true)
                             .build(),
                         contentDescription = title,
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(imageHeight)
-                            .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)),
-                        contentScale = ContentScale.Fit,
-                        error =painterResource(id = R.drawable.error),
-                        placeholder = painterResource(id = R.drawable.ing)
+                            .fillMaxSize(),
+                        contentScale = ContentScale.Crop
                     )
                 } else {
                     // 转圈动画
