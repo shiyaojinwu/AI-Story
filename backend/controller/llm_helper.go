@@ -25,7 +25,7 @@ func processLLMGeneration(story model.Story) {
 
 	defer resp.Body.Close()
 	body, _ := io.ReadAll(resp.Body)
-	fmt.Printf("llm接口原始响应%d，%s", resp.StatusCode, string(body))
+	fmt.Printf("story%d llm接口原始响应%d，%s", story.ID, resp.StatusCode, string(body))
 	var llmResp model.LLMResp
 	if err := json.Unmarshal(body, &llmResp); err != nil {
 		fmt.Printf("解析json失败%v\n,故事%d", err, story.ID)
@@ -34,7 +34,6 @@ func processLLMGeneration(story model.Story) {
 	}
 
 	// 转换数据结构
-	var createdShots []model.Shot // 这个变量用来发起协程生成图片
 	var shots []model.Shot
 	for _, item := range llmResp.Shots {
 		shots = append(shots, model.Shot{
@@ -47,7 +46,6 @@ func processLLMGeneration(story model.Story) {
 			Status:     model.StatusGenerating,
 		})
 	}
-	createdShots = append(createdShots, shots...)
 	story.Title = llmResp.Title
 
 	// 事务写入数据库
@@ -69,7 +67,7 @@ func processLLMGeneration(story model.Story) {
 	fmt.Print("分镜结构生成完毕,开始并发生成图片%d", story.ID)
 
 	// 协程触发图片生成任务
-	for _, s := range createdShots {
+	for _, s := range shots {
 		go processImageGeneration(s.ID, s.Prompt)
 	}
 }

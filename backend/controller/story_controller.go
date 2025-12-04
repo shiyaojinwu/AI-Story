@@ -28,12 +28,14 @@ func CreateStory(c *gin.Context) {
 		return
 	}
 
+	// mockTitle := "Title Generating"
 	// 把请求里的的json映射到model层的story模型
 	story := model.Story{
 		Content:   req.Content,
 		Style:     req.Style,
 		Status:    model.StatusCompleted,
 		CreatedAt: time.Now(),
+		// Title:     mockTitle,
 	}
 
 	// 然后把这个story模型写入数据库
@@ -51,8 +53,6 @@ func CreateStory(c *gin.Context) {
 		processLLMGeneration(s)
 	}(story)
 
-	mockTitle := "Title Generating"
-
 	// 返回结果
 	c.JSON(http.StatusOK, gin.H{
 		"code":   200,
@@ -61,7 +61,6 @@ func CreateStory(c *gin.Context) {
 			"storyId":   story.ID,
 			"status":    story.Status,
 			"createdAt": story.CreatedAt,
-			"title":     mockTitle,
 		},
 	})
 }

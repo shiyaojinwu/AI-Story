@@ -12,12 +12,16 @@ import (
 
 // to do 按故事获取分镜
 func GetShotsByStory(c *gin.Context) {
-	// storyIdStr := c.Param("id")
-	storyIdStr := string('1')
+	storyIdStr := c.Param("id")
+	// storyIdStr := string('1')
 
 	var shots []model.Shot
 	// 数据库查询
+	// 第一次查shot
 	result := db.DB.Where("story_id = ?", storyIdStr).Order("sort_order asc").Find(&shots)
+	// 第二次查story
+	var story model.Story
+	db.DB.Select("title").First(&story, "id = ?", storyIdStr)
 
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -33,8 +37,9 @@ func GetShotsByStory(c *gin.Context) {
 		"code":    200,
 		"message": "success",
 		"data": gin.H{
-			"storyId": storyIdStr,
-			"shots":   shots,
+			"storyTitle": story.Title,
+			"storyId":    storyIdStr,
+			"shots":      shots,
 		},
 	})
 }
@@ -155,13 +160,24 @@ func UpdateShot(c *gin.Context) {
 		"prompt":     req.Prompt,
 		"narration":  req.Narration,
 		"transition": req.Transition,
-		"status":     model.StatusGenerating,
+	}
+
+	// 检查一下是否真的需要更新
+	shouldRegenImage := req.Prompt != ""
+	if shouldRegenImage {
+		updates["status"] = model.StatusGenerating
 	}
 
 	// 执行更新
 	if err := db.DB.Model(&model.Shot{}).Where("id = ?", id).Updates(updates).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "更新失败", "data": nil})
 		return
+	}
+
+	// 异步画图
+	if shouldRegenImage {
+		idInt, _ := strconv.Atoi(id)
+		go processImageGeneration(uint(idInt), req.Prompt)
 	}
 
 	c.JSON(http.StatusOK, gin.H{
