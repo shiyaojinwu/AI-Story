@@ -139,7 +139,7 @@ fun safeFormatDate(date: String?): String {
 fun getAssetCover(asset: Asset): Any? {
     val status = Status.from(asset.status)
     return when (status) {
-        Status.COMPLETED -> asset.videoUrl ?: R.drawable.placeholder_default
+        Status.COMPLETED -> asset.thumbnailUrl ?: R.drawable.placeholder_default
         Status.GENERATING -> null
         Status.FAILED -> R.drawable.placeholder_failed
     }

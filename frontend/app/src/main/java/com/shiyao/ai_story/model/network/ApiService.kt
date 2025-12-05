@@ -8,7 +8,6 @@ import com.shiyao.ai_story.model.response.CreateStoryResponse
 import com.shiyao.ai_story.model.response.GenerateVideoResponse
 import com.shiyao.ai_story.model.response.ShotDetailResponse
 import com.shiyao.ai_story.model.response.ShotPreviewResponse
-import com.shiyao.ai_story.model.response.StoryPreviewResponse
 import com.shiyao.ai_story.model.response.StoryShotsResponse
 import retrofit2.Response
 import retrofit2.http.Body
@@ -88,7 +87,7 @@ interface ApiService {
     @GET("/api/story/{id}/preview")
     suspend fun getStoryPreview(
         @Path("id") storyId: String
-    ): Response<ApiResponse<StoryPreviewResponse>>
+    ): Response<ApiResponse<Asset>>
 
     /**
      * 获取所有视频资产

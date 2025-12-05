@@ -21,5 +21,4 @@ data class Asset(
     val duration: Int? = null,
     val status: String, // 状态：generating / completed / failed
     val createdAt: String? = Instant.now().toString()
-
 )

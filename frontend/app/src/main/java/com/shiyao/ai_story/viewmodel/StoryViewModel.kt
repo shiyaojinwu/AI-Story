@@ -1,11 +1,11 @@
 package com.shiyao.ai_story.viewmodel
 
 import android.util.Log
+import com.shiyao.ai_story.model.entity.Asset
 import com.shiyao.ai_story.model.enums.Status
 import com.shiyao.ai_story.model.enums.Style
 import com.shiyao.ai_story.model.repository.StoryRepository
 import com.shiyao.ai_story.model.request.CreateStoryRequest
-import com.shiyao.ai_story.model.response.StoryPreviewResponse
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,8 +39,8 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
 
     // 视频生成状态
     private val _generateVideoState =
-        MutableStateFlow<UIState<StoryPreviewResponse>>(UIState.Initial)
-    val generateVideoState: StateFlow<UIState<StoryPreviewResponse>> = _generateVideoState
+        MutableStateFlow<UIState<Asset>>(UIState.Initial)
+    val generateVideoState: StateFlow<UIState<Asset>> = _generateVideoState
 
     // 视频生成任务
     private var videoPollingJob: Job? = null
@@ -169,13 +169,15 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
             if (progress == 100) {
                 delay(500)
                 _generateVideoState.value = UIState.Success(
-                    StoryPreviewResponse(
+                    Asset(
                         status = Status.COMPLETED.value,
-                        previewUrl = "http://flv4mp4.people.com.cn/videofile7/pvmsvideo/2023/4/14/DangWang-BoChenDi_7a0283ace3c035c20500c33dfaef44ed.mp4",
-                        coverUrl = null,
-                        error = null,
-                        progress = null
-
+                        videoUrl = "http://flv4mp4.people.com.cn/videofile7/pvmsvideo/2023/4/14/DangWang-BoChenDi_7a0283ace3c035c20500c33dfaef44ed.mp4",
+                        thumbnailUrl = null,
+                        id = "0",
+                        storyId = "0",
+                        title = "mock video",
+                        duration = 8,
+                        createdAt = "2025-12-05T08:20:52.839732Z",
                     )
                 )
                 return
@@ -205,6 +207,7 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
                     Status.COMPLETED.value -> {
                         // 状态为 completed，成功
                         _generateVideoState.value = UIState.Success(previewResponse)
+                        Log.d("StoryViewModel", "Video generation completed")
                         return
                     }
 
@@ -212,7 +215,7 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
                         // 状态为 failed，报错
                         _generateVideoState.value = UIState.Error(
                             Exception("Video generation failed"),
-                            previewResponse.error ?: "视频生成失败"
+                            "视频生成失败"
                         )
                         return
                     }
@@ -221,7 +224,7 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
                         // 继续轮询
                         Log.d(
                             "StoryViewModel",
-                            "Video polling attempt $attempts/$maxAttempts, status: ${previewResponse.status}, progress: ${previewResponse.progress}%"
+                            "Video polling attempt $attempts/$maxAttempts, status: ${previewResponse.status}"
                         )
                     }
 

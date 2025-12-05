@@ -79,12 +79,13 @@ fun ShotScreen(
     // 监听生成视频状态：成功后再跳转预览页；失败时给出提示
     LaunchedEffect(generateVideoState) {
         if (generateVideoState.isSuccess) {
-            val videoUrl = generateVideoState.getOrNull()?.previewUrl
+            val videoUrl = generateVideoState.getOrNull()?.videoUrl
+            val title = generateVideoState.getOrNull()?.title?: "completed"
             if (videoUrl.isNullOrEmpty()) {
                 ToastUtils.showLong(context, "生成视频失败")
             } else {
                 // 生成成功才跳转预览页
-                navController.navigate(AppRoute.previewRoute(videoUrl, "Completed")) {
+                navController.navigate(AppRoute.previewRoute(videoUrl, title)) {
                     popUpTo(navController.graph.startDestinationId) { saveState = true }
                 }
             }

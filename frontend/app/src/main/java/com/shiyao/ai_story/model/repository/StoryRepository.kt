@@ -1,12 +1,12 @@
 package com.shiyao.ai_story.model.repository
 import com.shiyao.ai_story.model.dao.StoryDao
+import com.shiyao.ai_story.model.entity.Asset
 import com.shiyao.ai_story.model.entity.Story
 import com.shiyao.ai_story.model.network.ApiService
 import com.shiyao.ai_story.model.network.NetworkClient
 import com.shiyao.ai_story.model.request.CreateStoryRequest
 import com.shiyao.ai_story.model.response.CreateStoryResponse
 import com.shiyao.ai_story.model.response.GenerateVideoResponse
-import com.shiyao.ai_story.model.response.StoryPreviewResponse
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -76,6 +76,6 @@ class StoryRepository private constructor(
     suspend fun generateStoryVideo(storyId: String): GenerateVideoResponse =
         handleResponse(apiService.generateStoryVideo(storyId))
 
-    suspend fun getStoryPreview(storyId: String): StoryPreviewResponse =
+    suspend fun getStoryPreview(storyId: String): Asset =
         handleResponse(apiService.getStoryPreview(storyId))
 }
