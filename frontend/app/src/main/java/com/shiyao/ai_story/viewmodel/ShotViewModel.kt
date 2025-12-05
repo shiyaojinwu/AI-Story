@@ -113,10 +113,10 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
         }
     }
 
-    fun pollShot(shotId: String, intervalMillis: Long = 2000) {
+    fun pollShot(shotId: String, intervalMillis: Long = 5000) {
         safeLaunch {
             var pollCount = 0
-            val maxPollCount = 10
+            val maxPollCount = 20
 
             while (coroutineContext.isActive && pollCount < maxPollCount) {
                 pollCount++
@@ -191,7 +191,7 @@ class ShotViewModel(private val shotRepository: ShotRepository) : BaseViewModel(
     /**
      * 轮询加载网络分镜，直到全部完成
      */
-    fun pollShotsUntilCompleted(storyId: String, intervalMillis: Long = 2000) {
+    fun pollShotsUntilCompleted(storyId: String, intervalMillis: Long = 5000) {
         pollingJob?.cancel()
         pollingJob = safeLaunchJob {
             while (coroutineContext.isActive) {

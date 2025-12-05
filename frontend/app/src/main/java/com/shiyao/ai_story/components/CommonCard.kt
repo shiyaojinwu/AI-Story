@@ -68,8 +68,11 @@ fun CommonCard(
             pressedElevation = 20.dp
         )
     ) {
-        Column(modifier = Modifier.fillMaxWidth()
-            .wrapContentHeight()) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+        ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -115,16 +118,18 @@ fun CommonCard(
                 }
             }
 
-            Column(modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+            ) {
                 title?.let {
                     Text(
                         text = it,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = colorResource(id = R.color.text),
-                        modifier = Modifier.padding(bottom = 4.dp)
+                        modifier = Modifier.padding(bottom = 4.dp, start = 10.dp)
                     )
                 }
 
@@ -133,8 +138,10 @@ fun CommonCard(
                         text = it,
                         fontSize = 14.sp,
                         color = colorResource(id = R.color.text_hint),
-                        maxLines = Int.MAX_VALUE,
-                        overflow = TextOverflow.Visible
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(start = 10.dp)
+
                     )
                 }
             }
@@ -149,7 +156,7 @@ fun CommonCard_Single_Preview() {
     CommonCard(
         tag = "Generated",
         title = "Camp in the mountains",
-       // imageUrl = "https://www.keaitupian.cn/cjpic/frombd/0/253/4061721412/2857814056.jpg"
+        // imageUrl = "https://www.keaitupian.cn/cjpic/frombd/0/253/4061721412/2857814056.jpg"
     )
 }
 

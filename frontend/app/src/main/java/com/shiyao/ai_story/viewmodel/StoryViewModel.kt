@@ -110,7 +110,6 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
 
     /**
      * 生成视频：调 Repository 请求后端生成视频
-     * 轮询状态，每1秒一次，最多20次，直到返回 completed 或 failed
      */
     fun generateVideo(storyId: String) {
         // 取消之前的轮询任务
@@ -190,12 +189,12 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
      * @param storyId 故事ID（用于查询预览）
      * @param maxAttempts 最大轮询次数，默认20次
      */
-    private suspend fun pollVideoStatus(videoId: String, storyId: String, maxAttempts: Int = 20) {
+    private suspend fun pollVideoStatus(videoId: String, storyId: String, maxAttempts: Int = 40) {
         var attempts = 0
         while (attempts < maxAttempts) {
             try {
                 if (attempts > 0) { // 第一次立即查询，之后等待1秒
-                    delay(1000)
+                    delay(5000)
                 }
                 attempts++
 
@@ -235,7 +234,7 @@ class StoryViewModel(private val storyRepository: StoryRepository) : BaseViewMod
             }
         }
 
-        // 20次后仍未完成，报错超时
+        // 仍未完成，报错超时
         _generateVideoState.value = UIState.Error(
             Exception("Timeout"),
             "请求超时，请稍后重试"

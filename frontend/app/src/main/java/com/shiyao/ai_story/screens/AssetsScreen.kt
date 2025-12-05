@@ -75,7 +75,7 @@ fun AssetsScreen(
                 placeholder = "Search your stories...",
                 value = searchText,
                 onValueChange = { assetsViewModel.updateSearchQuery(it) },
-                modifier = Modifier.padding(top = 16.dp)
+                modifier = Modifier.padding(top = 20.dp)
             )
 
             // 列表 (使用 CommonCard)
