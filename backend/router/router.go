@@ -34,12 +34,14 @@ func InitRouter() *gin.Engine {
 		// 更新分镜
 		api.POST("/shot/:id/update", controller.UpdateShot)
 		// 获取单张分镜进度
-		api.GET("/shot/:id/preview", controller.GetShotProgress)
+		api.GET("/shot/:id/preview", controller.GetShotDetail)
 		// 生成mock数据
 		api.POST("/story/:id/mock-gen", controller.GenMockShots)
 
 		// asset模块
 		api.GET("/story/all", controller.GetAllAssets)
+		api.POST("/story/:id/generate-video", controller.GenerateVideo)
+		api.GET("/story/:id/preview", controller.GetVideoPreview)
 	}
 
 	return r

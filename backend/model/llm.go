@@ -23,3 +23,19 @@ type ImageReq struct {
 type ImageResp struct {
 	ImageURL string `json:"image_url"`
 }
+
+type VideoGenReq struct {
+	StoryID string         `json:"story_id"`
+	Shots   []VideoGenShot `json:"shots"`
+}
+
+type VideoGenShot struct {
+	ImageURL   string `json:"image_url"`
+	Narration  string `json:"narration"`
+	Transition string `json:"transition"`
+}
+
+type VideoGenResp struct {
+	VideoURL string `json:"video_url"`
+	Duration string `json:"duration"`
+}

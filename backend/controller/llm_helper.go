@@ -11,6 +11,55 @@ import (
 	"story-video-backend/model"
 )
 
+func processVideoGeneration(assetID uint, storyIDstr string, shots []model.Shot) {
+	fmt.Printf("开始为asset %d 合成视频\n", assetID)
+
+	// 阻止请求参数
+	var genShots []model.VideoGenShot
+	for _, s := range shots {
+		genShots = append(genShots, model.VideoGenShot{
+			ImageURL:   s.ImageURL,
+			Narration:  s.Narration,
+			Transition: s.Transition,
+		})
+	}
+
+	reqBody := model.VideoGenReq{
+		StoryID: storyIDstr,
+		Shots:   genShots,
+	}
+	// 序列化
+	jsonData, _ := json.Marshal(reqBody)
+	resp, err := http.Post(model.VideoUrl, "application/json", bytes.NewBuffer(jsonData))
+	// 校验
+	if err != nil || resp.StatusCode != http.StatusOK {
+		fmt.Printf("视频%d合成请求失败%v\n", assetID, err)
+		db.DB.Model(&model.Asset{}).Where("id = ?", assetID).Update("status", model.StatusFailed)
+		return
+	}
+	defer resp.Body.Close()
+
+	// 解析结果
+	bodyBytes, _ := io.ReadAll(resp.Body)
+	var genResp model.VideoGenResp
+	if err := json.Unmarshal(bodyBytes, &genResp); err != nil {
+		db.DB.Model(&model.Asset{}).Where("id = ?", assetID).Update("status", model.StatusFailed)
+		return
+	}
+
+	if genResp.VideoURL != "" {
+		db.DB.Model(&model.Asset{}).Where("id = ?", assetID).Updates(map[string]any{
+			"status":    model.StatusCompleted,
+			"video_url": genResp.VideoURL,
+			"duration":  genResp.Duration,
+		})
+		fmt.Printf("视频%d合成成功%s\n", assetID, genResp.VideoURL)
+	} else {
+		db.DB.Model(&model.Asset{}).Where("id = ?", assetID).Update("status", model.StatusFailed)
+		return
+	}
+}
+
 func processLLMGeneration(story model.Story) {
 	llmReq := model.LLMReq{Story: story.Content}
 	jsonData, _ := json.Marshal(llmReq)
@@ -25,7 +74,7 @@ func processLLMGeneration(story model.Story) {
 
 	defer resp.Body.Close()
 	body, _ := io.ReadAll(resp.Body)
-	fmt.Printf("llm接口原始响应%d，%s", resp.StatusCode, string(body))
+	fmt.Printf("story%d llm接口原始响应%d，%s", story.ID, resp.StatusCode, string(body))
 	var llmResp model.LLMResp
 	if err := json.Unmarshal(body, &llmResp); err != nil {
 		fmt.Printf("解析json失败%v\n,故事%d", err, story.ID)
@@ -34,7 +83,6 @@ func processLLMGeneration(story model.Story) {
 	}
 
 	// 转换数据结构
-	var createdShots []model.Shot // 这个变量用来发起协程生成图片
 	var shots []model.Shot
 	for _, item := range llmResp.Shots {
 		shots = append(shots, model.Shot{
@@ -47,7 +95,6 @@ func processLLMGeneration(story model.Story) {
 			Status:     model.StatusGenerating,
 		})
 	}
-	createdShots = append(createdShots, shots...)
 	story.Title = llmResp.Title
 
 	// 事务写入数据库
@@ -69,7 +116,7 @@ func processLLMGeneration(story model.Story) {
 	fmt.Print("分镜结构生成完毕,开始并发生成图片%d", story.ID)
 
 	// 协程触发图片生成任务
-	for _, s := range createdShots {
+	for _, s := range shots {
 		go processImageGeneration(s.ID, s.Prompt)
 	}
 }
