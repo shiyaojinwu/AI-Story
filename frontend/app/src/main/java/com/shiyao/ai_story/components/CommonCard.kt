@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -61,31 +62,31 @@ fun CommonCard(
         modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight(),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = backgroundColor),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = 4.dp,
+            defaultElevation = 6.dp,
             pressedElevation = 20.dp
         )
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-        ) {
+
+        Column(modifier = Modifier.fillMaxWidth()) {
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(imageHeight)
-                    .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)),
+                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
                 contentAlignment = Alignment.Center
             ) {
+
                 if (imageUrl != null) {
+
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
                             .data(imageUrl)
                             .placeholder(R.drawable.loading)
-                            .error(R.drawable.error)
+                            .error(R.drawable.placeholder_default)
                             .crossfade(true)
                             .build(),
                         contentDescription = title,
@@ -94,6 +95,7 @@ fun CommonCard(
                         contentScale = ContentScale.Crop
                     )
                 } else {
+
                     // 转圈动画
                     CircularProgressIndicator(
                         color = colorResource(id = R.color.primary),
@@ -113,35 +115,33 @@ fun CommonCard(
                                 color = colorResource(id = R.color.tag_background),
                                 shape = RoundedCornerShape(bottomStart = 8.dp, topEnd = 12.dp)
                             )
-                            .padding(horizontal = 12.dp, vertical = 4.dp)
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
                     )
                 }
             }
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-            ) {
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)) {
+
                 title?.let {
                     Text(
                         text = it,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.SemiBold,
                         color = colorResource(id = R.color.text),
-                        modifier = Modifier.padding(bottom = 4.dp, start = 10.dp)
                     )
                 }
+
+                Spacer(modifier = Modifier.height(4.dp))
 
                 content?.let {
                     Text(
                         text = it,
-                        fontSize = 14.sp,
+                        fontSize = 13.sp,
                         color = colorResource(id = R.color.text_hint),
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(start = 10.dp)
-
                     )
                 }
             }

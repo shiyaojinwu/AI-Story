@@ -137,9 +137,34 @@ object ExoPlayerHelper {
         exoPlayer?.setPlaybackSpeed(speed)
     }
 
-
     /**
      * 获取当前播放速度
      */
     fun getPlaybackSpeed(): Float = exoPlayer?.playbackParameters?.speed ?: 1.0f
+
+    /**
+     * 设置音量 0f~1f
+     */
+    fun setVolume(volume: Float) {
+        exoPlayer?.volume = volume.coerceIn(0f, 1f)
+    }
+
+    /**
+     * 获取当前音量
+     */
+    fun getVolume(): Float = exoPlayer?.volume ?: 1f
+
+    /**
+     * 静音（volume = 0f）
+     */
+    fun mute() {
+        exoPlayer?.volume = 0f
+    }
+
+    /**
+     * 取消静音（恢复为 1f）
+     */
+    fun unmute() {
+        exoPlayer?.volume = 1f
+    }
 }

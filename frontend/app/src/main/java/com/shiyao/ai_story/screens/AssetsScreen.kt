@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -47,13 +48,13 @@ fun AssetsScreen(
         assetsViewModel.refreshQuery()
         assetsViewModel.loadAssetsFromRepository()
     }
+
     Scaffold(
         bottomBar = {
-            BottomNavBar(
-                navController = navController
-            )
+            BottomNavBar(navController = navController)
         }
     ) { paddingValues ->
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -61,13 +62,14 @@ fun AssetsScreen(
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp)
         ) {
+
             // 标题
             Text(
                 text = "StoryFlow",
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = colorResource(id = R.color.text_tertiary),
-                modifier = Modifier.padding(top = 16.dp)
+                modifier = Modifier.padding(top = 18.dp)
             )
 
             // 搜索框
@@ -78,60 +80,66 @@ fun AssetsScreen(
                 modifier = Modifier.padding(top = 20.dp)
             )
 
-            // 列表 (使用 CommonCard)
+            // 列表
             LazyVerticalGrid(
                 columns = GridCells.Fixed(1),
-                horizontalArrangement = Arrangement.spacedBy(18.dp),
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
                 verticalArrangement = Arrangement.spacedBy(18.dp),
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = 16.dp)
-                    .padding(horizontal = 22.dp)
+                    .padding(top = 10.dp)
             ) {
+
                 items(assets) { asset ->
                     val cover = getAssetCover(asset)
-                    var isCompleted = asset.status == Status.COMPLETED.value
-                    if (asset.videoUrl == null) isCompleted = false
-                    CommonCard(
-                        title = asset.title,
-                        imageUrl = cover,
-                        content = try {
-                            formatToPretty(asset.createdAt!!)
-                        } catch (e: Exception) {
-                            Log.e("AssetsScreen", "Error parsing date: $e")
-                            ""
-                        },
-                        modifier = Modifier.clickable(
-                            enabled = isCompleted,
-                            onClick = {
-                                navController.navigate(
-                                    AppRoute.previewRoute(
-                                        asset.videoUrl!!,
-                                        asset.title
+                    val isCompleted =
+                        asset.status == Status.COMPLETED.value && asset.videoUrl != null
+
+                    Surface(
+                        modifier = Modifier
+                            .animateItem()
+                            .clickable(
+                                enabled = isCompleted,
+                                onClick = {
+                                    navController.navigate(
+                                        AppRoute.previewRoute(
+                                            asset.videoUrl!!,
+                                            asset.title
+                                        )
                                     )
-                                )
-                            }
-                        ),
-                        imageHeight = 150.dp
-                    )
+                                }
+                            )
+                    ) {
+                        CommonCard(
+                            title = asset.title,
+                            tag = Status.from(asset.status).value,
+                            imageUrl = cover,
+                            content = safeFormatDate(asset.createdAt),
+                            imageHeight = 150.dp
+                        )
+                    }
                 }
             }
         }
     }
 }
 
-fun formatToPretty(dateString: String): String {
-    val instant = Instant.parse(dateString)
-    val zoned = instant.atZone(ZoneId.systemDefault())
-    val formatter = DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.US)
-    return zoned.format(formatter)
+fun safeFormatDate(date: String?): String {
+    return try {
+        val instant = Instant.parse(date)
+        instant.atZone(ZoneId.systemDefault())
+            .format(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.US))
+    } catch (e: Exception) {
+        Log.e("AssetsScreen", "Error formatting date: $date", e)
+        ""
+    }
 }
 
 @Composable
 fun getAssetCover(asset: Asset): Any? {
     val status = Status.from(asset.status)
     return when (status) {
-        Status.COMPLETED -> asset.videoUrl?:R.drawable.placeholder_default
+        Status.COMPLETED -> asset.videoUrl ?: R.drawable.placeholder_default
         Status.GENERATING -> null
         Status.FAILED -> R.drawable.placeholder_failed
     }
