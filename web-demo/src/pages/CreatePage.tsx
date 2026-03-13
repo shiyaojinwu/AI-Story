@@ -8,9 +8,9 @@ interface Props {
 }
 
 const STYLES = [
-  { id: 'movie', name: '电影风格', desc: '胶片质感 · 电影级构图与光影', Icon: Film, accent: '#f6c15c' },
-  { id: 'animation', name: '动画风格', desc: '精致手绘 · 日系动画质感', Icon: Palette, accent: '#f472b6' },
-  { id: 'realistic', name: '写实风格', desc: '超高清 · 真实影像效果', Icon: Camera, accent: '#38bdf8' },
+  { id: 'movie', name: '电影风格', desc: '胶片质感 · 电影级构图与光影', Icon: Film, accent: '#d4a039' },
+  { id: 'animation', name: '动画风格', desc: '精致手绘 · 日系动画质感', Icon: Palette, accent: '#e08a6d' },
+  { id: 'realistic', name: '写实风格', desc: '超高清 · 真实影像效果', Icon: Camera, accent: '#8ab4a8' },
 ]
 
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } }
@@ -28,14 +28,14 @@ export default function CreatePage({ onGenerate }: Props) {
       exit={{ opacity: 0, y: -16 }}
       transition={{ duration: 0.45 }}
     >
-      {/* ── ambient orbs ── */}
+      {/* ambient orbs — warm tones */}
       <div style={{ position: 'fixed', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
-        <div className="orb" style={{ width: 500, height: 500, top: '-12%', right: '-8%', background: 'radial-gradient(circle, rgba(139,92,246,0.10) 0%, transparent 70%)' }} />
-        <div className="orb" style={{ width: 600, height: 600, bottom: '-18%', left: '-10%', background: 'radial-gradient(circle, rgba(109,40,217,0.07) 0%, transparent 70%)', animationDelay: '-5s' }} />
-        <div className="orb" style={{ width: 300, height: 300, top: '35%', left: '55%', background: 'radial-gradient(circle, rgba(246,193,92,0.05) 0%, transparent 70%)', animationDelay: '-9s' }} />
+        <div className="orb" style={{ width: 500, height: 500, top: '-12%', right: '-8%', background: 'radial-gradient(circle, rgba(212,160,57,0.07) 0%, transparent 70%)' }} />
+        <div className="orb" style={{ width: 600, height: 600, bottom: '-18%', left: '-10%', background: 'radial-gradient(circle, rgba(194,136,77,0.05) 0%, transparent 70%)', animationDelay: '-5s' }} />
+        <div className="orb" style={{ width: 300, height: 300, top: '40%', left: '60%', background: 'radial-gradient(circle, rgba(246,193,92,0.04) 0%, transparent 70%)', animationDelay: '-9s' }} />
       </div>
 
-      {/* ── header ── */}
+      {/* header */}
       <header style={{
         position: 'relative', zIndex: 1,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -45,11 +45,11 @@ export default function CreatePage({ onGenerate }: Props) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{
             width: 38, height: 38, borderRadius: 10,
-            background: 'linear-gradient(135deg, var(--c-violet-dim), var(--c-violet))',
+            background: 'linear-gradient(135deg, var(--c-gold-dim), var(--c-amber))',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: '#fff', fontWeight: 700, fontSize: 15,
+            color: '#0a0908', fontWeight: 700, fontSize: 15,
             fontFamily: 'var(--font-display)',
-            boxShadow: '0 0 20px var(--c-violet-glow)',
+            boxShadow: '0 0 20px var(--c-gold-glow)',
           }}>镜</div>
           <span style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--c-text)', letterSpacing: 1 }}>
             镜语 AI
@@ -60,7 +60,7 @@ export default function CreatePage({ onGenerate }: Props) {
         </span>
       </header>
 
-      {/* ── main content ── */}
+      {/* main */}
       <motion.main
         variants={stagger}
         initial="hidden"
@@ -75,7 +75,7 @@ export default function CreatePage({ onGenerate }: Props) {
           paddingTop: 56, paddingBottom: 48,
         }}
       >
-        {/* ── hero text ── */}
+        {/* hero */}
         <motion.div variants={fadeUp} style={{ textAlign: 'center', marginBottom: 52 }}>
           <h1
             className="gradient-title display-font"
@@ -90,7 +90,7 @@ export default function CreatePage({ onGenerate }: Props) {
           </p>
         </motion.div>
 
-        {/* ── story input ── */}
+        {/* story input */}
         <motion.div variants={fadeUp} style={{ width: '100%', marginBottom: 36 }}>
           <label className="label-text">你的故事</label>
           <textarea
@@ -102,7 +102,7 @@ export default function CreatePage({ onGenerate }: Props) {
           />
         </motion.div>
 
-        {/* ── style picker ── */}
+        {/* style picker */}
         <motion.div variants={fadeUp} style={{ width: '100%', marginBottom: 48 }}>
           <label className="label-text">视觉风格</label>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
@@ -118,15 +118,14 @@ export default function CreatePage({ onGenerate }: Props) {
                     textAlign: 'left',
                     cursor: 'pointer',
                     borderColor: active ? s.accent + '55' : undefined,
-                    boxShadow: active ? `0 0 30px ${s.accent}15, inset 0 0 40px ${s.accent}08` : undefined,
+                    boxShadow: active ? `0 0 30px ${s.accent}12, inset 0 0 40px ${s.accent}06` : undefined,
                     position: 'relative',
                   }}
                 >
-                  {/* icon */}
                   <div style={{
                     width: 44, height: 44, borderRadius: 11,
                     background: active
-                      ? `linear-gradient(135deg, ${s.accent}30, ${s.accent}10)`
+                      ? `linear-gradient(135deg, ${s.accent}28, ${s.accent}0c)`
                       : 'var(--c-card-up)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     marginBottom: 16, transition: 'background 0.3s',
@@ -139,14 +138,13 @@ export default function CreatePage({ onGenerate }: Props) {
                   <div style={{ fontSize: '0.8rem', color: 'var(--c-text-3)', lineHeight: 1.5 }}>
                     {s.desc}
                   </div>
-                  {/* check indicator */}
                   {active && (
                     <div style={{
                       position: 'absolute', top: 14, right: 14,
                       width: 22, height: 22, borderRadius: '50%',
                       background: s.accent, display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
-                      <Check size={13} color="#000" strokeWidth={3} />
+                      <Check size={13} color="#0a0908" strokeWidth={3} />
                     </div>
                   )}
                 </button>
@@ -155,7 +153,7 @@ export default function CreatePage({ onGenerate }: Props) {
           </div>
         </motion.div>
 
-        {/* ── submit ── */}
+        {/* submit */}
         <motion.div variants={fadeUp}>
           <button
             className="btn-primary"
@@ -168,7 +166,7 @@ export default function CreatePage({ onGenerate }: Props) {
         </motion.div>
       </motion.main>
 
-      {/* ── footer ── */}
+      {/* footer */}
       <footer style={{
         position: 'relative', zIndex: 1,
         padding: '16px 40px',

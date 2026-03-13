@@ -13,7 +13,6 @@ export default function PreviewPage({ title, shots, onBack }: Props) {
       exit={{ opacity: 0, x: -30 }}
       transition={{ duration: 0.35 }}
     >
-      {/* header */}
       <header style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '18px 40px', borderBottom: '1px solid var(--c-border)',
@@ -34,7 +33,6 @@ export default function PreviewPage({ title, shots, onBack }: Props) {
       </header>
 
       <main style={{ flex: 1, display: 'flex', gap: 28, padding: '32px 40px' }}>
-        {/* video area */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
           <div className="card" style={{
             overflow: 'hidden', aspectRatio: '16/9', position: 'relative',
@@ -56,7 +54,6 @@ export default function PreviewPage({ title, shots, onBack }: Props) {
             </div>
           </div>
 
-          {/* info bar */}
           <div className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 20px', marginTop: 16 }}>
             <div style={{ display: 'flex', gap: 24, fontSize: '0.78rem', color: 'var(--c-text-3)', fontFamily: 'var(--font-mono)' }}>
               <span>{shots.length * 5}s</span>
@@ -71,7 +68,6 @@ export default function PreviewPage({ title, shots, onBack }: Props) {
           </div>
         </div>
 
-        {/* shot list */}
         <div style={{ width: 260, display: 'flex', flexDirection: 'column' }}>
           <span className="label-text" style={{ marginBottom: 14 }}>分镜序列</span>
           <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 10, paddingRight: 4 }}>

@@ -33,20 +33,19 @@ export default function GeneratingPage({ stages, onDone }: Props) {
       exit={{ opacity: 0 }}
       style={{ alignItems: 'center', justifyContent: 'center' }}
     >
-      {/* ambient */}
       <div style={{ position: 'fixed', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
-        <div className="orb" style={{ width: 500, height: 500, top: '20%', left: '30%', background: 'radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%)' }} />
+        <div className="orb" style={{ width: 500, height: 500, top: '20%', left: '30%', background: 'radial-gradient(circle, rgba(212,160,57,0.10) 0%, transparent 70%)' }} />
       </div>
 
       <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 40, maxWidth: 420, width: '100%', padding: '0 24px' }}>
-        {/* orb animation */}
+        {/* orb */}
         <div style={{ position: 'relative', width: 120, height: 120 }}>
           <motion.div
             animate={{ scale: [1, 1.25, 1], rotate: [0, 180, 360] }}
             transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
             style={{
               position: 'absolute', inset: 0, borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(139,92,246,0.25) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(212,160,57,0.20) 0%, transparent 70%)',
               filter: 'blur(30px)',
             }}
           />
@@ -55,16 +54,16 @@ export default function GeneratingPage({ stages, onDone }: Props) {
             transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
             style={{
               position: 'absolute', top: 16, left: 16, width: 88, height: 88, borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(109,40,217,0.35) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(194,136,77,0.30) 0%, transparent 70%)',
               filter: 'blur(20px)',
             }}
           />
           <div style={{
             position: 'absolute', top: 28, left: 28, width: 64, height: 64, borderRadius: '50%',
-            background: 'linear-gradient(135deg, var(--c-violet-dim), var(--c-violet))',
+            background: 'linear-gradient(135deg, var(--c-gold-dim), var(--c-amber))',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 26,
-            boxShadow: '0 0 30px var(--c-violet-glow)',
+            boxShadow: '0 0 30px var(--c-gold-glow)',
           }}>
             {current?.icon}
           </div>
@@ -88,7 +87,7 @@ export default function GeneratingPage({ stages, onDone }: Props) {
         {/* progress bar */}
         <div style={{ width: '100%', height: 4, background: 'var(--c-border)', borderRadius: 4, overflow: 'hidden' }}>
           <motion.div
-            style={{ height: '100%', borderRadius: 4, background: 'linear-gradient(90deg, var(--c-violet-dim), var(--c-violet))' }}
+            style={{ height: '100%', borderRadius: 4, background: 'linear-gradient(90deg, var(--c-gold-dim), var(--c-amber))' }}
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.15 }}
           />
@@ -102,7 +101,7 @@ export default function GeneratingPage({ stages, onDone }: Props) {
               className={i === idx ? 'pulse-glow' : ''}
               style={{
                 width: 8, height: 8, borderRadius: '50%',
-                background: i < idx ? 'var(--c-violet)' : i === idx ? 'var(--c-amber)' : 'var(--c-border)',
+                background: i < idx ? 'var(--c-gold)' : i === idx ? 'var(--c-amber)' : 'var(--c-border)',
                 transition: 'all 0.3s',
                 transform: i === idx ? 'scale(1.3)' : 'scale(1)',
               }}

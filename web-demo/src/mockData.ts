@@ -52,7 +52,7 @@ export const DEMO_SHOTS: Shot[] = [
     prompt: 'Close-up shot of a transparent glass bottle with a letter inside, lying on wet sand, ocean waves gently touching it, magical glow, bokeh background, cinematic lighting',
     narration: '直到有一天，她在沙滩上发现了一个漂流瓶，里面装着一封来自远方的信。',
     transition: 'Crossfade',
-    imageUrl: 'https://cdn.midjourney.com/197d45a8-3492-4a4b-babc-6960f554f23f/0_0.png',
+    imageUrl: '../public/mock/old.png',
     status: 'completed',
   },
   {
@@ -138,7 +138,7 @@ export const GENERATION_STAGES = [
 // 用于演示"重新生成"功能，key 为 shot id，value 为备用图片URL
 // TODO: 用 Midjourney 对镜头3（漂流瓶）再生成一张不同构图的图，替换下面的URL
 export const ALTERNATE_IMAGES: Record<number, string> = {
-  3: 'https://cdn.midjourney.com/a098a2ca-cd38-4bcd-868a-f76cb5284e7c/0_2.png',
+  3: '../public/mock/shot3.png',
 }
 
 export const VIDEO_GENERATION_STAGES = [

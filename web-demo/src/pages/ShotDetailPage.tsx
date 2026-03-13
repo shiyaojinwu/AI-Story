@@ -39,7 +39,6 @@ export default function ShotDetailPage({ shot, onBack, onUpdate }: Props) {
       exit={{ opacity: 0, x: -30 }}
       transition={{ duration: 0.35 }}
     >
-      {/* header */}
       <header style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '18px 40px', borderBottom: '1px solid var(--c-border)',
@@ -67,9 +66,8 @@ export default function ShotDetailPage({ shot, onBack, onUpdate }: Props) {
         </div>
       </header>
 
-      {/* content */}
       <main style={{ flex: 1, display: 'flex', gap: 32, padding: '32px 40px' }}>
-        {/* left: image */}
+        {/* image */}
         <motion.div
           initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -94,7 +92,7 @@ export default function ShotDetailPage({ shot, onBack, onUpdate }: Props) {
             {regenerating && (
               <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <div style={{ textAlign: 'center' }}>
-                  <RefreshCw size={28} style={{ color: 'var(--c-violet)', animation: 'spin 1s linear infinite', marginBottom: 10 }} />
+                  <RefreshCw size={28} style={{ color: 'var(--c-gold)', animation: 'spin 1s linear infinite', marginBottom: 10 }} />
                   <p style={{ fontSize: '0.85rem', color: 'var(--c-text)' }}>正在重新生成...</p>
                 </div>
               </div>
@@ -106,7 +104,7 @@ export default function ShotDetailPage({ shot, onBack, onUpdate }: Props) {
           </div>
         </motion.div>
 
-        {/* right: edit panel */}
+        {/* edit panel */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -130,9 +128,9 @@ export default function ShotDetailPage({ shot, onBack, onUpdate }: Props) {
                   onClick={() => setTransition(t)}
                   style={{
                     flex: 1, padding: '11px 0', borderRadius: 10, fontSize: '0.82rem', fontWeight: 500,
-                    border: `1px solid ${transition === t ? 'var(--c-violet)' : 'var(--c-border)'}`,
-                    background: transition === t ? 'rgba(139,92,246,0.08)' : 'transparent',
-                    color: transition === t ? 'var(--c-violet)' : 'var(--c-text-2)',
+                    border: `1px solid ${transition === t ? 'var(--c-gold)' : 'var(--c-border)'}`,
+                    background: transition === t ? 'rgba(212,160,57,0.08)' : 'transparent',
+                    color: transition === t ? 'var(--c-amber)' : 'var(--c-text-2)',
                     cursor: 'pointer', transition: 'all 0.25s', fontFamily: 'var(--font-body)',
                   }}
                 >
@@ -142,10 +140,9 @@ export default function ShotDetailPage({ shot, onBack, onUpdate }: Props) {
             </div>
           </div>
 
-          {/* info card */}
           <div className="card" style={{ padding: 18, marginTop: 'auto' }}>
             {[
-              ['状态', <span style={{ color: 'var(--c-green)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}><span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--c-green)', display: 'inline-block' }} />已完成</span>],
+              ['状态', <span key="s" style={{ color: 'var(--c-green)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}><span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--c-green)', display: 'inline-block' }} />已完成</span>],
               ['生成模型', 'SDXL + LoRA'],
               ['生成耗时', '3.2s'],
             ].map(([label, val], i) => (

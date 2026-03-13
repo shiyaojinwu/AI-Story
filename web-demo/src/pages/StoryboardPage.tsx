@@ -19,7 +19,6 @@ export default function StoryboardPage({ title, shots, onShotClick, onGenerateVi
       exit={{ opacity: 0, x: -30 }}
       transition={{ duration: 0.35 }}
     >
-      {/* header */}
       <header style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '18px 40px', borderBottom: '1px solid var(--c-border)',
@@ -58,7 +57,6 @@ export default function StoryboardPage({ title, shots, onShotClick, onGenerateVi
             onClick={() => onShotClick(shot)}
             style={{ cursor: 'pointer', overflow: 'hidden' }}
           >
-            {/* image */}
             <div style={{ position: 'relative', aspectRatio: '16/9', background: 'var(--c-surface)', overflow: 'hidden' }}>
               <img
                 src={shot.imageUrl}
@@ -68,11 +66,10 @@ export default function StoryboardPage({ title, shots, onShotClick, onGenerateVi
                 onMouseOut={e => (e.currentTarget.style.transform = 'scale(1)')}
                 onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
               />
-              {/* badges */}
               <div style={{
                 position: 'absolute', top: 10, left: 10,
-                background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)',
-                color: '#fff', fontSize: '0.72rem', fontWeight: 600,
+                background: 'rgba(10,9,8,0.7)', backdropFilter: 'blur(8px)',
+                color: 'var(--c-amber)', fontSize: '0.72rem', fontWeight: 600,
                 padding: '4px 10px', borderRadius: 7,
                 fontFamily: 'var(--font-mono)',
               }}>
@@ -81,21 +78,20 @@ export default function StoryboardPage({ title, shots, onShotClick, onGenerateVi
               <div style={{
                 position: 'absolute', top: 10, right: 10,
                 fontSize: '0.7rem', fontWeight: 600, padding: '4px 10px', borderRadius: 7,
-                background: shot.status === 'completed' ? 'rgba(61,214,140,0.15)' : 'rgba(246,193,92,0.15)',
+                background: shot.status === 'completed' ? 'rgba(61,214,140,0.12)' : 'rgba(212,160,57,0.12)',
                 color: shot.status === 'completed' ? 'var(--c-green)' : 'var(--c-amber)',
               }}>
                 {shot.status === 'completed' ? '已完成' : '生成中'}
               </div>
               <div style={{
                 position: 'absolute', bottom: 10, right: 10,
-                background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)',
-                color: 'rgba(255,255,255,0.6)', fontSize: '0.68rem',
+                background: 'rgba(10,9,8,0.6)', backdropFilter: 'blur(8px)',
+                color: 'rgba(245,240,232,0.5)', fontSize: '0.68rem',
                 padding: '3px 9px', borderRadius: 6,
               }}>
                 {shot.transition}
               </div>
             </div>
-            {/* info */}
             <div style={{ padding: '14px 16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                 <span style={{ fontWeight: 600, fontSize: '0.88rem', color: 'var(--c-text)' }}>{shot.title}</span>
