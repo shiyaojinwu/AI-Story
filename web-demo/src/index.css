@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Noto Sans SC', system-ui, sans-serif;
+  --color-bg: #08080f;
+  --color-bg-card: #13131d;
+  --color-bg-card-hover: #1a1a2a;
+  --color-bg-input: #0e0e18;
+  --color-border: #2a2a3a;
+  --color-border-accent: #6d28d9;
+  --color-accent: #8b5cf6;
+  --color-accent-light: #a78bfa;
+  --color-accent-glow: rgba(139, 92, 246, 0.3);
+  --color-text-primary: #f1f1f6;
+  --color-text-secondary: #8888a0;
+  --color-text-muted: #55556a;
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-accent); }
+
+/* gradient text utility */
+.gradient-text {
+  background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 40%, #6d28d9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* glow button */
+.glow-btn {
+  position: relative;
+  background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+  transition: all 0.3s;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+}
+.glow-btn:hover {
+  box-shadow: 0 0 40px rgba(139, 92, 246, 0.5);
+  transform: translateY(-1px);
+}
+
+/* glass card */
+.glass-card {
+  background: rgba(19, 19, 29, 0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--color-border);
+  transition: all 0.3s;
+}
+.glass-card:hover {
+  border-color: var(--color-border-accent);
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.1);
+}
+
+/* pulse animation for generating status */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(139, 92, 246, 0.3); }
+  50% { box-shadow: 0 0 25px rgba(139, 92, 246, 0.6); }
+}
+.pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+
+/* typing cursor */
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+.cursor-blink::after {
+  content: '|';
+  animation: blink 1s infinite;
+  color: var(--color-accent);
+}
+
+/* background grid pattern */
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(139, 92, 246, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139, 92, 246, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
