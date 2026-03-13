@@ -2,107 +2,97 @@ import { motion } from 'framer-motion'
 import { ArrowLeft, Download, Volume2 } from 'lucide-react'
 import type { Shot } from '../mockData'
 
-interface Props {
-  title: string
-  shots: Shot[]
-  onBack: () => void
-}
+interface Props { title: string; shots: Shot[]; onBack: () => void }
 
 export default function PreviewPage({ title, shots, onBack }: Props) {
   return (
     <motion.div
+      className="page-shell"
       initial={{ opacity: 0, x: 30 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -30 }}
       transition={{ duration: 0.35 }}
-      className="min-h-screen flex flex-col"
     >
-      {/* Header */}
-      <header className="px-8 py-5 flex items-center justify-between border-b border-border/50">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={onBack}
-            className="w-9 h-9 rounded-lg border border-border flex items-center justify-center text-text-secondary hover:text-text-primary hover:border-accent transition-all cursor-pointer"
-          >
-            <ArrowLeft size={18} />
+      {/* header */}
+      <header style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '18px 40px', borderBottom: '1px solid var(--c-border)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <button className="btn-ghost" onClick={onBack} style={{ padding: '8px 10px' }}>
+            <ArrowLeft size={17} />
           </button>
           <div>
-            <h1 className="text-xl font-semibold text-text-primary">{title}</h1>
-            <p className="text-sm text-text-muted">视频预览</p>
+            <h1 className="display-font" style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--c-text)' }}>{title}</h1>
+            <p style={{ fontSize: '0.78rem', color: 'var(--c-text-3)', marginTop: 2 }}>视频预览</p>
           </div>
         </div>
-        <button className="glow-btn text-white font-medium px-5 py-2.5 rounded-lg flex items-center gap-2 text-sm cursor-pointer">
-          <Download size={16} />
+        <button className="btn-primary" style={{ padding: '11px 24px', fontSize: '0.85rem' }}>
+          <Download size={15} />
           导出视频
         </button>
       </header>
 
-      <main className="flex-1 flex gap-8 px-8 py-8">
-        {/* Video Player Area */}
-        <div className="flex-1 flex flex-col">
-          <div className="glass-card rounded-xl overflow-hidden aspect-video relative flex items-center justify-center bg-black">
-            {/* Try to load a video, fallback to placeholder */}
+      <main style={{ flex: 1, display: 'flex', gap: 28, padding: '32px 40px' }}>
+        {/* video area */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <div className="card" style={{
+            overflow: 'hidden', aspectRatio: '16/9', position: 'relative',
+            background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
             <video
               src="/mock/demo-video.mp4"
               controls
-              className="w-full h-full object-contain"
+              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
               poster={shots[0]?.imageUrl}
-              onError={(e) => {
-                const target = e.target as HTMLVideoElement
-                target.style.display = 'none'
-              }}
+              onError={e => { (e.target as HTMLVideoElement).style.display = 'none' }}
             />
-            {/* Placeholder overlay if no video */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <div className="text-6xl mb-4 opacity-50">🎬</div>
-              <p className="text-text-muted text-sm">放置 demo-video.mp4 到 public/mock/ 目录</p>
-              <p className="text-text-muted text-xs mt-1">或将上方 video 标签替换为实际视频地址</p>
+            <div style={{
+              position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center', pointerEvents: 'none',
+            }}>
+              <span style={{ fontSize: 48, opacity: 0.4, marginBottom: 12 }}>🎬</span>
+              <p style={{ fontSize: '0.82rem', color: 'var(--c-text-3)' }}>放置 demo-video.mp4 到 public/mock/</p>
             </div>
           </div>
 
-          {/* Video info */}
-          <div className="flex items-center justify-between mt-4 glass-card rounded-xl px-5 py-3">
-            <div className="flex gap-6 text-sm text-text-muted">
-              <span>时长: {shots.length * 5}s</span>
-              <span>分辨率: 1920×1080</span>
-              <span>帧率: 24fps</span>
-              <span>格式: MP4</span>
+          {/* info bar */}
+          <div className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 20px', marginTop: 16 }}>
+            <div style={{ display: 'flex', gap: 24, fontSize: '0.78rem', color: 'var(--c-text-3)', fontFamily: 'var(--font-mono)' }}>
+              <span>{shots.length * 5}s</span>
+              <span>1920×1080</span>
+              <span>24fps</span>
+              <span>MP4</span>
             </div>
-            <div className="flex items-center gap-2 text-sm text-text-secondary">
-              <Volume2 size={14} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.78rem', color: 'var(--c-text-2)' }}>
+              <Volume2 size={13} />
               <span>含语音旁白</span>
             </div>
           </div>
         </div>
 
-        {/* Right: Shot list / Timeline */}
-        <div className="w-[280px] flex flex-col">
-          <h3 className="text-sm font-medium text-text-secondary mb-4">分镜序列</h3>
-          <div className="flex-1 overflow-y-auto flex flex-col gap-3 pr-1">
-            {shots.map((shot, index) => (
+        {/* shot list */}
+        <div style={{ width: 260, display: 'flex', flexDirection: 'column' }}>
+          <span className="label-text" style={{ marginBottom: 14 }}>分镜序列</span>
+          <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 10, paddingRight: 4 }}>
+            {shots.map((shot, i) => (
               <motion.div
                 key={shot.id}
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05 }}
-                className="glass-card rounded-lg p-3 flex gap-3"
+                transition={{ delay: i * 0.05 }}
+                className="card"
+                style={{ padding: 10, display: 'flex', gap: 12, borderRadius: 10 }}
               >
-                <div className="w-20 h-12 rounded-md overflow-hidden bg-bg-input flex-shrink-0">
-                  <img
-                    src={shot.imageUrl}
-                    alt={shot.title}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement
-                      target.style.display = 'none'
-                    }}
-                  />
+                <div style={{ width: 72, height: 44, borderRadius: 7, overflow: 'hidden', background: 'var(--c-surface)', flexShrink: 0 }}>
+                  <img src={shot.imageUrl} alt={shot.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-xs font-medium text-text-primary truncate">
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--c-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {shot.sortOrder}. {shot.title}
                   </div>
-                  <div className="text-xs text-text-muted mt-1">
+                  <div style={{ fontSize: '0.7rem', color: 'var(--c-text-3)', marginTop: 3, fontFamily: 'var(--font-mono)' }}>
                     {shot.transition} · 5s
                   </div>
                 </div>

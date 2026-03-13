@@ -1,126 +1,111 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 
-interface Stage {
-  text: string
-  icon: string
-  duration: number
-}
-
-interface Props {
-  stages: Stage[]
-  onDone: () => void
-}
+interface Stage { text: string; icon: string; duration: number }
+interface Props { stages: Stage[]; onDone: () => void }
 
 export default function GeneratingPage({ stages, onDone }: Props) {
-  const [currentStage, setCurrentStage] = useState(0)
+  const [idx, setIdx] = useState(0)
   const [progress, setProgress] = useState(0)
 
   useEffect(() => {
-    if (currentStage >= stages.length) {
-      const timer = setTimeout(onDone, 500)
-      return () => clearTimeout(timer)
-    }
-
-    const stage = stages[currentStage]
-    const progressPerStage = 100 / stages.length
-    const startProgress = currentStage * progressPerStage
-    const endProgress = (currentStage + 1) * progressPerStage
-
-    // Animate progress within this stage
-    const steps = 20
-    const stepDuration = stage.duration / steps
+    if (idx >= stages.length) { const t = setTimeout(onDone, 400); return () => clearTimeout(t) }
+    const s = stages[idx]
+    const perStage = 100 / stages.length
+    const start = idx * perStage, end = (idx + 1) * perStage
     let step = 0
-
-    const interval = setInterval(() => {
+    const steps = 24, dt = s.duration / steps
+    const iv = setInterval(() => {
       step++
-      const eased = step / steps
-      setProgress(startProgress + (endProgress - startProgress) * eased)
-      if (step >= steps) {
-        clearInterval(interval)
-        setCurrentStage(prev => prev + 1)
-      }
-    }, stepDuration)
+      setProgress(start + (end - start) * (step / steps))
+      if (step >= steps) { clearInterval(iv); setIdx(p => p + 1) }
+    }, dt)
+    return () => clearInterval(iv)
+  }, [idx, stages, onDone])
 
-    return () => clearInterval(interval)
-  }, [currentStage, stages, onDone])
+  const current = stages[Math.min(idx, stages.length - 1)]
 
   return (
     <motion.div
+      className="page-shell"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen flex flex-col items-center justify-center px-6"
+      style={{ alignItems: 'center', justifyContent: 'center' }}
     >
-      {/* Central animation area */}
-      <div className="flex flex-col items-center gap-8 max-w-md w-full">
-        {/* Animated orb */}
-        <div className="relative w-32 h-32">
+      {/* ambient */}
+      <div style={{ position: 'fixed', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+        <div className="orb" style={{ width: 500, height: 500, top: '20%', left: '30%', background: 'radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%)' }} />
+      </div>
+
+      <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 40, maxWidth: 420, width: '100%', padding: '0 24px' }}>
+        {/* orb animation */}
+        <div style={{ position: 'relative', width: 120, height: 120 }}>
           <motion.div
-            animate={{
-              scale: [1, 1.2, 1],
-              rotate: [0, 180, 360],
+            animate={{ scale: [1, 1.25, 1], rotate: [0, 180, 360] }}
+            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+            style={{
+              position: 'absolute', inset: 0, borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(139,92,246,0.25) 0%, transparent 70%)',
+              filter: 'blur(30px)',
             }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-            className="w-full h-full rounded-full bg-gradient-to-br from-violet-600 via-purple-500 to-fuchsia-500 opacity-20 blur-xl absolute"
           />
           <motion.div
-            animate={{
-              scale: [1.1, 0.9, 1.1],
-              rotate: [360, 180, 0],
+            animate={{ scale: [1.1, 0.85, 1.1], rotate: [360, 180, 0] }}
+            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+            style={{
+              position: 'absolute', top: 16, left: 16, width: 88, height: 88, borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(109,40,217,0.35) 0%, transparent 70%)',
+              filter: 'blur(20px)',
             }}
-            transition={{
-              duration: 4,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-            className="w-24 h-24 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 opacity-40 blur-lg absolute top-4 left-4"
           />
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 absolute top-8 left-8 flex items-center justify-center text-2xl shadow-lg shadow-purple-500/30">
-            {stages[Math.min(currentStage, stages.length - 1)]?.icon}
+          <div style={{
+            position: 'absolute', top: 28, left: 28, width: 64, height: 64, borderRadius: '50%',
+            background: 'linear-gradient(135deg, var(--c-violet-dim), var(--c-violet))',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 26,
+            boxShadow: '0 0 30px var(--c-violet-glow)',
+          }}>
+            {current?.icon}
           </div>
         </div>
 
-        {/* Stage text */}
-        <div className="text-center">
+        {/* text */}
+        <div style={{ textAlign: 'center' }}>
           <motion.p
-            key={currentStage}
+            key={idx}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-xl text-text-primary font-medium mb-2"
+            style={{ fontSize: '1.2rem', fontWeight: 500, color: 'var(--c-text)', marginBottom: 8 }}
           >
-            {stages[Math.min(currentStage, stages.length - 1)]?.text}
+            {current?.text}
           </motion.p>
-          <p className="text-sm text-text-muted">
+          <p style={{ fontSize: '0.85rem', color: 'var(--c-text-3)', fontFamily: 'var(--font-mono)' }}>
             {Math.round(progress)}%
           </p>
         </div>
 
-        {/* Progress bar */}
-        <div className="w-full h-1.5 bg-border/50 rounded-full overflow-hidden">
+        {/* progress bar */}
+        <div style={{ width: '100%', height: 4, background: 'var(--c-border)', borderRadius: 4, overflow: 'hidden' }}>
           <motion.div
-            className="h-full bg-gradient-to-r from-violet-600 to-purple-500 rounded-full"
-            style={{ width: `${progress}%` }}
-            transition={{ duration: 0.1 }}
+            style={{ height: '100%', borderRadius: 4, background: 'linear-gradient(90deg, var(--c-violet-dim), var(--c-violet))' }}
+            animate={{ width: `${progress}%` }}
+            transition={{ duration: 0.15 }}
           />
         </div>
 
-        {/* Stage indicators */}
-        <div className="flex gap-3">
-          {stages.map((stage, i) => (
+        {/* dots */}
+        <div style={{ display: 'flex', gap: 10 }}>
+          {stages.map((_, i) => (
             <div
               key={i}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                i < currentStage
-                  ? 'bg-accent scale-100'
-                  : i === currentStage
-                  ? 'bg-accent-light pulse-glow scale-125'
-                  : 'bg-border'
-              }`}
+              className={i === idx ? 'pulse-glow' : ''}
+              style={{
+                width: 8, height: 8, borderRadius: '50%',
+                background: i < idx ? 'var(--c-violet)' : i === idx ? 'var(--c-amber)' : 'var(--c-border)',
+                transition: 'all 0.3s',
+                transform: i === idx ? 'scale(1.3)' : 'scale(1)',
+              }}
             />
           ))}
         </div>

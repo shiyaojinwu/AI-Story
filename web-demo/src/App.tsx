@@ -18,8 +18,8 @@ type Page =
 export default function App() {
   const [page, setPage] = useState<Page>({ name: 'create' })
   const [storyTitle, setStoryTitle] = useState('')
-  const [storyContent, setStoryContent] = useState('')
-  const [storyStyle, setStoryStyle] = useState('movie')
+  const [, setStoryContent] = useState('')
+  const [, setStoryStyle] = useState('movie')
   const [shots, setShots] = useState<Shot[]>(DEMO_SHOTS)
 
   const handleGenerate = useCallback((content: string, style: string) => {
@@ -59,7 +59,7 @@ export default function App() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-bg bg-grid">
+    <div className="noise" style={{ minHeight: '100vh' }}>
       <AnimatePresence mode="wait">
         {page.name === 'create' && (
           <CreatePage key="create" onGenerate={handleGenerate} />

@@ -1,127 +1,182 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Sparkles, ChevronRight } from 'lucide-react'
-import { STYLE_OPTIONS, DEMO_STORY_INPUT } from '../mockData'
+import { Sparkles, ChevronRight, Film, Palette, Camera, Check } from 'lucide-react'
+import { DEMO_STORY_INPUT } from '../mockData'
 
 interface Props {
   onGenerate: (content: string, style: string) => void
 }
 
+const STYLES = [
+  { id: 'movie', name: '电影风格', desc: '胶片质感 · 电影级构图与光影', Icon: Film, accent: '#f6c15c' },
+  { id: 'animation', name: '动画风格', desc: '精致手绘 · 日系动画质感', Icon: Palette, accent: '#f472b6' },
+  { id: 'realistic', name: '写实风格', desc: '超高清 · 真实影像效果', Icon: Camera, accent: '#38bdf8' },
+]
+
+const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } }
+const fadeUp = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] } } }
+
 export default function CreatePage({ onGenerate }: Props) {
   const [content, setContent] = useState('')
-  const [selectedStyle, setSelectedStyle] = useState('movie')
-
-  const handleSubmit = () => {
-    const text = content.trim() || DEMO_STORY_INPUT
-    onGenerate(text, selectedStyle)
-  }
+  const [style, setStyle] = useState('movie')
 
   return (
     <motion.div
+      className="page-shell"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.4 }}
-      className="min-h-screen flex flex-col"
+      exit={{ opacity: 0, y: -16 }}
+      transition={{ duration: 0.45 }}
     >
-      {/* Header */}
-      <header className="px-8 py-6 flex items-center justify-between border-b border-border/50">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-violet-600 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
-            镜
-          </div>
-          <span className="text-lg font-semibold text-text-primary">镜语 AI</span>
+      {/* ── ambient orbs ── */}
+      <div style={{ position: 'fixed', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
+        <div className="orb" style={{ width: 500, height: 500, top: '-12%', right: '-8%', background: 'radial-gradient(circle, rgba(139,92,246,0.10) 0%, transparent 70%)' }} />
+        <div className="orb" style={{ width: 600, height: 600, bottom: '-18%', left: '-10%', background: 'radial-gradient(circle, rgba(109,40,217,0.07) 0%, transparent 70%)', animationDelay: '-5s' }} />
+        <div className="orb" style={{ width: 300, height: 300, top: '35%', left: '55%', background: 'radial-gradient(circle, rgba(246,193,92,0.05) 0%, transparent 70%)', animationDelay: '-9s' }} />
+      </div>
+
+      {/* ── header ── */}
+      <header style={{
+        position: 'relative', zIndex: 1,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '20px 40px',
+        borderBottom: '1px solid var(--c-border)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{
+            width: 38, height: 38, borderRadius: 10,
+            background: 'linear-gradient(135deg, var(--c-violet-dim), var(--c-violet))',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#fff', fontWeight: 700, fontSize: 15,
+            fontFamily: 'var(--font-display)',
+            boxShadow: '0 0 20px var(--c-violet-glow)',
+          }}>镜</div>
+          <span style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--c-text)', letterSpacing: 1 }}>
+            镜语 AI
+          </span>
         </div>
-        <div className="text-sm text-text-muted">多模态AI结构化视频创作平台</div>
+        <span style={{ fontSize: '0.78rem', color: 'var(--c-text-3)', letterSpacing: 2, fontWeight: 400 }}>
+          MULTI-MODAL AI VIDEO CREATION
+        </span>
       </header>
 
-      {/* Hero + Form */}
-      <main className="flex-1 flex flex-col items-center justify-center px-6 py-12 max-w-4xl mx-auto w-full">
-        {/* Hero */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="text-center mb-12"
-        >
-          <h1 className="text-5xl font-bold mb-4 gradient-text leading-tight">
+      {/* ── main content ── */}
+      <motion.main
+        variants={stagger}
+        initial="hidden"
+        animate="show"
+        style={{
+          position: 'relative', zIndex: 1,
+          flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
+          justifyContent: 'center',
+          width: '100%', maxWidth: 880,
+          marginLeft: 'auto', marginRight: 'auto',
+          paddingLeft: 32, paddingRight: 32,
+          paddingTop: 56, paddingBottom: 48,
+        }}
+      >
+        {/* ── hero text ── */}
+        <motion.div variants={fadeUp} style={{ textAlign: 'center', marginBottom: 52 }}>
+          <h1
+            className="gradient-title display-font"
+            style={{ fontSize: 'clamp(2.2rem, 4vw, 3.2rem)', fontWeight: 700, lineHeight: 1.3, marginBottom: 18 }}
+          >
             一段故事，逐镜打磨，一部影片
           </h1>
-          <p className="text-text-secondary text-lg max-w-2xl mx-auto">
-            输入你的故事，AI 将自动拆解分镜、生成画面、合成配音，
+          <p style={{ fontSize: '1.05rem', color: 'var(--c-text-2)', lineHeight: 1.8, maxWidth: 520, margin: '0 auto' }}>
+            输入你的故事，AI 将自动拆解分镜、生成画面、合成配音
             <br />
             让你像导演一样掌控每一个镜头
           </p>
         </motion.div>
 
-        {/* Story Input */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="w-full mb-8"
-        >
-          <label className="block text-sm text-text-secondary mb-2 font-medium">
-            你的故事
-          </label>
+        {/* ── story input ── */}
+        <motion.div variants={fadeUp} style={{ width: '100%', marginBottom: 36 }}>
+          <label className="label-text">你的故事</label>
           <textarea
+            className="input-field"
             value={content}
             onChange={e => setContent(e.target.value)}
             placeholder={DEMO_STORY_INPUT}
             rows={6}
-            className="w-full bg-bg-input border border-border rounded-xl px-5 py-4 text-text-primary placeholder:text-text-muted/50 resize-none focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent-glow transition-all text-base leading-relaxed"
           />
         </motion.div>
 
-        {/* Style Selection */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="w-full mb-10"
-        >
-          <label className="block text-sm text-text-secondary mb-3 font-medium">
-            视觉风格
-          </label>
-          <div className="grid grid-cols-3 gap-4">
-            {STYLE_OPTIONS.map(style => (
-              <button
-                key={style.id}
-                onClick={() => setSelectedStyle(style.id)}
-                className={`glass-card rounded-xl p-5 text-left cursor-pointer transition-all ${
-                  selectedStyle === style.id
-                    ? 'border-accent ring-1 ring-accent-glow bg-gradient-to-br ' + style.gradient
-                    : ''
-                }`}
-              >
-                <span className="text-2xl mb-2 block">{style.icon}</span>
-                <div className="font-semibold text-text-primary mb-1">{style.name}</div>
-                <div className="text-sm text-text-secondary">{style.description}</div>
-              </button>
-            ))}
+        {/* ── style picker ── */}
+        <motion.div variants={fadeUp} style={{ width: '100%', marginBottom: 48 }}>
+          <label className="label-text">视觉风格</label>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+            {STYLES.map(s => {
+              const active = style === s.id
+              return (
+                <button
+                  key={s.id}
+                  onClick={() => setStyle(s.id)}
+                  className="card"
+                  style={{
+                    padding: '24px 20px',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    borderColor: active ? s.accent + '55' : undefined,
+                    boxShadow: active ? `0 0 30px ${s.accent}15, inset 0 0 40px ${s.accent}08` : undefined,
+                    position: 'relative',
+                  }}
+                >
+                  {/* icon */}
+                  <div style={{
+                    width: 44, height: 44, borderRadius: 11,
+                    background: active
+                      ? `linear-gradient(135deg, ${s.accent}30, ${s.accent}10)`
+                      : 'var(--c-card-up)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    marginBottom: 16, transition: 'background 0.3s',
+                  }}>
+                    <s.Icon size={20} style={{ color: active ? s.accent : 'var(--c-text-2)' }} />
+                  </div>
+                  <div style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--c-text)', marginBottom: 4 }}>
+                    {s.name}
+                  </div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--c-text-3)', lineHeight: 1.5 }}>
+                    {s.desc}
+                  </div>
+                  {/* check indicator */}
+                  {active && (
+                    <div style={{
+                      position: 'absolute', top: 14, right: 14,
+                      width: 22, height: 22, borderRadius: '50%',
+                      background: s.accent, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <Check size={13} color="#000" strokeWidth={3} />
+                    </div>
+                  )}
+                </button>
+              )
+            })}
           </div>
         </motion.div>
 
-        {/* Generate Button */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
+        {/* ── submit ── */}
+        <motion.div variants={fadeUp}>
           <button
-            onClick={handleSubmit}
-            className="glow-btn text-white font-semibold px-10 py-4 rounded-xl text-lg flex items-center gap-3 cursor-pointer"
+            className="btn-primary"
+            onClick={() => onGenerate(content.trim() || DEMO_STORY_INPUT, style)}
           >
-            <Sparkles size={20} />
+            <Sparkles size={19} />
             开始创作
-            <ChevronRight size={18} />
+            <ChevronRight size={17} />
           </button>
         </motion.div>
-      </main>
+      </motion.main>
 
-      {/* Footer */}
-      <footer className="px-8 py-4 border-t border-border/30 text-center text-xs text-text-muted">
-        Powered by Multi-Modal AI Orchestration Engine
+      {/* ── footer ── */}
+      <footer style={{
+        position: 'relative', zIndex: 1,
+        padding: '16px 40px',
+        borderTop: '1px solid var(--c-border)',
+        textAlign: 'center',
+        fontSize: '0.72rem', color: 'var(--c-text-3)', letterSpacing: 2,
+      }}>
+        POWERED BY MULTI-MODAL AI ORCHESTRATION ENGINE
       </footer>
     </motion.div>
   )
