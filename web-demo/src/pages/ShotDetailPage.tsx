@@ -59,7 +59,7 @@ export default function ShotDetailPage({ shot, onBack, onUpdate }: Props) {
             <RefreshCw size={14} style={regenerating ? { animation: 'spin 1s linear infinite' } : {}} />
             {regenerating ? '生成中...' : '重新生成图片'}
           </button>
-          <button className="btn-primary" onClick={() => { onUpdate({ ...shot, prompt, narration, transition }); onBack() }} style={{ padding: '9px 22px', fontSize: '0.85rem' }}>
+          <button className="btn-primary" onClick={() => { onUpdate({ ...shot, prompt, narration, transition, imageUrl: currentImage }); onBack() }} style={{ padding: '9px 22px', fontSize: '0.85rem' }}>
             <Save size={14} />
             保存
           </button>

@@ -49,8 +49,6 @@ export default function PreviewPage({ title, shots, onBack }: Props) {
               position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
               alignItems: 'center', justifyContent: 'center', pointerEvents: 'none',
             }}>
-              <span style={{ fontSize: 48, opacity: 0.4, marginBottom: 12 }}>🎬</span>
-              <p style={{ fontSize: '0.82rem', color: 'var(--c-text-3)' }}>放置 demo-video.mp4 到 public/mock/</p>
             </div>
           </div>
 

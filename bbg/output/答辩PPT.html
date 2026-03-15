@@ -740,7 +740,7 @@ body {
         -->
         <video
           id="mobile-video"
-          src="./assets/mobile-demo.mp4"
+          src="./android.mp4"
           muted
           loop
           autoplay
@@ -767,27 +767,18 @@ body {
 </div>
 
 <!-- ========== P7: 演示视频页 ========== -->
-<div class="slide" id="s7">
-  <h2 class="slide-title">产品演示</h2>
+<div class="slide" id="s7" style="padding:30px 50px 20px;">
+  <h2 class="slide-title" style="margin-bottom:12px;font-size:22px;">产品演示</h2>
 
-  <div style="display:flex;gap:24px;flex:1;position:relative;z-index:1;align-items:flex-start;">
-    <div style="flex:1;">
-      <div class="video-container">
-        <div class="video-label">镜语AI · Web端演示</div>
-        <!--
-          ============================================
-          🌐 Web端演示视频 - 替换此处
-          ============================================
-          将 src 替换为你的Web端录屏视频文件路径
-          例如: src="./assets/web-demo.mp4"
-        -->
-        <video
-          id="web-video"
-          src="./assets/web-demo.mp4"
-          controls
-          style="width:100%;"
-        ></video>
-      </div>
+  <div style="flex:1;min-height:0;position:relative;z-index:1;display:flex;flex-direction:column;">
+    <div class="video-container" style="flex:1;min-height:0;display:flex;flex-direction:column;">
+      <div class="video-label">镜语AI · Web端演示</div>
+      <video
+        id="web-video"
+        src="./video.mp4"
+        controls
+        style="width:100%;flex:1;min-height:0;object-fit:contain;background:#000;"
+      ></video>
     </div>
   </div>
 </div>
@@ -846,6 +837,14 @@ body {
 const slides = document.querySelectorAll('.slide');
 const totalSlides = slides.length;
 let current = 0;
+let paused = false;
+
+function togglePause() {
+  paused = !paused;
+  // Pause or resume all videos on the current slide
+  const videos = slides[current].querySelectorAll('video');
+  videos.forEach(v => { if (paused) v.pause(); else v.play(); });
+}
 
 const dotsContainer = document.getElementById('navDots');
 for (let i = 0; i < totalSlides; i++) {
@@ -866,6 +865,12 @@ function goTo(index) {
 }
 
 document.addEventListener('keydown', (e) => {
+  if (e.key === 'p' || e.key === 'P') {
+    e.preventDefault();
+    togglePause();
+    return;
+  }
+  if (paused) return;
   if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ' || e.key === 'PageDown') {
     e.preventDefault();
     goTo(current + 1);
@@ -883,6 +888,7 @@ document.addEventListener('keydown', (e) => {
 
 document.addEventListener('click', (e) => {
   if (e.target.closest('.nav-bar') || e.target.closest('video') || e.target.closest('button')) return;
+  if (paused) return;
   if (e.clientX > window.innerWidth / 2) {
     goTo(current + 1);
   } else {
