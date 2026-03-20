@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { ArrowLeft, Play, ChevronRight } from 'lucide-react'
-import type { Shot } from '../mockData'
+import type { Shot } from '../storyData'
 
 interface Props {
   title: string

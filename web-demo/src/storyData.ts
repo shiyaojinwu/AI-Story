@@ -20,11 +20,11 @@ export interface Story {
 
 // ====== 预制的演示故事 ======
 // 你可以替换 content 为你想演示的故事文本
-export const DEMO_STORY_INPUT = `在一个被遗忘的海边小镇上，住着一个喜欢画画的女孩。每天傍晚，她都会坐在灯塔旁的礁石上，对着落日画下大海的颜色。有一天，她在海滩上捡到了一个透明的瓶子，里面装着一封来自远方的信。信上写着："如果你能看到这封信，请在下一个满月之夜，到灯塔顶上点亮一盏灯。"满月之夜来临，女孩爬上灯塔，点亮了尘封已久的灯。灯光穿透迷雾，照亮了远方海面上一艘破旧的帆船。船上站着一个男孩，他微笑着向她挥手。`
+export const DEFAULT_STORY_INPUT = `在一个被遗忘的海边小镇上，住着一个喜欢画画的女孩。每天傍晚，她都会坐在灯塔旁的礁石上，对着落日画下大海的颜色。有一天，她在海滩上捡到了一个透明的瓶子，里面装着一封来自远方的信。信上写着："如果你能看到这封信，请在下一个满月之夜，到灯塔顶上点亮一盏灯。"满月之夜来临，女孩爬上灯塔，点亮了尘封已久的灯。灯光穿透迷雾，照亮了远方海面上一艘破旧的帆船。船上站着一个男孩，他微笑着向她挥手。`
 
 // ====== 预制的分镜数据 ======
 // imageUrl 请替换为你用 Midjourney/DALL-E 生成的图片地址
-export const DEMO_SHOTS: Shot[] = [
+export const DEFAULT_SHOTS: Shot[] = [
   {
     id: 1,
     sortOrder: 1,
@@ -52,7 +52,7 @@ export const DEMO_SHOTS: Shot[] = [
     prompt: 'Close-up shot of a transparent glass bottle with a letter inside, lying on wet sand, ocean waves gently touching it, magical glow, bokeh background, cinematic lighting',
     narration: '直到有一天，她在沙滩上发现了一个漂流瓶，里面装着一封来自远方的信。',
     transition: 'Crossfade',
-    imageUrl: '../public/mock/old.png',
+    imageUrl: '../public/shots/old.png',
     status: 'completed',
   },
   {
@@ -72,7 +72,7 @@ export const DEMO_SHOTS: Shot[] = [
     prompt: 'Dramatic low-angle shot of girl lighting the old lighthouse lamp, full moon visible through window, beam of light cutting through fog, volumetric lighting, epic cinematic moment',
     narration: '满月之夜，女孩爬上灯塔，点亮了尘封已久的灯火。',
     transition: 'Crossfade',
-    imageUrl: 'https://media.discordapp.net/attachments/1481854420550553756/1481878674830790687/vetsp6557_Dramatic_low-angle_shot_of_girl_lighting_the_old_ligh_d22fef40-6c06-4f5c-88a3-b6fa43a01434.png?ex=69b4ea90&is=69b39910&hm=44a0fd52d762ae86073c01774212143efddeb5721c45100c4beefb29d78ecf7e&=&format=webp&quality=lossless&width=1165&height=653 ',
+    imageUrl: '../public/shots/shot5.png',
     status: 'completed',
   },
   {
@@ -87,13 +87,13 @@ export const DEMO_SHOTS: Shot[] = [
   },
 ]
 
-export const DEMO_STORY: Story = {
+export const DEFAULT_STORY: Story = {
   id: 1,
   title: '灯塔之约',
-  content: DEMO_STORY_INPUT,
+  content: DEFAULT_STORY_INPUT,
   style: 'movie',
   status: 'completed',
-  shots: DEMO_SHOTS,
+  shots: DEFAULT_SHOTS,
 }
 
 // ====== 风格选项 ======
@@ -136,9 +136,8 @@ export const GENERATION_STAGES = [
 
 // ====== 重新生成的备用图片 ======
 // 用于演示"重新生成"功能，key 为 shot id，value 为备用图片URL
-// TODO: 用 Midjourney 对镜头3（漂流瓶）再生成一张不同构图的图，替换下面的URL
-export const ALTERNATE_IMAGES: Record<number, string> = {
-  3: '../public/mock/shot3.png',
+export const REGENERATE_IMAGES: Record<number, string> = {
+  3: '../public/shots/shot3.png',
 }
 
 export const VIDEO_GENERATION_STAGES = [

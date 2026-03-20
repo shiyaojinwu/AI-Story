@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowLeft, RefreshCw, Save } from 'lucide-react'
-import type { Shot } from '../mockData'
-import { ALTERNATE_IMAGES } from '../mockData'
+import type { Shot } from '../storyData'
+import { REGENERATE_IMAGES } from '../storyData'
 
 interface Props { shot: Shot; onBack: () => void; onUpdate: (shot: Shot) => void }
 
@@ -19,7 +19,7 @@ export default function ShotDetailPage({ shot, onBack, onUpdate }: Props) {
   const handleRegenerate = () => {
     setRegenerating(true)
     setTimeout(() => {
-      const alt = ALTERNATE_IMAGES[shot.id]
+      const alt = REGENERATE_IMAGES[shot.id]
       if (alt && !hasRegenerated) {
         setCurrentImage(alt)
         setHasRegenerated(true)

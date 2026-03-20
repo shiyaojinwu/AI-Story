@@ -5,8 +5,8 @@ import GeneratingPage from './pages/GeneratingPage'
 import StoryboardPage from './pages/StoryboardPage'
 import ShotDetailPage from './pages/ShotDetailPage'
 import PreviewPage from './pages/PreviewPage'
-import { DEMO_SHOTS, GENERATION_STAGES, VIDEO_GENERATION_STAGES } from './mockData'
-import type { Shot } from './mockData'
+import { DEFAULT_SHOTS, GENERATION_STAGES, VIDEO_GENERATION_STAGES } from './storyData'
+import type { Shot } from './storyData'
 
 type Page =
   | { name: 'create' }
@@ -20,7 +20,7 @@ export default function App() {
   const [storyTitle, setStoryTitle] = useState('')
   const [, setStoryContent] = useState('')
   const [, setStoryStyle] = useState('movie')
-  const [shots, setShots] = useState<Shot[]>(DEMO_SHOTS)
+  const [shots, setShots] = useState<Shot[]>(DEFAULT_SHOTS)
 
   const handleGenerate = useCallback((content: string, style: string) => {
     setStoryContent(content)
@@ -53,10 +53,8 @@ export default function App() {
     setShots(prev => prev.map(s => s.id === updated.id ? updated : s))
   }, [])
 
-  const handleBack = useCallback((target: Page['name']) => {
-    if (target === 'storyboard') setPage({ name: 'storyboard' })
-    else if (target === 'create') setPage({ name: 'create' })
-  }, [])
+  const handleBackToCreate = useCallback(() => setPage({ name: 'create' }), [])
+  const handleBackToStoryboard = useCallback(() => setPage({ name: 'storyboard' }), [])
 
   return (
     <div className="noise" style={{ minHeight: '100vh' }}>
@@ -78,14 +76,14 @@ export default function App() {
             shots={shots}
             onShotClick={handleShotClick}
             onGenerateVideo={handleGenerateVideo}
-            onBack={() => handleBack('create')}
+            onBack={handleBackToCreate}
           />
         )}
         {page.name === 'shot-detail' && (
           <ShotDetailPage
             key="shot-detail"
             shot={page.shot}
-            onBack={() => handleBack('storyboard')}
+            onBack={handleBackToStoryboard}
             onUpdate={handleShotUpdate}
           />
         )}
@@ -94,7 +92,7 @@ export default function App() {
             key="preview"
             title={storyTitle}
             shots={shots}
-            onBack={() => handleBack('storyboard')}
+            onBack={handleBackToStoryboard}
           />
         )}
       </AnimatePresence>

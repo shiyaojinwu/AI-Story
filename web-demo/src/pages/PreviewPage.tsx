@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { ArrowLeft, Download, Volume2 } from 'lucide-react'
-import type { Shot } from '../mockData'
+import type { Shot } from '../storyData'
 
 interface Props { title: string; shots: Shot[]; onBack: () => void }
 
@@ -39,7 +39,7 @@ export default function PreviewPage({ title, shots, onBack }: Props) {
             background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             <video
-              src="/mock/demo-video.mp4"
+              src="/shots/demo-video.mp4"
               controls
               style={{ width: '100%', height: '100%', objectFit: 'contain' }}
               poster={shots[0]?.imageUrl}

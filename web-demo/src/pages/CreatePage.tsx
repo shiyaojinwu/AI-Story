@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Sparkles, ChevronRight, Film, Palette, Camera, Check } from 'lucide-react'
-import { DEMO_STORY_INPUT } from '../mockData'
+import { DEFAULT_STORY_INPUT } from '../storyData'
 
 interface Props {
   onGenerate: (content: string, style: string) => void
@@ -97,7 +97,7 @@ export default function CreatePage({ onGenerate }: Props) {
             className="input-field"
             value={content}
             onChange={e => setContent(e.target.value)}
-            placeholder={DEMO_STORY_INPUT}
+            placeholder={DEFAULT_STORY_INPUT}
             rows={6}
           />
         </motion.div>
@@ -157,7 +157,7 @@ export default function CreatePage({ onGenerate }: Props) {
         <motion.div variants={fadeUp}>
           <button
             className="btn-primary"
-            onClick={() => onGenerate(content.trim() || DEMO_STORY_INPUT, style)}
+            onClick={() => onGenerate(content.trim() || DEFAULT_STORY_INPUT, style)}
           >
             <Sparkles size={19} />
             开始创作
